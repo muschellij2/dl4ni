@@ -1,0 +1,47 @@
+TODO:
+  + Hacer paquete de R,
+  + A la hora de inferir, no leer toda la imagen de golpe, hacerlo de forma ordenada e ir montando la imagen resultado poco a poco, dependiendo de si el lote entero cabe en memoria
+  - Comentarios y documentación en todas las funciones
+  + on.exit() en fit_generator para cargar siempre la mejor configuración
+  - "save_model" y "load_model" con la posibilidad de guardar comprimido.
+  + "fit_with_generator" no cambia el valor de "best_loss", quizás haya que convetir "DLmodel" en un environment.
+  - "fit with generator" con "initial_epoch" para mantener tasas de aprendizaje y demás.
+  - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
+  - Viñetas y README.md
+  - Layers operations, como select_layers (by_name, by_index)...
+  - Al hacer grafo, renombrar capas, y usar esta función al generar el modelo. En la configuración (y en la info del problema) almacenar el nombre de la carpeta de los inputs ("T1", "FLAIR") que después se usará para renombrar las capas.
+  - warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
+  - verbose para la función de "fit_with_generator"
+  - Poner capas convolucionales a la salida
+  - Más tipos de bloques: block_clf, block_resnet, block_unet, block_smooth (como last layer y extended), block_crop, block_downsample, block_upsample...con sus wrappers.
+  - Extended Model cuando last_layer tiene type multivalued o similar, se le añade una más (que habrá que gestionar en la inference function), por ejemplo haciendo argmax o un layer_dot con un tensor constante...
+  + transform_coords para (x, y, z) entre la imagen input y la output, si la resolución fuera distinta.
+  + Multi-input como lista de listas vol_layers...
+  + Buscar BRATS 2015 training set
+  - App shiny (playground) para hacer el entranmiento, definir la configuración, crear modelos o aplicarlos, con la posibilidad de usar un widget para visualizar imágenes 3d.
+  - Manipulación de redes. 
+  - pad_sequence con lstm para hacer modelos sobre la imagen al completo.
+  - Generación de textos a partir de las imágenes completas: empezar con output \in\{"axial", "coronal", "sagital"\} e ir complicando el modelo.
+  + Block_multivalued, como las múltiples capas categóricas, pero después cada una de ellas con una capa lambda que haga el producto dot por 1:numclasses. Y una alternativa que haga argmax, pero esta última no se entrene. Debería tener la posibilidad de meter capas ocultas intermedias distintas en cada capa categórica.
+  + Comenzar todo definiendo la configuración, que se usará para crear el modelo, para los generadores, al entrenar y en la inferencia.
+  + Model load and save con hiperparámetros.
+  + Modelo más genérico, donde una parte es el volumen 3d y la otra son las features que se extraigan de la imagen (extensión de únicamente usar las coordenadas xyz en esa otra parte)
+  - Autoencoder para la parcelación. Si podemos representar una parcelación por número entre -1 y 1 por ejemplo, podemos hacer que eso sea la salida de la red para que Mapee una ventana de la imagen original a la codificación de la parcelación
+  - Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
+  - Grafo de cada red, que se pueda dibujar con graphviz o con el método que sea. Nombres a los nodos/capas autogenerados a partir de un "prefix" que se proporciona.
+  - Mapeo de T1 a Flair...
+  - Prepararlo todo para imágenes 4d como fMRI o DTI.
+  - Cálculo de la matriz de transformación homogénea del registro afín, usando la parte central de una imagen, y varias LSTM o similar para hacer regresión sobre las componentes de la matriz.
+  - Reinforcement learning para clasificación, primero de una red que intenta aprender la clasificación al estilo Flappy Bird y después redes enfrentadas que luchen por ver cuál lo hace mejor y aprendan una de la otra.
+  - Regresión para calcular el grosor cortical
+  - Un sistema completo de procesamiento de imagen estructural con Deep Learning, desde la corrección de la inhomogeneidad, BET, segmentación, parcelación, orientación a espacio MNI, y cuantificación de volumen y grosor.
+  - Y cálculo de lesiones.
+  - Prepararlo todo para problemas más generales (clasificación de imágenes de sujetos en varios grupos, super resolución, multimodalidad...)
+  - Viñetas y demos por cada problema.
+  - Lstm para procesar la imagen entera??
+  - Entrenar con capas convolucionales.
+  + Si hace falta red convolucional, se hace un layer reshape
+  + Usar lo de leer las ventanas de una imagen en posiciones aleatorias
+  + Siempre son dos inputs, las coordenadas y el volumen de la ventana, se unen en la primera capa densa.
+  + Así se puede definir el width pero no hace falta stride
+  + Clase r6 que guarde el width y tenga los métodos para entrenar dados los datos de entrenamiento e inferir una imagen entera?
