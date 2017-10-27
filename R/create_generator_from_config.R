@@ -173,11 +173,15 @@ create_generator_from_config <- function(config,
       
       sub_epoch <<- sub_epoch + 1
       
+      print(paste0("Subepoch ", sub_epoch))
+      
       if (sub_epoch > max_epochs) {
         
         sub_epoch <<- 1
         
         next_file <<- next_file + 1
+        print(paste0("Next_file ", next_file))
+        
         
         if (next_file > length(x_files[[1]])) 
           next_file <<- 1
@@ -275,6 +279,9 @@ create_generator_from_config <- function(config,
       x <- coords[, 1] - 1
       y <- coords[, 2] - 1
       z <- coords[, 3] - 1
+      
+      # str(apply(coords, 2, range))
+      # print("Reading X")
       
       X_vol <- list()
       
@@ -377,12 +384,23 @@ create_generator_from_config <- function(config,
         
       }
       
-      Vy_coords <- transform_coords(x = x, y = y, z = z, Vx = Vx[[input]], Vy = Vy)
+      if (any(dim(Vy) != dim(Vx[[input]]))) {
+        
+        Vy_coords <- transform_coords(x = x, y = y, z = z, Vx = Vx[[input]], Vy = Vy)
+        
+        x_ <- round(Vy_coords$x)
+        y_ <- round(Vy_coords$y)
+        z_ <- round(Vy_coords$z)
+        
+      } else {
+        
+        x_ <- x
+        y_ <- y
+        z_ <- z
+        
+      }
       
-      x_ <- round(Vy_coords$x)
-      y_ <- round(Vy_coords$y)
-      z_ <- round(Vy_coords$z)
-      
+      # print("Reading Y")
       Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
       Y <- Y[, -c(1:3)]
       
