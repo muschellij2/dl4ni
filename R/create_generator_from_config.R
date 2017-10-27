@@ -25,10 +25,10 @@ create_generator_from_config <- function(config,
   
   if ("DLconfig" %in% class(config)) {
     
-    num_inputs <- length(vol_layers)
+    num_inputs <- length(config$vol_layers)
     
     mode <- mode[1]
-    radius <- 0.5 * (width + 1)
+    radius <- 0.5 * (config$width + 1)
     
     if (mode == "all") {
       
@@ -104,23 +104,56 @@ create_generator_from_config <- function(config,
       
       sampling_indices <- sample(all_idx, length(all_idx))
       
-      if (config$class_balance) {
+      if (!is.null(config$class_balance) & !is.null(config$y_label)) {
         
-        which_idx <- which(Vy %in% config$y_label)
-        not_idx <- setdiff(all_idx, which_idx)
+        Vy[!(Vy %in% config$y_label)] <- 0
         
-        if (length(not_idx) > length(which_idx)) {
+        if (config$class_balance == "extensive") {
+
+          balanced_classes <- sample(c(0, config$y_label), size = length(all_idx), replace = TRUE)
+          sampling_indices <- rep(0, length(balanced_classes))
           
-          which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
+          for (class in c(0, config$y_label)) {
+            
+            idx_for_class <- which(balanced_classes == class)
+            idx_in_img <- intersect(which(Vy == class), all_idx)
+            
+            if (length(idx_in_img) > 0) {
+              idx <- sample(idx_in_img, 
+                            size = length(idx_for_class), 
+                            replace = length(idx_for_class) > length(idx_in_img))
+              sampling_indices[idx_for_class] <- idx
+              
+            }
+            
+          }
+          
+          sampling_indices <- sampling_indices[sampling_indices > 0]
+          
+          if (length(sampling_indices) < length(all_idx))
+            sampling_indices <- sample(sampling_indices, 
+                                       size = length(all_idx),
+                                       replace = TRUE)
           
         } else {
           
-          which_idx <- sample(which_idx, size = length(not_idx))
+          which_idx <- which(Vy %in% config$y_label)
+          not_idx <- setdiff(all_idx, which_idx)
+          
+          if (length(not_idx) > length(which_idx)) {
+            
+            which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
+            
+          } else {
+            
+            which_idx <- sample(which_idx, size = length(not_idx))
+            
+          }
+          
+          sampling_indices <- c(which_idx, not_idx)
+          sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
           
         }
-        
-        sampling_indices <- c(which_idx, not_idx)
-        sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
         
       }
       
@@ -168,23 +201,56 @@ create_generator_from_config <- function(config,
           
           sampling_indices <- sample(all_idx, length(all_idx))
           
-          if (config$class_balance) {
+          if (!is.null(config$class_balance) & !is.null(config$y_label)) {
             
-            which_idx <- which(Vy %in% config$y_label)
-            not_idx <- setdiff(all_idx, which_idx)
+            Vy[!(Vy %in% config$y_label)] <- 0
             
-            if (length(not_idx) > length(which_idx)) {
+            if (config$class_balance == "extensive") {
               
-              which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
+              balanced_classes <- sample(c(0, config$y_label), size = length(all_idx), replace = TRUE)
+              sampling_indices <- rep(0, length(balanced_classes))
+              
+              for (class in c(0, config$y_label)) {
+                
+                idx_for_class <- which(balanced_classes == class)
+                idx_in_img <- intersect(which(Vy == class), all_idx)
+                
+                if (length(idx_in_img) > 0) {
+                  idx <- sample(idx_in_img, 
+                                size = length(idx_for_class), 
+                                replace = length(idx_for_class) > length(idx_in_img))
+                  sampling_indices[idx_for_class] <- idx
+                  
+                }
+                
+              }
+              
+              sampling_indices <- sampling_indices[sampling_indices > 0]
+              
+              if (length(sampling_indices) < length(all_idx))
+                sampling_indices <- sample(sampling_indices, 
+                                           size = length(all_idx),
+                                           replace = TRUE)
               
             } else {
               
-              which_idx <- sample(which_idx, size = length(not_idx))
+              which_idx <- which(Vy %in% config$y_label)
+              not_idx <- setdiff(all_idx, which_idx)
+              
+              if (length(not_idx) > length(which_idx)) {
+                
+                which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
+                
+              } else {
+                
+                which_idx <- sample(which_idx, size = length(not_idx))
+                
+              }
+              
+              sampling_indices <- c(which_idx, not_idx)
+              sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
               
             }
-            
-            sampling_indices <- c(which_idx, not_idx)
-            sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
             
           }
           

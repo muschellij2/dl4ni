@@ -2,7 +2,6 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#'
 #' @return OUTPUT_DESCRIPTION
 #'
 #' @details DETAILS
@@ -69,6 +68,16 @@ define_config <- function(...) {
     if (config$categorize_output) {
       
       config$num_classes <- config$last_layer$params$num_classes
+      
+      if (config$num_classes > 2) {
+        
+        config$class_balance <- "extensive"
+        
+      } else {
+        
+        config$class_balance <- "simple"
+        
+      }
       
     }
     
