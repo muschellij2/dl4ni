@@ -4,11 +4,12 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param x        (name) PARAM_DESCRIPTION
-#' @param y        (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param text     (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param force    (logical) PARAM_DESCRIPTION, Default: FALSE
-#' @param ...      (name) PARAM_DESCRIPTION
+#' @param x               (name) PARAM_DESCRIPTION
+#' @param y               (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param text            (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param interactiveness (logical) PARAM DESCRIPTION, Default: TRUE
+#' @param force           (logical) PARAM_DESCRIPTION, Default: FALSE
+#' @param ...             (name) PARAM_DESCRIPTION
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -24,7 +25,7 @@
 #' @importFrom RNifti updateNifti
 #' @importFrom RNifti updateNifti
 #' @import neurobase
-ortho_plot <- function(x, y = NULL, text = NULL, force = FALSE, ...) {
+ortho_plot <- function(x, y = NULL, text = "", interactiveness = TRUE, force = FALSE, ...) {
   
   require(neurobase)
   
@@ -38,19 +39,38 @@ ortho_plot <- function(x, y = NULL, text = NULL, force = FALSE, ...) {
   saving_path <- ifelse("saving_path" %in% names(args), args$saving_path, tempdir())
   saving_prefix <- ifelse("saving_path" %in% names(args), args$saving_prefix, tempfile())
   
-  if (!is.null(text)) 
-    filename <- file.path(saving_path, 
-                          saving_prefix, 
-                          paste0("plot_", gsub(pattern = " ", replacement = "_", x = tolower(text))))
-                          
+  
+  interactiveness <- interactiveness && interactive() && require(papayar)
+  interactiveness <- interactiveness && !force
+  
+  filename <- file.path(saving_path, 
+                        saving_prefix, 
+                        paste0("plot_", gsub(pattern = " ", replacement = "_", x = tolower(text))))
+  
   if (!interactive() | force) {
     
     png(filename = filename)
     
   }
-                          
-  neurobase::ortho2(x = x, y = y,
-                    text = text, ...)
+  
+  if (interactiveness) {
+    
+    if (!is.null(y)) {
+
+      papayar::papaya(list(x, y))
+      
+    } else {
+      
+      papayar::papaya(x)
+      
+    }
+    
+  } else {
+    
+    neurobase::ortho2(x = x, y = y,
+                      text = text, ...)
+    
+  }
   
   if (!interactive() | force) {
     
