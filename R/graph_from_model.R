@@ -61,13 +61,13 @@ graph_from_model <- function(.model) {
           
           
           adj_matrix[parents, layer_id] <- 1
-
+          
           parents <- layer_id %>% .search_parents(inbound_nodes = model_structure$config$layers$inbound_nodes,
                                                   layers_name = layers_name, 
                                                   layers_type = layers_type, 
                                                   hidden_types = hidden_types, 
                                                   mode = "all")
-
+          
           all_parents[parents, layer_id] <- 1
           
         }
@@ -78,18 +78,18 @@ graph_from_model <- function(.model) {
     
     # Last layer
     parents <- num_layers %>% .search_parents(inbound_nodes = model_structure$config$layers$inbound_nodes,
-                                            layers_name = layers_name, 
-                                            layers_type = layers_type, 
-                                            hidden_types = hidden_types)
+                                              layers_name = layers_name, 
+                                              layers_type = layers_type, 
+                                              hidden_types = hidden_types)
     
     
     adj_matrix[parents, num_layers] <- 1
     
     parents <- num_layers %>% .search_parents(inbound_nodes = model_structure$config$layers$inbound_nodes,
-                                            layers_name = layers_name, 
-                                            layers_type = layers_type, 
-                                            hidden_types = hidden_types, 
-                                            mode = "all")
+                                              layers_name = layers_name, 
+                                              layers_type = layers_type, 
+                                              hidden_types = hidden_types, 
+                                              mode = "all")
     
     all_parents[parents, num_layers] <- 1
     
@@ -152,7 +152,7 @@ graph_from_model <- function(.model) {
   parents <- c()
   
   if (length(inbound_nodes[[node_id]]) > 0) {
-
+    
     in_nodes <- inbound_nodes[[node_id]][[1]]
     
     num_parents <- length(in_nodes)
@@ -201,7 +201,8 @@ graph_from_model <- function(.model) {
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param g    (name) PARAM_DESCRIPTION
+#' @param g             (name) PARAM_DESCRIPTION
+#' @param interactive   (logical) PARAM_DESCRIPTION, Default: TRUE
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -213,7 +214,11 @@ graph_from_model <- function(.model) {
 #' @export 
 #' @importFrom igraph layout_with_sugiyama
 #' @importFrom scales alpha hue_pal
-plot_graph <- function(g) {
+#' @import htmlwidgets
+#' @import threejs
+#' 
+plot_graph <- function(g, interactive = FALSE) {
+  
   
   num_types <- length(unique(V(g)$type))
   colors <- scales::alpha(colour = scales::hue_pal()(num_types), alpha = 0.85)
@@ -226,14 +231,13 @@ plot_graph <- function(g) {
   levels <- coords[, 2]
   highest_level <- max(levels)
   knot <- highest_level - which.min(rev(table(levels))) + 1
-  # # coords_highest_level <- coords[coords[, 2] == highest_level, 1]
   minx <- min(coords[, 1])
   maxx <- max(coords[, 1])
-
+  
   for (current_level in seq(highest_level, knot + 1, by = -1)) {
-
+    
     coords_level <- coords[coords[, 2] == current_level, 1]
-
+    
     if (length(coords_level) > 1) {
       
       s <- order(coords_level)
@@ -241,23 +245,27 @@ plot_graph <- function(g) {
       
       new_coords <- minx + coef[s] * (maxx - minx)
       coords[coords[, 2] == current_level, 1] <- new_coords
-
-      # coords_level <- coords_level / max(coords_level)
-      # coords_level <- coords_level - mean(coords_level)
-      # coords_level <- exp(coords_level)
-      # coords_level <- (coords_level - min(coords_level)) / (max(coords_level) - min(coords_level))
-      # coords_level <- minx + coords_level * (maxx - minx)
-      # coords[coords[, 2] == current_level, 1] <- coords_level
-
+      
     } else {
-
+      
       break
-
+      
     }
-
+    
   }
   
   L$layout <- norm_coords(coords, ymin = -1, ymax = 1, xmin = -1, xmax = 1)
-  plot(g, edge.arrow.size = .4, vertex.label = NA, edge.curved = 0, layout = L$layout, rescale = FALSE)
+  
+  if (interactive && require(htmlwidgets) && require(threejs)) {
+    
+    threejs::graphjs(g, main = "Network", bg = "gray10", edge.arrow.size = .4, 
+                     vertex.label = NA, edge.curved = 0, layout = cbind(L$layout, 0), showLabels = FALSE, 
+                     stroke = FALSE, curvature = 0.1, attraction = 0.9, repulsion = 0.8, opacity = 0.9)
+    
+  } else {
+    
+    plot(g, edge.arrow.size = .4, vertex.label = NA, edge.curved = 0, layout = L$layout, rescale = FALSE)
+    
+  }
   
 }
