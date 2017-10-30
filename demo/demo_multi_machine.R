@@ -119,11 +119,11 @@ saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
 modality_model %>% fit_with_generator(train_config = train_config, 
-                                   validation_config = test_config,
-                                   epochs = epochs,
-                                   keep_best = keep_best,
-                                   path = saving_path,
-                                   prefix = saving_prefix)
+                                      validation_config = test_config,
+                                      epochs = epochs,
+                                      keep_best = keep_best,
+                                      path = saving_path,
+                                      prefix = saving_prefix)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
@@ -142,8 +142,9 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
-modality <- modality_model %>% infer(V = input_imgs, speed = "medium")
+ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)
+ortho_plot(x = ground_truth, text = "Ground Truth", interactiveness = FALSE)
 
-ortho_plot(x = input_imgs[[1]], text = "Original image")
-ortho_plot(x = ground_truth, text = "Ground Truth")
-ortho_plot(x = modality, text = "Predicted")
+modality <- modality_model %>% infer(V = input_imgs, speed = "faster")
+
+ortho_plot(x = modality, text = "Predicted", interactiveness = FALSE)

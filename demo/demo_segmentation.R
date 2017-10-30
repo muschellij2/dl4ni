@@ -1,3 +1,8 @@
+rm(list = ls())
+rstudioapi::restartSession()
+devtools::load_all()
+devtools::load_all("../dl4ni.data/")
+
 ##%######################################################%##
 #                                                          #
 ####           Example For Brain Segmentation 2         ####
@@ -47,7 +52,7 @@ last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
                                               hidden_layers = c(10))
 
 
-optimizer <- optimizer_nadam()
+optimizer <- keras::optimizer_nadam()
 
 config <- define_config(window_width = width, 
                         num_features = num_features,

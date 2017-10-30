@@ -7,6 +7,7 @@
 #' @param steps_per_epoch      (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param train_config         (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param epochs               (numeric) PARAM_DESCRIPTION, Default: 10
+#' @param starting_epoch       (numeric) PARAM_DESCRIPTION, Default: 1
 #' @param validation_data      (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param validation_steps     (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param validation_config    (NULL) PARAM_DESCRIPTION, Default: NULL
@@ -27,6 +28,7 @@ fit_with_generator <- function(.model,
                                steps_per_epoch = NULL,
                                train_config = NULL,
                                epochs = 10,
+                               starting_epoch = 1,
                                validation_data = NULL,
                                validation_steps = NULL, 
                                validation_config = NULL,
@@ -44,7 +46,7 @@ fit_with_generator <- function(.model,
     
     generator <- train_config$generator
     steps_per_epoch <- train_config$max_sub_epochs * train_config$num_files
-    batch_size <- train_config$num_windows / 2
+    batch_size <- floor(train_config$num_windows / 2)
     
   } else {
     
@@ -66,7 +68,6 @@ fit_with_generator <- function(.model,
   prefix <- NULL
   
   if (!is.null(extra_args$batch_size)) batch_size <- extra_args$batch_size
-  
   
   if (keep_best & ("path" %in% names(extra_args))) path <- extra_args$path
   if (keep_best & ("prefix" %in% names(extra_args))) prefix <- extra_args$prefix
@@ -108,12 +109,53 @@ fit_with_generator <- function(.model,
   
   if (keep_best) {
     
-    message("Model saved in ", file.path(model_path, model_prefix))
+    save_path <- file.path(model_path, model_prefix)
     
-    dir.create(file.path(model_path, model_prefix), recursive = TRUE, showWarnings = FALSE)
-    
-    .model %>% save_model(path = model_path, prefix = model_prefix, 
-                                       comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
+    if (file.exists(save_path)) {
+      
+      choices <- c("Overwrite", "Load previous", "Save both")
+      title <- "Already existing model. Choose an action:"
+      chosen_output <- utils::select.list(choices = choices, title = title)
+      
+      switch(chosen_output,
+             "Overwrite" = {
+               
+               .model %>% save_model(path = model_path, prefix = model_prefix, 
+                                     comment = paste0(timestamp(quiet = TRUE), ":", " New initial state.\n"))
+               
+             },
+             "Load previous" = {
+               
+               .model <- load_model(path = model_path, prefix = model_prefix)
+               message("Previous model loaded.")
+               
+             },
+             "Save both" = {
+               
+               model_prefix <- c(model_prefix, "_other")
+               save_path <- file.path(model_path, model_prefix)
+               
+               dir.create(save_path, recursive = TRUE, showWarnings = FALSE)
+               
+               .model %>% save_model(path = model_path, prefix = model_prefix, 
+                                     comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
+               
+             }
+             )
+      
+      message("Model saved in ", save_path)
+      
+      
+    } else {
+      
+      dir.create(save_path, recursive = TRUE, showWarnings = FALSE)
+      
+      .model %>% save_model(path = model_path, prefix = model_prefix, 
+                            comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
+      
+      message("Model saved in ", save_path)
+      
+    }
     
     on.exit({
       
@@ -158,8 +200,11 @@ fit_with_generator <- function(.model,
     }
   )
   
+  training_epochs <- seq(epochs)
+  if (starting_epoch > 1) 
+    training_epochs <- setdiff(training_epochs, seq(starting_epoch))
   
-  for (epoch in seq(epochs)) {
+  for (epoch in training_epochs) {
     
     message("\nEpoch ", epoch,  "/", epochs)
     

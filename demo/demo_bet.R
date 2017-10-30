@@ -1,3 +1,8 @@
+rm(list = ls())
+rstudioapi::restartSession()
+devtools::load_all()
+devtools::load_all("../dl4ni.data/")
+
 ##%######################################################%##
 #                                                          #
 ####           Example For Brain Extraction 2           ####
@@ -47,11 +52,7 @@ last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
                                               force_categorical = TRUE, 
                                               hidden_layers = list(10))
 
-class_balance <- FALSE
-category_method <- "by_class"
-
-optimizer <- optimizer_adam()
-loss <- loss_mean_squared_error
+optimizer <- keras::optimizer_adam()
 
 config <- define_config(window_width = width, 
                         num_features = num_features,
@@ -62,11 +63,8 @@ config <- define_config(window_width = width,
                         common_layers = common_layers,
                         common_dropout = common_dropout,
                         last_layer_info = last_layer_info,
-                        class_balance = class_balance,
                         optimizer = optimizer, 
-                        loss = loss,
                         output_width = output_width,
-                        category_method = category_method,
                         scale = "z",
                         scale_y = "none")
 

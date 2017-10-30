@@ -16,11 +16,15 @@ ALREADY DONE:
   + Siempre son dos inputs, las coordenadas y el volumen de la ventana, se unen en la primera capa densa.
   + Así se puede definir el width pero no hace falta stride
   + Clase r6 que guarde el width y tenga los métodos para entrenar dados los datos de entrenamiento e inferir una imagen entera?
+  + Diferentes losses, ad hoc para cada problema. Multi-output y multi-loss. Probar loss_categorical_entropy.
+  + "fit with generator" con "initial_epoch" para mantener tasas de aprendizaje y demás.
+  + warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
 
 TODO:
   - Comentarios y documentación en todas las funciones
+  - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
+  - En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
   - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
-  - Diferentes losses, ad hoc para cada problema. Multi-output y multi-loss. Probar loss_categorical_entropy.
   - default_block <- function(num_layers, initial_units, last_units, type = c("dense", "conv")).
   - Construir un grafo por cada path independiente desde cada input hasta el knot, y se usa para distribuir los nodos del grafo y pintarlo.
   - En get_problem_info, poner "problem_description" y un "verbose".
@@ -28,12 +32,10 @@ TODO:
   - Adaptar get_problem_info para problemas de clasificación o regresión donde solo hay una salida (por imagen): para el registro de la imagen, para clasificar sujetos en grupos...
   - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
-  - "fit with generator" con "initial_epoch" para mantener tasas de aprendizaje y demás.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Viñetas y README.md
   - Layers operations, como select_layers (by_name, by_index)...
   - Al hacer grafo, renombrar capas, y usar esta función al generar el modelo. En la configuración (y en la info del problema) almacenar el nombre de la carpeta de los inputs ("T1", "FLAIR") que después se usará para renombrar las capas.
-  - warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
   - verbose para la función de "fit_with_generator"
   - Poner capas convolucionales a la salida
   - Más tipos de bloques: block_clf, block_resnet, block_unet, block_smooth (como last layer y extended), block_crop, block_downsample, block_upsample...con sus wrappers.
