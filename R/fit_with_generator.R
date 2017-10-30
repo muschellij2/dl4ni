@@ -153,17 +153,9 @@ fit_with_generator <- function(.model,
   last_loss <- Inf
   
   my_callback <- keras::callback_lambda(
-    
-    # on_epoch_begin = function(epoch, logs = NULL) {epoch_start_time <<- Sys.time()},
-    # on_epoch_end = function(epoch, logs = NULL) {
-    #   epoch_end_time <- Sys.time()
-    #   # cat("Elapsed time = ", epoch_end_time - epoch_start_time, " == Sub-Epoch Loss = ", logs$loss, "\n")
-    # },
-    # on_batch_begin = function(batch, logs = NULL) {},
     on_batch_end = function(batch, logs = NULL) {
       last_loss <<- logs$loss
     }
-    
   )
   
   
@@ -177,7 +169,6 @@ fit_with_generator <- function(.model,
       message("Start Training")
       
     }
-    
     
     training_loss <- 0
     
@@ -273,6 +264,7 @@ fit_with_generator <- function(.model,
                                      y = test_data[[2]],
                                      batch_size = batch_size,
                                      verbose = 0)
+          if (is.list(loss)) loss <- loss$loss
           loss_acc <- loss_acc + loss
           
           if (progress)

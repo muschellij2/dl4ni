@@ -26,6 +26,7 @@ block_categorical <- function(object,
                               hidden_dropout = 0,
                               num_classes = 2,
                               units = 1,
+                              concatenate = FALSE,
                               params = NULL) {
   
   if (is.null(params)) {
@@ -37,9 +38,15 @@ block_categorical <- function(object,
     params$num_paths <- ifelse("units" %in% names(params), params$units, units)
     
   }
-  
+
   if ("num_classes" %in% names(params)) num_classes <- params$num_classes
-  
+  if ("concatenate" %in% names(params)) {
+    
+    concatenate <- params$concatenate
+    params$concatenate <- FALSE
+    
+  }
+
   # Build the independent paths.
   outputs <- object %>% block_paths(hidden_layers = hidden_layers, 
                                     hidden_activation = hidden_activation, 
@@ -47,7 +54,7 @@ block_categorical <- function(object,
                                     num_paths = params$num_paths, 
                                     params = params)
   
-  
+
   # For each independent path, add the output representation
   for (i in seq_along(outputs)) {
     
@@ -57,8 +64,16 @@ block_categorical <- function(object,
     
   }
   
-  output <- concatenate_layers(outputs)
-  
-  return(output)
+  if (concatenate) {
+    
+    output <- concatenate_layers(outputs)
+    
+    return(output)
+    
+  } else {
+    
+    return(outputs)
+    
+  }
   
 }

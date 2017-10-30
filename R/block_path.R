@@ -37,7 +37,7 @@ block_paths <- function(object,
     concatenate <- ifelse("concatenate" %in% names(params), params$concatenate, concatenate)
     
   }
-  
+
   require(keras)
   
   # Build the independent paths.
