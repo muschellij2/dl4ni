@@ -217,7 +217,7 @@ create_inference_function_from_config <- function(config) {
         
         inputs <- c(list(X_coords), X_vol)
         
-        output <- .model %>% predict_on_batch(x = inputs)
+        output <- .model %>% keras::predict_on_batch(x = inputs)
         
         if (config$categorize_output) {
           
@@ -227,7 +227,8 @@ create_inference_function_from_config <- function(config) {
             num_classes <- config$last_layer$params$num_classes
             units <- config$last_layer$params$units
             
-            output <- Reduce(cbind, output)
+            if (config$multioutput)
+              output <- Reduce(cbind, output)
 
             dims <- dim(output)
             

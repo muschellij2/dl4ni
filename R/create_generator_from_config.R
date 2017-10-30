@@ -432,17 +432,23 @@ create_generator_from_config <- function(config,
         
         Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
         
-        Y_list <- list()
-        for (i in seq(config$output_width ^ 3)) {
+        if (config$multioutput) {
           
-          Y_list[[i]] <- Y[ , 1:config$num_classes]
-          Y <- Y[, -c(1:config$num_classes)]
+          Y_list <- list()
+          for (i in seq(config$output_width ^ 3)) {
+            
+            Y_list[[i]] <- Y[ , 1:config$num_classes]
+            Y <- Y[, -c(1:config$num_classes)]
+            
+          }
+          
+          Y <- Y_list
           
         }
         
         x <- c(list(X_coords), X_vol)
         
-        return(list(x, Y_list))
+        return(list(x, Y))
         
       }
       
