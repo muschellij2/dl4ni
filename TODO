@@ -1,10 +1,25 @@
-TODO:
+ALREADY DONE:
   + Hacer paquete de R,
   + A la hora de inferir, no leer toda la imagen de golpe, hacerlo de forma ordenada e ir montando la imagen resultado poco a poco, dependiendo de si el lote entero cabe en memoria
-  - Comentarios y documentación en todas las funciones
   + on.exit() en fit_generator para cargar siempre la mejor configuración
-  - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
   + Si categorize_output == TRUE, hacer class_balance por cada una de las clases.
+  + "fit_with_generator" no cambia el valor de "best_loss", quizás haya que convetir "DLmodel" en un environment.
+  + transform_coords para (x, y, z) entre la imagen input y la output, si la resolución fuera distinta.
+  + Multi-input como lista de listas vol_layers...
+  + Buscar BRATS 2015 training set
+  + Block_multivalued, como las múltiples capas categóricas, pero después cada una de ellas con una capa lambda que haga el producto dot por 1:numclasses. Y una alternativa que haga argmax, pero esta última no se entrene. Debería tener la posibilidad de meter capas ocultas intermedias distintas en cada capa categórica.
+  + Comenzar todo definiendo la configuración, que se usará para crear el modelo, para los generadores, al entrenar y en la inferencia.
+  + Model load and save con hiperparámetros.
+  + Modelo más genérico, donde una parte es el volumen 3d y la otra son las features que se extraigan de la imagen (extensión de únicamente usar las coordenadas xyz en esa otra parte)
+  + Si hace falta red convolucional, se hace un layer reshape
+  + Usar lo de leer las ventanas de una imagen en posiciones aleatorias
+  + Siempre son dos inputs, las coordenadas y el volumen de la ventana, se unen en la primera capa densa.
+  + Así se puede definir el width pero no hace falta stride
+  + Clase r6 que guarde el width y tenga los métodos para entrenar dados los datos de entrenamiento e inferir una imagen entera?
+
+TODO:
+  - Comentarios y documentación en todas las funciones
+  - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
   - Diferentes losses, ad hoc para cada problema. Multi-output y multi-loss. Probar loss_categorical_entropy.
   - default_block <- function(num_layers, initial_units, last_units, type = c("dense", "conv")).
   - Construir un grafo por cada path independiente desde cada input hasta el knot, y se usa para distribuir los nodos del grafo y pintarlo.
@@ -13,7 +28,6 @@ TODO:
   - Adaptar get_problem_info para problemas de clasificación o regresión donde solo hay una salida (por imagen): para el registro de la imagen, para clasificar sujetos en grupos...
   - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
-  + "fit_with_generator" no cambia el valor de "best_loss", quizás haya que convetir "DLmodel" en un environment.
   - "fit with generator" con "initial_epoch" para mantener tasas de aprendizaje y demás.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Viñetas y README.md
@@ -24,17 +38,10 @@ TODO:
   - Poner capas convolucionales a la salida
   - Más tipos de bloques: block_clf, block_resnet, block_unet, block_smooth (como last layer y extended), block_crop, block_downsample, block_upsample...con sus wrappers.
   - Extended Model cuando last_layer tiene type multivalued o similar, se le añade una más (que habrá que gestionar en la inference function), por ejemplo haciendo argmax o un layer_dot con un tensor constante...
-  + transform_coords para (x, y, z) entre la imagen input y la output, si la resolución fuera distinta.
-  + Multi-input como lista de listas vol_layers...
-  + Buscar BRATS 2015 training set
   - App shiny (playground) para hacer el entranmiento, definir la configuración, crear modelos o aplicarlos, con la posibilidad de usar un widget para visualizar imágenes 3d.
   - Manipulación de redes. 
   - pad_sequence con lstm para hacer modelos sobre la imagen al completo.
   - Generación de textos a partir de las imágenes completas: empezar con output \in\{"axial", "coronal", "sagital"\} e ir complicando el modelo.
-  + Block_multivalued, como las múltiples capas categóricas, pero después cada una de ellas con una capa lambda que haga el producto dot por 1:numclasses. Y una alternativa que haga argmax, pero esta última no se entrene. Debería tener la posibilidad de meter capas ocultas intermedias distintas en cada capa categórica.
-  + Comenzar todo definiendo la configuración, que se usará para crear el modelo, para los generadores, al entrenar y en la inferencia.
-  + Model load and save con hiperparámetros.
-  + Modelo más genérico, donde una parte es el volumen 3d y la otra son las features que se extraigan de la imagen (extensión de únicamente usar las coordenadas xyz en esa otra parte)
   - Autoencoder para la parcelación. Si podemos representar una parcelación por número entre -1 y 1 por ejemplo, podemos hacer que eso sea la salida de la red para que Mapee una ventana de la imagen original a la codificación de la parcelación
   - Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   - Grafo de cada red, que se pueda dibujar con graphviz o con el método que sea. Nombres a los nodos/capas autogenerados a partir de un "prefix" que se proporciona.
@@ -49,8 +56,3 @@ TODO:
   - Viñetas y demos por cada problema.
   - Lstm para procesar la imagen entera??
   - Entrenar con capas convolucionales.
-  + Si hace falta red convolucional, se hace un layer reshape
-  + Usar lo de leer las ventanas de una imagen en posiciones aleatorias
-  + Siempre son dos inputs, las coordenadas y el volumen de la ventana, se unen en la primera capa densa.
-  + Así se puede definir el width pero no hace falta stride
-  + Clase r6 que guarde el width y tenga los métodos para entrenar dados los datos de entrenamiento e inferir una imagen entera?

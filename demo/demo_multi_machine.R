@@ -1,11 +1,12 @@
 ##%######################################################%##
 #                                                          #
-####           Example For Brain Segmentation 2         ####
+####           Example For Brain Multi-Machine          ####
 #                                                          #
 ##%######################################################%##
 
 require(neurobase)
 require(dl4ni.data)
+load_keras()
 
 ##%######################################################%##
 #                                                          #
@@ -13,7 +14,7 @@ require(dl4ni.data)
 #                                                          #
 ##%######################################################%##
 
-problem <- "segmentation2"
+problem <- "multi-machine"
 info <- problem %>% get_problem_info()
 
 info %>% split_train_test_sets()
@@ -29,25 +30,25 @@ output_width <- 3
 num_features <- 3
 
 vol_layers_pattern <- list(clf(all = TRUE,
-                               hidden_layers = list(dense(200),
-                                                    dense(100))))
-vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
-vol_dropout <- 0.15
+                               hidden_layers = list(dense(250),
+                                                    dense(200))))
 
-feature_layers <- list(dense(10), dense(5))
+vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
+
+vol_dropout <- 0.25
+
+feature_layers <- list(clf(hidden_layers = list(dense(10), dense(10))))
 feature_dropout <- 0.15
 
-# common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
-common_layers <- list(dense(500), dense(250), dense(100))
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(250), dense(100))))
+# common_layers <- list(dense(250), dense(200))
 common_dropout <- 0.25
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
                                               force_categorical = FALSE, 
-                                              multioutput = TRUE,
-                                              hidden_layers = c(10))
+                                              hidden_layers = list(30, 20))
 
-
-optimizer <- optimizer_nadam()
+optimizer <- keras::optimizer_adam()
 
 config <- define_config(window_width = width, 
                         num_features = num_features,
@@ -59,10 +60,12 @@ config <- define_config(window_width = width,
                         common_dropout = common_dropout,
                         last_layer_info = last_layer_info,
                         class_balance = FALSE,
+                        regularize = TRUE,
+                        path = "volumes",
                         optimizer = optimizer, 
                         output_width = output_width,
-                        scale = "z",
-                        scale_y = "none")
+                        scale = "meanmax",
+                        scale_y = "meanmax")
 
 ##%######################################################%##
 #                                                          #
@@ -71,10 +74,10 @@ config <- define_config(window_width = width,
 ##%######################################################%##
 
 
-segmentation_model <- config %>% create_model_from_config()
-summary(segmentation_model$model)
+modality_model <- config %>% create_model_from_config()
+summary(modality_model$model)
 
-g <- segmentation_model %>% graph_from_model()
+g <- modality_model %>% graph_from_model()
 g %>% plot_graph()
 
 ##%######################################################%##
@@ -95,6 +98,7 @@ test_config <- config %>% create_generator_from_config(x_files = info$test$x,
                                                        mode = "sampling",
                                                        max_sub_epochs = max_sub_epochs)
 
+
 ##%######################################################%##
 #                                                          #
 ####                 Inference Function                 ####
@@ -109,21 +113,21 @@ infer <- config %>% create_inference_function_from_config()
 #                                                          #
 ##%######################################################%##
 
-epochs <- 3
+epochs <- 10
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-segmentation_model %>% fit_with_generator(train_config = train_config, 
-                                          validation_config = test_config,
-                                          epochs = epochs,
-                                          keep_best = keep_best,
-                                          path = saving_path,
-                                          prefix = saving_prefix)
+modality_model %>% fit_with_generator(train_config = train_config, 
+                                   validation_config = test_config,
+                                   epochs = epochs,
+                                   keep_best = keep_best,
+                                   path = saving_path,
+                                   prefix = saving_prefix)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-segmentation_model %>% save_model(path = saving_path, prefix = saving_prefix, comment = "After training")
+modality_model %>% save_model(path = saving_path, prefix = saving_prefix, comment = "After training")
 
 
 ##%######################################################%##
@@ -138,10 +142,8 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
-segmentation <- segmentation_model %>% infer(V = input_imgs, speed = "faster")
+modality <- modality_model %>% infer(V = input_imgs, speed = "medium")
 
-num_classes <- length(info$values)
-col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
-
-ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth")
-ortho_plot(x = input_imgs[[1]], y = segmentation, col.y = col.y, text = "Predicted")
+ortho_plot(x = input_imgs[[1]], text = "Original image")
+ortho_plot(x = ground_truth, text = "Ground Truth")
+ortho_plot(x = modality, text = "Predicted")
