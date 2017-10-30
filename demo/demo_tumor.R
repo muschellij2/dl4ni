@@ -29,10 +29,10 @@ width <- 7
 output_width <- 3
 num_features <- 3
 
-vol_layers_pattern <- list(clf(all = TRUE,
-                               hidden_layers = list(dense(250))),
-                           regression(units = 10, hidden_layers = list(dense(30),
-                                                                       dense(10))))
+vol_layers_pattern <- list(clf(all = FALSE,
+                               hidden_layers = list(dense(250), dense(100))),
+                           regression(units = 25, hidden_layers = list(dense(10),
+                                                                       dense(5))))
 
 vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
 
@@ -42,19 +42,16 @@ feature_layers <- list(dense(10), dense(10))
 feature_dropout <- 0.15
 
 # common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
-common_layers <- list(regression(units = 10, hidden_layers = list(dense(30),
-                                                                  dense(10))),
-                      clf(all = TRUE, hidden_layers = list(dense(500), 
-                                                           dense(250), 
-                                                           dense(100))))
+common_layers <- list(clf(all = FALSE, hidden_layers = list(dense(100), 
+                                                            dense(250), 
+                                                            dense(100))))
 common_dropout <- 0.25
 
-last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
-                                              force_categorical = FALSE, 
+last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
+                                              multioutput = TRUE,
                                               hidden_layers = c(20, 10))
 
 optimizer <- optimizer_nadam()
-loss <- loss_mean_squared_error
 
 config <- define_config(window_width = width, 
                         num_features = num_features,
@@ -67,7 +64,6 @@ config <- define_config(window_width = width,
                         last_layer_info = last_layer_info,
                         class_balance = TRUE,
                         optimizer = optimizer, 
-                        loss = loss,
                         output_width = output_width,
                         scale = "z",
                         scale_y = "none")
@@ -130,7 +126,7 @@ tumor_model %>% fit_with_generator(train_config = train_config,
                                    path = saving_path,
                                    prefix = saving_prefix)
 
-tumor_model <- load_model(path = saving_path, prefix = saving_prefix)
+# tumor_model <- load_model(path = saving_path, prefix = saving_prefix)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
