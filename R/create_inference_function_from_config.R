@@ -17,7 +17,7 @@ create_inference_function_from_config <- function(config) {
   
   if ("DLconfig" %in% class(config)) {
     
-    radius <- 0.5 * (width + 1)
+    radius <- 0.5 * (config$width + 1)
     
     f_inference <- function(model, V, speed = c("slower", "medium", "faster"), ...) {
       
@@ -227,6 +227,8 @@ create_inference_function_from_config <- function(config) {
             num_classes <- config$last_layer$params$num_classes
             units <- config$last_layer$params$units
             
+            output <- Reduce(cbind, output)
+
             dims <- dim(output)
             
             if (config$category_method == "simple") {

@@ -72,7 +72,6 @@ create_model_from_config <- function(config) {
         }
         
       }
-      
 
       output_vol <- individual_outputs
       

@@ -173,14 +173,14 @@ create_generator_from_config <- function(config,
       
       sub_epoch <<- sub_epoch + 1
       
-      print(paste0("Subepoch ", sub_epoch))
+      # print(paste0("Subepoch ", sub_epoch))
       
       if (sub_epoch > max_epochs) {
         
         sub_epoch <<- 1
         
         next_file <<- next_file + 1
-        print(paste0("Next_file ", next_file))
+        # print(paste0("Next_file ", next_file))
         
         
         if (next_file > length(x_files[[1]])) 
@@ -432,9 +432,17 @@ create_generator_from_config <- function(config,
         
         Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
         
+        Y_list <- list()
+        for (i in seq(config$output_width ^ 3)) {
+          
+          Y_list[[i]] <- Y[ , 1:config$num_classes]
+          Y <- Y[, -c(1:config$num_classes)]
+          
+        }
+        
         x <- c(list(X_coords), X_vol)
         
-        return(list(x, Y))
+        return(list(x, Y_list))
         
       }
       

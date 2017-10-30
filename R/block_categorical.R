@@ -26,6 +26,7 @@ block_categorical <- function(object,
                               hidden_dropout = 0,
                               num_classes = 2,
                               units = 1,
+                              concatenate = FALSE,
                               params = NULL) {
   
   if (is.null(params)) {
@@ -39,6 +40,7 @@ block_categorical <- function(object,
   }
   
   if ("num_classes" %in% names(params)) num_classes <- params$num_classes
+  if ("concatenate" %in% names(params)) concatenate <- params$concatenate
   
   # Build the independent paths.
   outputs <- object %>% block_paths(hidden_layers = hidden_layers, 
@@ -57,8 +59,16 @@ block_categorical <- function(object,
     
   }
   
-  output <- concatenate_layers(outputs)
-  
-  return(output)
+  if (concatenate) {
+    
+    output <- concatenate_layers(outputs)
+    
+    return(output)
+    
+  } else {
+    
+    return(outputs)
+    
+  }
   
 }

@@ -29,6 +29,12 @@ define_last_layer <- function(info, units, force_categorical, ...) {
       last_layer <- categorical(num_classes = num_classes + 1, 
                                 units = units, ...)
       
+      loss <- list()
+      for (i in seq(units)) {
+        
+        loss[[i]] <- keras::loss_categorical_crossentropy
+        
+      }
       
       output_activation <- "sigmoid"
       
@@ -39,6 +45,13 @@ define_last_layer <- function(info, units, force_categorical, ...) {
         last_layer <- categorical(num_classes = num_classes + 1, 
                                   units = units, ...)
         
+        loss <- list()
+        for (i in seq(units)) {
+          
+          loss[[i]] <- keras::loss_categorical_crossentropy
+          
+        }
+        
         
         output_activation <- "sigmoid"
         
@@ -47,11 +60,11 @@ define_last_layer <- function(info, units, force_categorical, ...) {
         last_layer <- dense(units = units)
         output_activation <- "softsign"
         binarise <- TRUE
+        loss <- loss_mean_squared_error
         
       }
       
     }
-    
     
   } else {
     
@@ -79,11 +92,13 @@ define_last_layer <- function(info, units, force_categorical, ...) {
                              output_activation = output_activation, 
                              ...)
     
+    loss <- loss_mean_squared_error
     
   }
   
   return(list(last_layer = last_layer, 
-              output_activation = output_activation, 
+              output_activation = output_activation,
+              loss = loss,
               remap_classes = remap_classes,
               binarise = binarise,
               num_classes = num_classes,
