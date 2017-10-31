@@ -1,28 +1,35 @@
-#' @title FUNCTION_TITLE
+#' @title Fit a Model using Generators
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description this function is used to fit or train a \code{DLmodel} by using generator 
+#' functions for training and validation data.
 #'
-#' @param .model               (name) PARAM_DESCRIPTION
-#' @param generator            (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param steps_per_epoch      (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param train_config         (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param epochs               (numeric) PARAM_DESCRIPTION, Default: 10
-#' @param starting_epoch       (numeric) PARAM_DESCRIPTION, Default: 1
-#' @param validation_data      (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param validation_steps     (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param validation_config    (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param keep_best            (logical) PARAM_DESCRIPTION, Default: TRUE
-#' @param ...                  (name) PARAM_DESCRIPTION
+#' @param .model               (\code{DLmodel}) The model to train
+#' @param generator            (function) The generator function for training data, built by \code{\link{create_generator_from_config}}, Default: NULL
+#' @param steps_per_epoch      (integer) Number of steps per training epoch, Default: NULL
+#' @param train_config         (list) The training configuration, the output of \code{\link{create_generator_from_config}} when inputs are training files, Default: NULL
+#' @param epochs               (numeric) Maximum number of epochs to train, Default: 10
+#' @param starting_epoch       (numeric) strating epoch, useful when we want to resume a previous fit, Default: 1
+#' @param validation_data      (function or matrix) Data for validation. It can be a generator function, built by \code{\link{create_generator_from_config}}, Default: NULL
+#' @param validation_steps     (integer) Number of steps of validation per epoch, Default: NULL
+#' @param validation_config    (list) The testing configuration, the output of \code{\link{create_generator_from_config}} when inputs are validation files, Default: NULL
+#' @param keep_best            (logical) Should the training always store the best model up-to-date?, Default: TRUE
+#' @param verbose              (logical) Provide additional information on training, Default: TRUE
+#' @param ...                  extra arguments passed to other functions.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return The trained \code{DLmodel}.
 #'
-#' @details DETAILS
+#' @details \code{generator}, \code{steps_per_epoch}, \code{validation_data} and \code{validation_steps} are completely and automatically determined if one uses the \code{train_config} and \code{validation_config} parameters, both being the outputs of \code{\link{create_generator_from_config}}.
+#' 
+#' Additionally, we can pass this function two arguments: \code{path} and \code{prefix}, the best model will be stored in the corresponding path with the given prefix (usually something indicative or with a timestamp).
+#' 
 #' @seealso 
 #'  \code{\link[keras]{callback_lambda}}
+#'  
 #' @export 
 #' @importFrom keras callback_lambda
 #' @import keras
 #' @import progress
+#' 
 fit_with_generator <- function(.model,
                                generator = NULL,
                                steps_per_epoch = NULL,
@@ -33,15 +40,22 @@ fit_with_generator <- function(.model,
                                validation_steps = NULL, 
                                validation_config = NULL,
                                keep_best = TRUE,
+                               verbose = TRUE,
                                ...) {
   
   require(keras)
   
+  # Basic input class check
+  stopifnot(inherits(.model, "DLmodel"))
+  
+  # Manage extra arguments
   extra_args <- list(...)
   
+  # At least we require the training configuration
   if (is.null(train_config) & is.null(generator) & is.null(steps_per_epoch)) 
     stop("No training configuration/generator provided.")
   
+  # If we have a train_config, this define the other variables:
   if (!is.null(train_config)) {
     
     generator <- train_config$generator
@@ -54,9 +68,15 @@ fit_with_generator <- function(.model,
     
   }
   
+  # If the batch_size is defined explicitly, use the provided by the user
+  if (!is.null(extra_args$batch_size)) batch_size <- extra_args$batch_size
+  
+  
+  # If no validation is provided, a warning will be given
   if (is.null(validation_config) & is.null(validation_data) & is.null(validation_steps)) 
     warning("No validation configuration/generator provided.")
   
+  # If it is provided, other variables are defined from the configuration.
   if (!is.null(validation_config)) {
     
     validation_data <- validation_config$generator
@@ -64,17 +84,18 @@ fit_with_generator <- function(.model,
 
   }
   
+  # Let's take into account where to store the best model
   path <- NULL
   prefix <- NULL
   
-  if (!is.null(extra_args$batch_size)) batch_size <- extra_args$batch_size
-  
+  # If path or prefix are provided, use them.
   if (keep_best & ("path" %in% names(extra_args))) path <- extra_args$path
   if (keep_best & ("prefix" %in% names(extra_args))) prefix <- extra_args$prefix
   
   extra_args["path"] <- NULL
   extra_args["prefix"] <- NULL
   
+  # If not, use temp folder and file.
   if (keep_best & is.null(path))  
     model_path <- tempdir()
   else 
@@ -85,51 +106,63 @@ fit_with_generator <- function(.model,
   else
     model_prefix <- prefix
   
-  if ("DLmodel" %in% class(.model)) {
+  # Initialize variables for training
+  model <- .model$model
+  
+  if ("best_loss" %in% names(.model)) {
     
-    model <- .model$model
-    
-    if ("best_loss" %in% names(.model)) {
-      
-      best_validation_loss <- .model$best_loss
-      
-    } else {
-      
-      best_validation_loss <- Inf
-      
-    }
+    best_validation_loss <- .model$best_loss
     
   } else {
     
-    stop("Not a DLmodel object")
-
+    best_validation_loss <- Inf
+    
   }
   
   epoch <- 0
   
+  # Set variables needed to keep always the best model trained so far
   if (keep_best) {
     
+    # Path to store the best model
     save_path <- file.path(model_path, model_prefix)
     
-    if (file.exists(save_path)) {
+    # If it exists, we ask the user for some input: Should we:
+    # Overwrite?
+    # Load the previous model?
+    # Save both?
+    # Note that this only works when in interactive mode. If in a script, it will
+    # always overwrite.
+    if (file.exists(save_path) & interactive()) {
       
       choices <- c("Overwrite", "Load previous", "Save both")
       title <- "Already existing model. Choose an action:"
       chosen_output <- utils::select.list(choices = choices, title = title)
       
+      # Perform the required action
       switch(chosen_output,
+             
              "Overwrite" = {
                
                .model %>% save_model(path = model_path, prefix = model_prefix, 
                                      comment = paste0(timestamp(quiet = TRUE), ":", " New initial state.\n"))
                
+               saveRDS(best_validation_loss, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
+               
              },
+             
              "Load previous" = {
                
                .model <- load_model(path = model_path, prefix = model_prefix)
-               message("Previous model loaded.")
+               
+               if (file.exists(file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds"))))
+                 best_validation_loss <- readRDS(file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
+               
+               if (verbose)
+                 message("Previous model loaded.")
                
              },
+             
              "Save both" = {
                
                model_prefix <- c(model_prefix, "_other")
@@ -140,23 +173,32 @@ fit_with_generator <- function(.model,
                .model %>% save_model(path = model_path, prefix = model_prefix, 
                                      comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
                
-             }
-             )
+               saveRDS(best_validation_loss, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
+               
+             })
       
-      message("Model saved in ", save_path)
+      if (verbose)
+        message("Model saved in ", save_path)
       
       
     } else {
+      
+      # Overwrite if in a script or new training 
       
       dir.create(save_path, recursive = TRUE, showWarnings = FALSE)
       
       .model %>% save_model(path = model_path, prefix = model_prefix, 
                             comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
       
-      message("Model saved in ", save_path)
+      if (verbose)
+        message("Model saved in ", save_path)
       
     }
     
+    # Define the action to perform when exiting this training:
+    # If we have trained for more than one epoch, load the best
+    # model up-to-date.
+    # This works even when the user interrupts training.
     on.exit({
       
       if (epoch > 1) {
@@ -164,7 +206,7 @@ fit_with_generator <- function(.model,
         message("Loading previous best model, with loss:", best_validation_loss)
         
         weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
-        
+
         .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
         # file.path(model_pathmodel_filename %>% load_model_hdf5()
         
@@ -176,22 +218,28 @@ fit_with_generator <- function(.model,
     
   }
   
-  if (require(progress)) {
+  # Package progress is useful to make graphical progress bars.
+  if (verbose) {
     
-    progress <- TRUE
-    pb_epochs <- progress_bar$new(format = " Epoch :epoch/:total [:bar] ETA: :eta . Elapsed: :elapsed",
-                                  total = epochs,
-                                  clear = FALSE,
-                                  width = 60)
-    
-    pb_epochs$update(ratio = 0, tokens = list(epoch = 0))
-    
-  } else {
-    
-    progress <- FALSE
+    if (require(progress)) {
+      
+      progress <- TRUE
+      pb_epochs <- progress_bar$new(format = " Epoch :epoch/:total [:bar] ETA: :eta . Elapsed: :elapsed",
+                                    total = epochs,
+                                    clear = FALSE,
+                                    width = 60)
+      
+      pb_epochs$update(ratio = 0, tokens = list(epoch = 0))
+      
+    } else {
+      
+      progress <- FALSE
+      
+    }
     
   }
   
+  # Initialize the callbacks for the training
   last_loss <- Inf
   
   my_callback <- keras::callback_lambda(
@@ -200,39 +248,56 @@ fit_with_generator <- function(.model,
     }
   )
   
+  # Select epochs to train, useful to resume previous trainings.
   training_epochs <- seq(epochs)
   if (starting_epoch > 1) 
-    training_epochs <- setdiff(training_epochs, seq(starting_epoch))
+    training_epochs <- setdiff(training_epochs, seq(starting_epoch - 1))
   
+  # For each training epoch
   for (epoch in training_epochs) {
     
-    message("\nEpoch ", epoch,  "/", epochs)
-    
-    if (!progress) {
-
-      message("==========")
-      message("Start Training")
+    # Information (progress bar) for epochs.
+    if (verbose) {
+      
+      message("\nEpoch ", epoch,  "/", epochs)
+      
+      if (!progress) {
+        
+        message("==========")
+        message("Start Training")
+        
+      }
       
     }
     
     training_loss <- 0
     
-    if (progress) {
+    # Information (progress bar) for subepochs
+    if (verbose) {
       
-      pb_subepoch <- progress_bar$new(format = paste0("   Training Subepoch :subepoch/:total ",
-                                                      "[:bar] ETA: :eta . Elapsed: :elapsed. ",
-                                                      "Current loss = :loss"),
-                                      total = steps_per_epoch,
-                                      clear = FALSE,
-                                      width = 100)
-      
-      pb_subepoch$update(ratio = 0, tokens = list(subepoch = 0, loss = last_loss)) 
+      if (progress) {
+        
+        pb_subepoch <- progress_bar$new(format = paste0("   Training Subepoch :subepoch/:total ",
+                                                        "[:bar] ETA: :eta . Elapsed: :elapsed. ",
+                                                        "Current loss = :loss"),
+                                        total = steps_per_epoch,
+                                        clear = FALSE,
+                                        width = 100)
+        
+        pb_subepoch$update(ratio = 0, tokens = list(subepoch = 0, loss = last_loss)) 
+        
+      }
       
     }
     
+    # For each subepoch
     for (step in seq(steps_per_epoch)) {
       
-      # Get Training data
+      # Get Training datausing the generator
+      # data has 2 or 3 components:
+      # The first is always the input samples
+      # The second is always the desired outputs
+      # A possible third indicates sample weights.
       data <- generator()
       
       if (length(data) > 2) {
@@ -262,92 +327,137 @@ fit_with_generator <- function(.model,
         
       }
       
-      if (progress)
-        pb_subepoch$tick(tokens = list(subepoch = step, 
-                                       loss = sprintf("%.5f", last_loss)))
+      if (verbose) {
+        
+        if (progress)
+          pb_subepoch$tick(tokens = list(subepoch = step, 
+                                         loss = sprintf("%.5f", last_loss)))
+        
+      }
       
     }
     
-    
+    # Loss obtained after this training epoch
     training_loss <- last_loss
     
-    if (!progress) 
-      message("Training loss: ", training_loss)
+    if (verbose) {
+      
+      if (!progress) 
+        message("Training loss: ", training_loss)
+      
+    }
     
-    # We have validation data
+    # If we have validation data, start the validation
     if (!is.null(validation_data)) {
       
-      if (!progress)
-        message("   Start Validation")
+      if (verbose) {
+        
+        if (!progress)
+          message("   Start Validation")
+        
+      }
       
+      # Initialize variables for validation
       loss <- 0
       loss_acc <- 0
       
       if (is.function(validation_data)) {
         
-        # It is a generator
+        # If it is a generator
         
-        if (progress) {
+        if (verbose) {
           
-          pb_subepoch_val <- progress_bar$new(format = paste0("   Validating Subepoch :subepoch/:total ",
-                                                              "[:bar] ETA: :eta . Elapsed: :elapsed. ",
-                                                              "Validation loss = :loss"),
-                                              total = validation_steps,
-                                              clear = FALSE,
-                                              width = 100)
-          
-          pb_subepoch_val$update(ratio = 0, tokens = list(subepoch = 0, loss = Inf))
+          if (progress) {
+            
+            # Progress bar for validation subepoch
+            pb_subepoch_val <- progress_bar$new(format = paste0("   Validating Subepoch :subepoch/:total ",
+                                                                "[:bar] ETA: :eta . Elapsed: :elapsed. ",
+                                                                "Validation loss = :loss"),
+                                                total = validation_steps,
+                                                clear = FALSE,
+                                                width = 100)
+            
+            pb_subepoch_val$update(ratio = 0, tokens = list(subepoch = 0, loss = Inf))
+            
+          }
           
         }
         
-        
+        # Perform the validation and store the losses
+        loss_acc <- rep(0, length(validation_steps))
         for (val_steps in seq(validation_steps)) {
           
-          
+          # Use the generator to get data
           test_data <- validation_data()
+          
+          # Evaluate
           loss <- model %>% evaluate(x = test_data[[1]],
                                      y = test_data[[2]],
                                      batch_size = batch_size,
                                      verbose = 0)
-          if (is.list(loss)) loss <- loss$loss
-          loss_acc <- loss_acc + loss
           
-          if (progress)
-            pb_subepoch_val$tick(tokens = list(subepoch = val_steps, 
-                                               loss = sprintf("%.5f", loss)))
+          # Store loss (if multi-output, it is a list)
+          if (is.list(loss)) loss <- loss$loss
+          loss_acc[val_steps] <- loss
+          
+          if (verbose) {
+            
+            if (progress)
+              pb_subepoch_val$tick(tokens = list(subepoch = val_steps, 
+                                                 loss = sprintf("%.5f", loss)))
+            
+          }
           
         }
         
-        loss_acc <- loss_acc / validation_steps
+        # Compute the mean loss
+        # loss_acc <- loss_acc / validation_steps
+        # loss_acc <- median(loss_acc)
+        loss_acc <- mean(loss_acc)
         
       } else {
         
-        # It is data
+        # If we have validation data, not a generator, just evaluate
         loss_acc <- model %>% evaluate(x = validation_data[[1]],
                                        y = validation_data[[2]])
         
       }
       
+      # If we have to keep the best model, and we have reduced the loss, save the model as the new best
       if (keep_best & (loss_acc < best_validation_loss)) {
         
+        # Save everything
         best_validation_loss <- loss_acc
+        
+        saveRDS(object = loss_acc, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
+        
         .model %>% save_model(path = model_path, prefix = model_prefix, 
                               comment = paste0(timestamp(quiet = TRUE), ":", " Model with loss: ", loss_acc, "\n"))
+        
         message("New best model found with loss:", loss_acc)
         
       }
       
-      if (!progress)
-        message("\nValidation loss: ", loss_acc)
+      if (verbose) {
+        
+        if (!progress)
+          message("\nValidation loss: ", loss_acc)
+        
+      }
       
     }
     
-    
-    if (progress) 
-      pb_epochs$tick(tokens = list(epoch = epoch))
+    if (verbose) {
+      
+      # Update the progress bar
+      if (progress) 
+        pb_epochs$tick(tokens = list(epoch = epoch))
+      
+    }
     
   }
   
+  # To end, return the best model in the training.
   if (keep_best) {
     
     message("Loading previous best model, with loss:", best_validation_loss)
@@ -355,8 +465,7 @@ fit_with_generator <- function(.model,
     weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
     
     .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-    # file.path(model_pathmodel_filename %>% load_model_hdf5()
-    
+
     .model$best_loss <- best_validation_loss
 
   }

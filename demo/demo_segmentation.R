@@ -114,7 +114,7 @@ infer <- config %>% create_inference_function_from_config()
 #                                                          #
 ##%######################################################%##
 
-epochs <- 3
+epochs <- 30
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -122,6 +122,7 @@ saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 segmentation_model %>% fit_with_generator(train_config = train_config, 
                                           validation_config = test_config,
                                           epochs = epochs,
+                                          starting_epoch = 1,
                                           keep_best = keep_best,
                                           path = saving_path,
                                           prefix = saving_prefix)
@@ -146,7 +147,7 @@ ground_truth <- neurobase::readnii(info$outputs[test_index])
 segmentation <- segmentation_model %>% infer(V = input_imgs, speed = "faster")
 
 num_classes <- length(info$values)
-col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
+col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
 
-ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth")
-ortho_plot(x = input_imgs[[1]], y = segmentation, col.y = col.y, text = "Predicted")
+ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth", interactiveness = FALSE)
+ortho_plot(x = input_imgs[[1]], y = segmentation, col.y = col.y, text = "Predicted", interactiveness = FALSE)
