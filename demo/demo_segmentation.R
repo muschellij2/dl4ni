@@ -35,6 +35,8 @@ num_features <- 3
 
 vol_layers_pattern <- list(clf(all = TRUE,
                                hidden_layers = list(dense(200),
+                                                    dense(100),
+                                                    dense(250),
                                                     dense(100))))
 vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
 vol_dropout <- 0.15
@@ -42,14 +44,14 @@ vol_dropout <- 0.15
 feature_layers <- list(dense(10), dense(5))
 feature_dropout <- 0.15
 
-# common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
-common_layers <- list(dense(500), dense(250), dense(100))
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(100))))
 common_dropout <- 0.25
+# common_dropout <- 0.1
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
-                                              force_categorical = FALSE, 
-                                              multioutput = TRUE,
-                                              hidden_layers = c(10))
+                                              force_categorical = TRUE,
+                                              # loss_function = keras::loss_mean_squared_error,
+                                              hidden_layers = list(10))
 
 
 optimizer <- keras::optimizer_nadam()
@@ -144,10 +146,12 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
-segmentation <- segmentation_model %>% infer(V = input_imgs, speed = "faster")
+segmentation <- segmentation_model %>% infer(V = input_imgs, speed = "medium")
 
 num_classes <- length(info$values)
 col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
 
 ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth", interactiveness = FALSE)
-ortho_plot(x = input_imgs[[1]], y = segmentation, col.y = col.y, text = "Predicted", interactiveness = FALSE)
+ortho_plot(x = input_imgs[[1]], y = segmentation, col.y = col.y, text = "Predicted Regularize Medium", interactiveness = FALSE)
+
+"segmentation2_2017_10_31_13_23_02_final"

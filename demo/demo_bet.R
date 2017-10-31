@@ -36,23 +36,24 @@ num_features <- 3
 
 vol_layers_pattern <- list(clf(all = TRUE,
                                hidden_layers = list(dense(200),
+                                                    dense(100),
+                                                    dense(250),
                                                     dense(100))))
 vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
-vol_dropout <- 0.1
+vol_dropout <- 0.15
 
-feature_layers <- list()#list(clf(hidden_layers = list(dense(10), dense(10))))
+feature_layers <- list(dense(10), dense(5))
 feature_dropout <- 0.15
 
-# common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
-common_layers <- list(dense(250), dense(100))
-common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(250), dense(100))))
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(100))))
 common_dropout <- 0.25
-common_dropout <- 0.1
+# common_dropout <- 0.1
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
                                               force_categorical = TRUE,
                                               # loss_function = keras::loss_mean_squared_error,
                                               hidden_layers = list(10))
+
 
 optimizer <- keras::optimizer_nadam()
 

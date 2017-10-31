@@ -21,6 +21,7 @@ ALREADY DONE:
   + warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
 
 TODO:
+  - Meter el info del problema en el config.
   - Comentarios y documentación en todas las funciones
   - En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
   - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
