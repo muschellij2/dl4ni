@@ -299,6 +299,7 @@ fit_with_generator <- function(.model,
       # The second is always the desired outputs
       # A possible third indicates sample weights.
       data <- generator()
+      num_outputs <- length(data[[2]])
       
       if (length(data) > 2) {
         # With sample weight
@@ -326,6 +327,9 @@ fit_with_generator <- function(.model,
           # ...)
         
       }
+      
+      
+      last_loss <- last_loss / num_outputs
       
       if (verbose) {
         
@@ -398,13 +402,13 @@ fit_with_generator <- function(.model,
           
           # Store loss (if multi-output, it is a list)
           if (is.list(loss)) loss <- loss$loss
-          loss_acc[val_steps] <- loss
+          loss_acc[val_steps] <- loss / num_outputs
           
           if (verbose) {
             
             if (progress)
               pb_subepoch_val$tick(tokens = list(subepoch = val_steps, 
-                                                 loss = sprintf("%.5f", loss)))
+                                                 loss = sprintf("%.5f", loss / num_outputs)))
             
           }
           

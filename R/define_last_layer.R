@@ -33,6 +33,8 @@ define_last_layer <- function(info,
   binarise <- FALSE
   num_classes <- 0
   
+  extra_args <- list(...)
+  
   last_layer_info <- switch(info$type,
                             
                             "image_labelling" = {
@@ -41,6 +43,16 @@ define_last_layer <- function(info,
                               # Get the number of classes and their labels
                               num_classes <- length(info$values)
                               y_label <- info$values
+                              
+                              loss_function <- keras::loss_categorical_crossentropy
+                              if (num_classes == 1)
+                                loss_function <- keras::loss_binary_crossentropy
+                              
+                              if ("loss_function" %in% names(extra_args)) {
+                                
+                                loss_function <- extra_args$loss_function
+                                
+                              }
                               
                               remap_classes <- list(source = info$values, 
                                                     target = seq_along(info$values))
@@ -58,7 +70,7 @@ define_last_layer <- function(info,
                                   loss <- list()
                                   for (i in seq(units)) {
                                     
-                                    loss[[i]] <- keras::loss_categorical_crossentropy
+                                    loss[[i]] <- loss_function
                                     
                                   }
                                   
@@ -90,7 +102,7 @@ define_last_layer <- function(info,
                                     loss <- list()
                                     for (i in seq(units)) {
                                       
-                                      loss[[i]] <- keras::loss_binary_crossentropy
+                                      loss[[i]] <- loss_function
                                       
                                     }
                                     

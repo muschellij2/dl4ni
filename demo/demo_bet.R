@@ -30,7 +30,6 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-
 width <- 7
 output_width <- 3
 num_features <- 3
@@ -46,13 +45,16 @@ feature_dropout <- 0.15
 
 # common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
 common_layers <- list(dense(250), dense(100))
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(250), dense(100))))
+common_dropout <- 0.25
 common_dropout <- 0.1
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
-                                              force_categorical = TRUE, 
+                                              force_categorical = TRUE,
+                                              # loss_function = keras::loss_mean_squared_error,
                                               hidden_layers = list(10))
 
-optimizer <- keras::optimizer_adam()
+optimizer <- keras::optimizer_nadam()
 
 config <- define_config(window_width = width, 
                         num_features = num_features,
@@ -73,7 +75,6 @@ config <- define_config(window_width = width,
 ####                   Model Creation                   ####
 #                                                          #
 ##%######################################################%##
-
 
 bet_model <- config %>% create_model_from_config()
 summary(bet_model$model)
@@ -113,7 +114,7 @@ infer <- config %>% create_inference_function_from_config()
 #                                                          #
 ##%######################################################%##
 
-epochs <- 4
+epochs <- 10
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -146,5 +147,5 @@ brain <- bet_model %>% infer(V = input_imgs, speed = "faster")
 num_classes <- length(info$values)
 col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
 
-ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth")
-ortho_plot(x = input_imgs[[1]], y = brain, col.y = col.y, text = "Predicted")
+ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth", interactiveness = FALSE)
+ortho_plot(x = input_imgs[[1]], y = brain, col.y = col.y, text = "Predicted", interactiveness = FALSE)
