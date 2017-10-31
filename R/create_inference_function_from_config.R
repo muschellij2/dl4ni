@@ -18,7 +18,10 @@ create_inference_function_from_config <- function(config) {
   
   radius <- 0.5 * (config$width + 1)
   
-  f_inference <- function(model, V, speed = c("slower", "medium", "faster"), ...) {
+  f_inference <- function(model, 
+                          V, 
+                          speed = c("slower", "medium", "faster"), 
+                          ...) {
     
     num_inputs <- length(V)
     
@@ -43,12 +46,12 @@ create_inference_function_from_config <- function(config) {
       
     }
     
-    V0 <- V[[1]] * 0
-    V0[seq(from = radius, to = dim(V0)[1] - (radius + 1), by = stride),
-       seq(from = radius, to = dim(V0)[2] - (radius + 1), by = stride),
-       seq(from = radius, to = dim(V0)[3] - (radius + 1), by = stride)] <- 1
-    all_idx <- which(V0 > 0)
-    
+    V0 <- V[[1]] * 0 
+    V0[seq(from = 1, to = dim(V0)[1], by = stride), 
+       seq(from = 1, to = dim(V0)[2], by = stride), 
+       seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
+    all_idx <- which(V0 > 0) 
+
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
       res <- array(0, dim = c(dim(V[[1]]), config$last_layer$params$num_classes))
@@ -111,6 +114,7 @@ create_inference_function_from_config <- function(config) {
       for (input in seq(num_inputs)) {
         
         X <- get_windows_at(V[[input]], config$width, x, y, z)
+        
         X_coords <- X[, 1:3]
         X_coords[, 1] <- X_coords[, 1] / dim(V[[input]])[1]
         X_coords[, 2] <- X_coords[, 2] / dim(V[[input]])[2]
@@ -205,7 +209,6 @@ create_inference_function_from_config <- function(config) {
           
         }
         
-        
       }
       
       inputs <- c(list(X_coords), X_vol)
@@ -248,9 +251,7 @@ create_inference_function_from_config <- function(config) {
             }
             
           } else {
-            
-            # new_output <- array(output, dim = c(dim[1], num_classes, units))
-            
+
             for (k in seq(num_classes)) {
               
               new_output <- output[, seq(from = k, to = num_classes * units, by = num_classes)]
