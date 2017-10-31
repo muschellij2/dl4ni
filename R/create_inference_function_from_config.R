@@ -51,7 +51,6 @@ create_inference_function_from_config <- function(config) {
        seq(from = 1, to = dim(V0)[2], by = stride), 
        seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
     all_idx <- which(V0 > 0) 
-    
 
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
@@ -252,9 +251,7 @@ create_inference_function_from_config <- function(config) {
             }
             
           } else {
-            
-            # new_output <- array(output, dim = c(dim[1], num_classes, units))
-            
+
             for (k in seq(num_classes)) {
               
               new_output <- output[, seq(from = k, to = num_classes * units, by = num_classes)]
