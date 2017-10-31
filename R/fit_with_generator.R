@@ -434,7 +434,7 @@ fit_with_generator <- function(.model,
         .model %>% save_model(path = model_path, prefix = model_prefix, 
                               comment = paste0(timestamp(quiet = TRUE), ":", " Model with loss: ", loss_acc, "\n"))
         
-        message("New best model found with loss:", loss_acc)
+        message("New best model found with loss: ", sprintf("%.5f", loss_acc))
         
       }
       

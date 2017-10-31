@@ -22,17 +22,17 @@ ALREADY DONE:
 
 TODO:
   - Comentarios y documentación en todas las funciones
-  - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
   - En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
+  - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
+  - "save_model" y "load_model" con la posibilidad de guardar comprimido.
+  - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
+  - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
   - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
   - default_block <- function(num_layers, initial_units, last_units, type = c("dense", "conv")).
   - Construir un grafo por cada path independiente desde cada input hasta el knot, y se usa para distribuir los nodos del grafo y pintarlo.
   - En get_problem_info, poner "problem_description" y un "verbose".
   - En get_problem_info, preparar para "autoencoder", donde el last_layer_info podrá ser usado como decoder (o parte de él).
   - Adaptar get_problem_info para problemas de clasificación o regresión donde solo hay una salida (por imagen): para el registro de la imagen, para clasificar sujetos en grupos...
-  - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
-  - "save_model" y "load_model" con la posibilidad de guardar comprimido.
-  - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Viñetas y README.md
   - Layers operations, como select_layers (by_name, by_index)...
   - Al hacer grafo, renombrar capas, y usar esta función al generar el modelo. En la configuración (y en la info del problema) almacenar el nombre de la carpeta de los inputs ("T1", "FLAIR") que después se usará para renombrar las capas.
