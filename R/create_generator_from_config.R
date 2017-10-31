@@ -79,11 +79,11 @@ create_generator_from_config <- function(config,
   if (config$scale_y %in% "z") stdY <- sd(as.vector(Vy))
   if (config$scale_y %in% c("max", "meanmax")) maxY <- max(as.vector(Vy))
   
-  V0 <- Vy * 0
-  V0[seq(from = radius, to = dim(V0)[1] - (radius + 1), by = stride),
-     seq(from = radius, to = dim(V0)[2] - (radius + 1), by = stride),
-     seq(from = radius, to = dim(V0)[3] - (radius + 1), by = stride)] <- 1
-  all_idx <- which(V0 > 0)
+  V0 <- Vy * 0 
+  V0[seq(from = 1, to = dim(V0)[1], by = stride), 
+     seq(from = 1, to = dim(V0)[2], by = stride), 
+     seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
+  all_idx <- which(V0 > 0) 
   
   if (mode == "all") {
     
@@ -112,7 +112,7 @@ create_generator_from_config <- function(config,
         for (class in c(0, config$y_label)) {
           
           idx_for_class <- which(balanced_classes == class)
-          idx_in_img <- intersect(which(Vy == class), all_idx)
+          idx_in_img <- which(Vy == class)
           
           if (length(idx_in_img) > 0) {
             idx <- sample(idx_in_img, 
@@ -134,7 +134,6 @@ create_generator_from_config <- function(config,
       } else {
         
         which_idx <- which(Vy %in% config$y_label)
-        which_idx <- intersect(which_idx, all_idx)
         not_idx <- setdiff(all_idx, which_idx)
         
         if (length(not_idx) > length(which_idx)) {
@@ -221,7 +220,7 @@ create_generator_from_config <- function(config,
             for (class in c(0, config$y_label)) {
               
               idx_for_class <- which(balanced_classes == class)
-              idx_in_img <- intersect(which(Vy == class), all_idx)
+              idx_in_img <- which(Vy == class)
               
               if (length(idx_in_img) > 0) {
                 idx <- sample(idx_in_img, 
@@ -243,7 +242,6 @@ create_generator_from_config <- function(config,
           } else {
             
             which_idx <- which(Vy %in% config$y_label)
-            which_idx <- intersect(which_idx, all_idx)
             not_idx <- setdiff(all_idx, which_idx)
             
             if (length(not_idx) > length(which_idx)) {
@@ -286,7 +284,7 @@ create_generator_from_config <- function(config,
     y <- coords[, 2] - 1
     z <- coords[, 3] - 1
     
-    stopifnot(all(x >= radius - 1), all(y >= radius - 1), all(z >= radius - 1))
+    # stopifnot(all(x >= radius - 1), all(y >= radius - 1), all(z >= radius - 1))
     
     # print("Reading X")
     
@@ -417,7 +415,7 @@ create_generator_from_config <- function(config,
     # str(range(z_))
     # str(config$output_width)
     
-    stopifnot(all(x_ >= radius - 1), all(y_ >= radius - 1), all(z_ >= radius - 1))
+    # stopifnot(all(x_ >= radius - 1), all(y_ >= radius - 1), all(z_ >= radius - 1))
     
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]

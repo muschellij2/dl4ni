@@ -97,7 +97,6 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
   
   int n_neighbours = pow(width, 3);
   
-  
   // Count how many windows we'll have
   int count = 0;
   
@@ -118,9 +117,14 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
         
         for (int dx = -radius + 1; dx < radius; dx++) {
           
-          int offset = (x[i] + dx) + dims[0] * (y[i] + dy) + dims[0] * dims[1] * (z[i] + dz);
+          if ((x[i] + dx >= 0) & (x[i] + dx < dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < dims[2])) {
+            
+            int offset = (x[i] + dx) + dims[0] * (y[i] + dy) + dims[0] * dims[1] * (z[i] + dz);
+            
+            res(count, inner_count + 3) = V[offset];
+            
+          }
           
-          res(count, inner_count + 3) = V[offset];
           inner_count++;
           
         }
@@ -303,10 +307,15 @@ void results_to_volume(NumericVector V,
         
         for (int dx = -radius + 1; dx < radius; dx++) {
           
-          int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
+          if ((x[i] + dx >= 0) & (x[i] + dx < dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < dims[2])) {
+            
+            int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
+            
+            res[offset] += V[i + dims[0] * inner_count];
+            counts[offset] += 1;
+            
+          }
           
-          res[offset] += V[i + dims[0] * inner_count];
-          counts[offset] += 1;
           inner_count++;
           
         }
@@ -344,9 +353,9 @@ void results_to_fuzzy_volume(NumericVector V,
       for (int dy = -radius + 1; dy < radius; dy++) {
         
         for (int dx = -radius + 1; dx < radius; dx++) {
-
+          
           int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
-                    
+          
           for (int k = 0; k < num_classes; k++) {
             
             int offset_4d = offset + k * target_dims[0] * target_dims[1] * target_dims[2];
@@ -436,15 +445,19 @@ void results_to_volume_label_with_distance(NumericVector V,
         
         for (int dx = -radius + 1; dx < radius; dx++) {
           
-          int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
-          
-          // if (V[i + dims[0] * inner_count] > res[offset])
-          if (dx * dx + dy * dy + dz * dz < last_distance[offset]) {
+          if ((x[i] + dx >= 0) & (x[i] + dx < target_dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < target_dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < target_dims[2])) {
             
-            res[offset] = V[i + dims[0] * inner_count];
-            last_distance[offset] = dx * dx + dy * dy + dz * dz;
+            int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
+            
+            if (dx * dx + dy * dy + dz * dz < last_distance[offset]) {
+              
+              res[offset] = V[i + dims[0] * inner_count];
+              last_distance[offset] = dx * dx + dy * dy + dz * dz;
+              
+            }
             
           }
+          
           inner_count++;
           
         }
