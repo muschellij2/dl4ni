@@ -299,7 +299,7 @@ fit_with_generator <- function(.model,
       # The second is always the desired outputs
       # A possible third indicates sample weights.
       data <- generator()
-      num_outputs <- length(data[[2]])
+      num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
       
       if (length(data) > 2) {
         # With sample weight

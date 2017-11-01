@@ -20,7 +20,7 @@ load_keras()
 ##%######################################################%##
 
 problem <- "brain_extraction"
-info <- problem %>% get_problem_info(num_subjects = 10)
+info <- problem %>% get_problem_info()
 
 info %>% split_train_test_sets()
 
@@ -35,7 +35,9 @@ output_width <- 3
 num_features <- 3
 
 vol_layers_pattern <- list(clf(all = TRUE,
-                               hidden_layers = list(dense(200),
+                               hidden_layers = list(dense(300),
+                                                    dense(400),
+                                                    dense(200),
                                                     dense(100),
                                                     dense(250),
                                                     dense(100))))
@@ -45,9 +47,8 @@ vol_dropout <- 0.15
 feature_layers <- list(dense(10), dense(5))
 feature_dropout <- 0.15
 
-common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(100))))
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(200), dense(100))))
 common_dropout <- 0.25
-# common_dropout <- 0.1
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
                                               force_categorical = TRUE,
@@ -115,7 +116,7 @@ infer <- config %>% create_inference_function_from_config()
 #                                                          #
 ##%######################################################%##
 
-epochs <- 10
+epochs <- 15
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -123,6 +124,7 @@ saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 bet_model %>% fit_with_generator(train_config = train_config, 
                                  validation_config = test_config,
                                  epochs = epochs,
+                                 starting_epoch = 1,
                                  keep_best = keep_best,
                                  path = saving_path,
                                  prefix = saving_prefix)
@@ -143,10 +145,10 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
-brain <- bet_model %>% infer(V = input_imgs, speed = "faster")
+brain <- bet_model %>% infer(V = input_imgs, speed = "medium")
 
 num_classes <- length(info$values)
 col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
 
 ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth", interactiveness = FALSE)
-ortho_plot(x = input_imgs[[1]], y = brain, col.y = col.y, text = "Predicted", interactiveness = FALSE)
+ortho_plot(x = input_imgs[[1]], y = brain > 0, col.y = col.y, text = "Predicted", interactiveness = FALSE)
