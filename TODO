@@ -20,14 +20,15 @@ ALREADY DONE:
   + "fit with generator" con "initial_epoch" para mantener tasas de aprendizaje y demás.
   + warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
   + En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
+  + Si hay más clases aparte de las que se predicen, hacer que se combinen en una única clase "otras", que también se debe predecir para ayudar a clasificar mejor: esto ayudaría a la parcelación.
 
+WIP:
+  = Comentarios y documentación en todas las funciones
+  = Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
+  = Por cada nuevo output en el flow, estimar el camino hasta los inputs: habrá de cambiar la dirección en el grafo.
 
 TODO:
   - Meter el info del problema en el config.
-  - Comentarios y documentación en todas las funciones
-  - Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
-  - Si hay más clases aparte de las que se predicen, hacer que se combinen en una única clase "otras", que también se debe predecir para ayudar a clasificar mejor: esto ayudaría a la parcelación.
-  - Por cada nuevo output en el flow, estimar el camino hasta los inputs: habrá de camiar la dirección en el grafo.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Tratar de inferir tanto el scale como el scale_y según el tipo de problema

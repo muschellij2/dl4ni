@@ -15,13 +15,12 @@ load_keras()
 ##%######################################################%##
 
 problem <- "parcellation"
-info <- problem %>% get_problem_info(num_subjects = 10)
+info <- problem %>% get_problem_info()
 
 info %>% split_train_test_sets()
 
 scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
-# scgm_labels_reduced <- c(10:13)
-info$values <- scgm_labels
+info %>% subset_problem(subset_classes = scgm_labels)
 
 ##%######################################################%##
 #                                                          #
@@ -33,27 +32,29 @@ width <- 7
 output_width <- 3
 num_features <- 3
 
-# vol_layers <- list(dense(200), dense(100), dense(200))
 vol_layers_pattern <- list(clf(all = TRUE,
-                               hidden_layers = list(dense(200),
+                               hidden_layers = list(dense(300),
+                                                    dense(400),
+                                                    dense(200),
+                                                    dense(100),
+                                                    dense(250),
                                                     dense(100))))
 vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
-
 vol_dropout <- 0.15
 
-feature_layers <- list(dense(10), dense(10))
+feature_layers <- list(dense(10), dense(5))
 feature_dropout <- 0.15
 
-# common_layers <- list(dense(1000), dense(500), dense(250), dense(100), dense(250))
-common_layers <- list(dense(500), dense(250), dense(100))
-common_dropout <- 0.1
+common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(400), 
+                                                           dense(200), 
+                                                           dense(100))))
+common_dropout <- 0.25
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
-                                              force_categorical = FALSE, 
-                                              hidden_layers = c(20))
+                                              force_categorical = TRUE,
+                                              hidden_layers = list(30, 20))
 
 optimizer <- optimizer_nadam()
-loss <- loss_mean_squared_error
 
 config <- define_config(window_width = width, 
                         num_features = num_features,
@@ -64,9 +65,7 @@ config <- define_config(window_width = width,
                         common_layers = common_layers,
                         common_dropout = common_dropout,
                         last_layer_info = last_layer_info,
-                        class_balance = TRUE,
                         optimizer = optimizer, 
-                        loss = loss,
                         output_width = output_width,
                         scale = "z",
                         scale_y = "none")
@@ -145,13 +144,13 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
-ground_truth <- array(ground_truth * (ground_truth %in% info$values), dim = dim(input_imgs[[1]]))
+ground_truth <- array(ground_truth * (ground_truth %in% info$remap_classes$source), dim = dim(input_imgs[[1]]))
 
 parcellation <- parcellation_model %>% infer(V = input_imgs, speed = "faster")
 
-num_classes <- length(info$values)
+num_classes <- length(info$remap_classes$source)
 col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
 
-ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth")
-ortho_plot(x = input_imgs[[1]], y = parcellation, col.y = col.y, text = "Predicted")
+ortho_plot(x = input_imgs[[1]], y = ground_truth, col.y = col.y, text = "Ground Truth", interactiveness = FALSE)
+ortho_plot(x = input_imgs[[1]], y = parcellation, col.y = col.y, text = "Predicted", interactiveness = FALSE)
 

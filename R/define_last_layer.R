@@ -42,7 +42,6 @@ define_last_layer <- function(info,
                               # If it's a classification problem
                               # Get the number of classes and their labels
                               num_classes <- length(info$values)
-                              y_label <- info$values
                               
                               loss_function <- keras::loss_categorical_crossentropy
                               if (num_classes == 1)
@@ -54,8 +53,18 @@ define_last_layer <- function(info,
                                 
                               }
                               
-                              remap_classes <- list(source = info$values, 
-                                                    target = seq_along(info$values))
+                              if (!is.null(info$subsetted) && !info$subsetted) {
+                                
+                                y_label <- info$values
+                                remap_classes <- list(source = info$values, 
+                                                      target = seq_along(info$values))
+                                
+                              } else {
+                                
+                                y_label <- info$original_values
+                                remap_classes <- info$remap_classes
+                                
+                              }
                               
                               # If more than 2 classes, only option is a categorical layer as output.
                               if (num_classes > 1) {

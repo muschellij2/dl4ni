@@ -2,38 +2,38 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 volume_to_windows <- function(V, stride, width, displacement = 0L) {
-    .Call('dl4ni_volume_to_windows', PACKAGE = 'dl4ni', V, stride, width, displacement)
+    .Call('_dl4ni_volume_to_windows', PACKAGE = 'dl4ni', V, stride, width, displacement)
 }
 
 get_windows_at <- function(V, width, x, y, z) {
-    .Call('dl4ni_get_windows_at', PACKAGE = 'dl4ni', V, width, x, y, z)
+    .Call('_dl4ni_get_windows_at', PACKAGE = 'dl4ni', V, width, x, y, z)
 }
 
 windows_to_volume <- function(V, stride, width, target_dims, displacement = 0L) {
-    .Call('dl4ni_windows_to_volume', PACKAGE = 'dl4ni', V, stride, width, target_dims, displacement)
+    .Call('_dl4ni_windows_to_volume', PACKAGE = 'dl4ni', V, stride, width, target_dims, displacement)
 }
 
 windows_to_volume_label <- function(V, stride, width, target_dims, displacement = 0L) {
-    .Call('dl4ni_windows_to_volume_label', PACKAGE = 'dl4ni', V, stride, width, target_dims, displacement)
+    .Call('_dl4ni_windows_to_volume_label', PACKAGE = 'dl4ni', V, stride, width, target_dims, displacement)
 }
 
 results_to_volume <- function(V, width, res, counts, x, y, z) {
-    invisible(.Call('dl4ni_results_to_volume', PACKAGE = 'dl4ni', V, width, res, counts, x, y, z))
+    invisible(.Call('_dl4ni_results_to_volume', PACKAGE = 'dl4ni', V, width, res, counts, x, y, z))
 }
 
 results_to_fuzzy_volume <- function(V, width, num_classes, res, counts, x, y, z) {
-    invisible(.Call('dl4ni_results_to_fuzzy_volume', PACKAGE = 'dl4ni', V, width, num_classes, res, counts, x, y, z))
+    invisible(.Call('_dl4ni_results_to_fuzzy_volume', PACKAGE = 'dl4ni', V, width, num_classes, res, counts, x, y, z))
 }
 
 results_to_volume_label <- function(V, width, res, x, y, z) {
-    invisible(.Call('dl4ni_results_to_volume_label', PACKAGE = 'dl4ni', V, width, res, x, y, z))
+    invisible(.Call('_dl4ni_results_to_volume_label', PACKAGE = 'dl4ni', V, width, res, x, y, z))
 }
 
 results_to_volume_label_with_distance <- function(V, width, res, last_distance, x, y, z) {
-    invisible(.Call('dl4ni_results_to_volume_label_with_distance', PACKAGE = 'dl4ni', V, width, res, last_distance, x, y, z))
+    invisible(.Call('_dl4ni_results_to_volume_label_with_distance', PACKAGE = 'dl4ni', V, width, res, last_distance, x, y, z))
 }
 
 regularize <- function(image, kernel) {
-    .Call('dl4ni_regularize', PACKAGE = 'dl4ni', image, kernel)
+    .Call('_dl4ni_regularize', PACKAGE = 'dl4ni', image, kernel)
 }
 

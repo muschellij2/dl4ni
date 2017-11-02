@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // volume_to_windows
 NumericVector volume_to_windows(NumericVector V, int stride, int width, int displacement);
-RcppExport SEXP dl4ni_volume_to_windows(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP displacementSEXP) {
+RcppExport SEXP _dl4ni_volume_to_windows(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP displacementSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // get_windows_at
 NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, IntegerVector y, IntegerVector z);
-RcppExport SEXP dl4ni_get_windows_at(SEXP VSEXP, SEXP widthSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+RcppExport SEXP _dl4ni_get_windows_at(SEXP VSEXP, SEXP widthSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,7 +36,7 @@ END_RCPP
 }
 // windows_to_volume
 NumericVector windows_to_volume(NumericVector V, int stride, int width, IntegerVector target_dims, int displacement);
-RcppExport SEXP dl4ni_windows_to_volume(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP target_dimsSEXP, SEXP displacementSEXP) {
+RcppExport SEXP _dl4ni_windows_to_volume(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP target_dimsSEXP, SEXP displacementSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -51,7 +51,7 @@ END_RCPP
 }
 // windows_to_volume_label
 NumericVector windows_to_volume_label(NumericVector V, int stride, int width, IntegerVector target_dims, int displacement);
-RcppExport SEXP dl4ni_windows_to_volume_label(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP target_dimsSEXP, SEXP displacementSEXP) {
+RcppExport SEXP _dl4ni_windows_to_volume_label(SEXP VSEXP, SEXP strideSEXP, SEXP widthSEXP, SEXP target_dimsSEXP, SEXP displacementSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -66,7 +66,7 @@ END_RCPP
 }
 // results_to_volume
 void results_to_volume(NumericVector V, int width, NumericVector res, NumericVector counts, IntegerVector x, IntegerVector y, IntegerVector z);
-RcppExport SEXP dl4ni_results_to_volume(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP countsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+RcppExport SEXP _dl4ni_results_to_volume(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP countsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type V(VSEXP);
@@ -82,7 +82,7 @@ END_RCPP
 }
 // results_to_fuzzy_volume
 void results_to_fuzzy_volume(NumericVector V, int width, int num_classes, NumericVector res, NumericVector counts, IntegerVector x, IntegerVector y, IntegerVector z);
-RcppExport SEXP dl4ni_results_to_fuzzy_volume(SEXP VSEXP, SEXP widthSEXP, SEXP num_classesSEXP, SEXP resSEXP, SEXP countsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+RcppExport SEXP _dl4ni_results_to_fuzzy_volume(SEXP VSEXP, SEXP widthSEXP, SEXP num_classesSEXP, SEXP resSEXP, SEXP countsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type V(VSEXP);
@@ -99,7 +99,7 @@ END_RCPP
 }
 // results_to_volume_label
 void results_to_volume_label(NumericVector V, int width, NumericVector res, IntegerVector x, IntegerVector y, IntegerVector z);
-RcppExport SEXP dl4ni_results_to_volume_label(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+RcppExport SEXP _dl4ni_results_to_volume_label(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type V(VSEXP);
@@ -114,7 +114,7 @@ END_RCPP
 }
 // results_to_volume_label_with_distance
 void results_to_volume_label_with_distance(NumericVector V, int width, NumericVector res, NumericVector last_distance, IntegerVector x, IntegerVector y, IntegerVector z);
-RcppExport SEXP dl4ni_results_to_volume_label_with_distance(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP last_distanceSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+RcppExport SEXP _dl4ni_results_to_volume_label_with_distance(SEXP VSEXP, SEXP widthSEXP, SEXP resSEXP, SEXP last_distanceSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type V(VSEXP);
@@ -130,7 +130,7 @@ END_RCPP
 }
 // regularize
 NumericVector regularize(NumericVector image, NumericVector kernel);
-RcppExport SEXP dl4ni_regularize(SEXP imageSEXP, SEXP kernelSEXP) {
+RcppExport SEXP _dl4ni_regularize(SEXP imageSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -142,15 +142,15 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"dl4ni_volume_to_windows", (DL_FUNC) &dl4ni_volume_to_windows, 4},
-    {"dl4ni_get_windows_at", (DL_FUNC) &dl4ni_get_windows_at, 5},
-    {"dl4ni_windows_to_volume", (DL_FUNC) &dl4ni_windows_to_volume, 5},
-    {"dl4ni_windows_to_volume_label", (DL_FUNC) &dl4ni_windows_to_volume_label, 5},
-    {"dl4ni_results_to_volume", (DL_FUNC) &dl4ni_results_to_volume, 7},
-    {"dl4ni_results_to_fuzzy_volume", (DL_FUNC) &dl4ni_results_to_fuzzy_volume, 8},
-    {"dl4ni_results_to_volume_label", (DL_FUNC) &dl4ni_results_to_volume_label, 6},
-    {"dl4ni_results_to_volume_label_with_distance", (DL_FUNC) &dl4ni_results_to_volume_label_with_distance, 7},
-    {"dl4ni_regularize", (DL_FUNC) &dl4ni_regularize, 2},
+    {"_dl4ni_volume_to_windows", (DL_FUNC) &_dl4ni_volume_to_windows, 4},
+    {"_dl4ni_get_windows_at", (DL_FUNC) &_dl4ni_get_windows_at, 5},
+    {"_dl4ni_windows_to_volume", (DL_FUNC) &_dl4ni_windows_to_volume, 5},
+    {"_dl4ni_windows_to_volume_label", (DL_FUNC) &_dl4ni_windows_to_volume_label, 5},
+    {"_dl4ni_results_to_volume", (DL_FUNC) &_dl4ni_results_to_volume, 7},
+    {"_dl4ni_results_to_fuzzy_volume", (DL_FUNC) &_dl4ni_results_to_fuzzy_volume, 8},
+    {"_dl4ni_results_to_volume_label", (DL_FUNC) &_dl4ni_results_to_volume_label, 6},
+    {"_dl4ni_results_to_volume_label_with_distance", (DL_FUNC) &_dl4ni_results_to_volume_label_with_distance, 7},
+    {"_dl4ni_regularize", (DL_FUNC) &_dl4ni_regularize, 2},
     {NULL, NULL, 0}
 };
 

@@ -421,11 +421,6 @@ create_generator_from_config <- function(config,
     Y <- Y[, -c(1:3)]
     
     # cat("Read Y...\n")
-    if (!is.null(config$y_label)) {
-      
-      Y[!(Y %in% config$y_label)] <- 0
-      
-    }
     
     if (!is.null(config$remap_classes)) {
       
@@ -439,6 +434,19 @@ create_generator_from_config <- function(config,
         Y_[Y == s[i]] <- t[i]
         
       }
+      
+      extra_classes <- setdiff(unique(as.vector(Y[Y > 0])), s)
+      remaining <- 0
+      
+      if (!is.null(config$remap_classes$remaining)) 
+        remaining <- config$remap_classes$remaining
+      
+      for (k in extra_classes) {
+        
+        Y_[Y == k] <- remaining
+        
+      }
+      
       Y <- Y_
       
     }
@@ -470,6 +478,12 @@ create_generator_from_config <- function(config,
       # cat("Exiting...\n")
       
       return(list(x, Y))
+      
+    }
+    
+    if (!is.null(config$y_label)) {
+      
+      Y[!(Y %in% config$y_label)] <- 0
       
     }
     

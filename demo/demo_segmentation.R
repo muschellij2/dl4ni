@@ -46,12 +46,10 @@ feature_dropout <- 0.15
 
 common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(100))))
 common_dropout <- 0.25
-# common_dropout <- 0.1
 
 last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
                                               force_categorical = TRUE,
-                                              # loss_function = keras::loss_mean_squared_error,
-                                              hidden_layers = list(10))
+                                              hidden_layers = list(15, 10))
 
 
 optimizer <- keras::optimizer_nadam()
@@ -65,7 +63,6 @@ config <- define_config(window_width = width,
                         common_layers = common_layers,
                         common_dropout = common_dropout,
                         last_layer_info = last_layer_info,
-                        class_balance = FALSE,
                         optimizer = optimizer, 
                         output_width = output_width,
                         scale = "z",
