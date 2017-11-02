@@ -22,6 +22,7 @@ ALREADY DONE:
 
 TODO:
   - Comentarios y documentación en todas las funciones
+  - add_trainable_model <- function(flow, config, inputs, output) para los flows. Después ese modelo se podría entrenar.
   - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
   - En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
   - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
