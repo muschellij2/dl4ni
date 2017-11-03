@@ -47,6 +47,7 @@ analyze_output <- function(output) {
     
   }
   
+  class(info) <- c("DLproblem", class(info))
   return(info)
 
 }

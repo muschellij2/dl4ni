@@ -10,7 +10,7 @@
 #'
 #' @details DETAILS
 #' @export 
-execute_flow <- function(flow, inputs = list(), desired_outputs = NULL) {
+execute_flow <- function(flow, inputs = list(), desired_outputs = NULL, initialize_outputs = TRUE) {
   
   stopifnot(inherits(flow, "DLflow"))
   
@@ -24,7 +24,8 @@ execute_flow <- function(flow, inputs = list(), desired_outputs = NULL) {
   input_names <- input_names[input_names %in% flow$inputs]
   
   # Initialize computed_outputs
-  flow$computed_outputs <- list()
+  if (initialize_outputs)
+    flow$computed_outputs <- list()
   
   # Check that the desired outputs can be computed
   all_computable <- all(desired_outputs %in% flow$outputs)
@@ -108,5 +109,13 @@ execute_flow <- function(flow, inputs = list(), desired_outputs = NULL) {
   
   
   return(results)
+  
+}
+
+reset_outputs <- function(flow) {
+  
+  flow$computed_outputs <- list()
+  
+  return(invisible(flow))
   
 }
