@@ -10,7 +10,9 @@
 #'
 #' @details DETAILS
 #' @export 
-execute_flow <- function(flow, inputs = list(), desired_outputs = NULL, initialize_outputs = TRUE) {
+execute_flow <- function(flow, inputs = list(), given_inputs = NULL, desired_outputs = NULL, initialize_outputs = TRUE) {
+  
+  require(igraph)
   
   stopifnot(inherits(flow, "DLflow"))
   
@@ -21,7 +23,7 @@ execute_flow <- function(flow, inputs = list(), desired_outputs = NULL, initiali
     stop("Not all input files exist.")
   
   input_names <- names(inputs)
-  input_names <- input_names[input_names %in% flow$inputs]
+  # input_names <- input_names[input_names %in% flow$inputs]
   
   # Initialize computed_outputs
   if (initialize_outputs)
@@ -38,6 +40,8 @@ execute_flow <- function(flow, inputs = list(), desired_outputs = NULL, initiali
   
   if (length(desired_outputs) > 0) {
     
+    inputs <- c(inputs, given_inputs)
+    
     # Read inputs
     for (name in input_names) {
       
@@ -48,55 +52,52 @@ execute_flow <- function(flow, inputs = list(), desired_outputs = NULL, initiali
     # For each output
     for (output in desired_outputs) {
       
-      # Are all the required inputs?
-      inputs_idx <- unique(flow$required_inputs[[output]])
-      all_required <- all(V(flow$graph)$name[inputs_idx] %in% input_names)
-      
-      if (!all_required) {
-        
-        message <- paste0("Not all required inputs for ", output)
-        warning(message)
-        
-        next
-        
-      }
-      
       # Define which parts of the flow must be processed
       pipeline <- flow$pipeline[[output]]
       
+      to_compute <- flow %>% which_to_compute(output = output, given_inputs = input_names)
+      
+      pipeline <- intersect(flow$outputs[pipeline], c(to_compute, output))
+      pipeline <- match(pipeline, flow$outputs)
+      
+
       # Execute in order
-      for (process_idx in pipeline) {
+      if (length(pipeline) > 0) {
         
-        intermediate_output <- flow$outputs[process_idx]
-        
-        # if this process is already computed, go to the next one
-        if (!is.null(flow$computed_outputs[[intermediate_output]])) next
-        
-        cat("Computing", intermediate_output, "...\n")
-        
-        process <- flow$processes[[intermediate_output]]
-        my_inputs <- flow$inmediate_inputs[[intermediate_output]]
-        
-        switch(V(flow$graph)$type[process_idx],
-               
-               "function" = {
+        for (process_idx in pipeline) {
+          
+          intermediate_output <- flow$outputs[process_idx]
+          
+          # if this process is already computed, go to the next one
+          if (!is.null(flow$computed_outputs[[intermediate_output]])) next
+          
+          cat("Computing", intermediate_output, "...\n")
+          
+          process <- flow$processes[[intermediate_output]]
+          my_inputs <- flow$inmediate_inputs[[intermediate_output]]
+          
+          switch(V(flow$graph)$type[process_idx],
                  
-                 params <- flow$computed_outputs[my_inputs]
-                 names(params) <- names(formals(process))
-                 flow$computed_outputs[[intermediate_output]] <- do.call(what = process, args = params)
+                 "function" = {
+                   
+                   params <- flow$computed_outputs[my_inputs]
+                   names(params) <- names(formals(process))
+                   flow$computed_outputs[[intermediate_output]] <- do.call(what = process, args = params)
+                   
+                 },
                  
-               },
-               
-               "DLmodel" = {
-                 
-                 # Inference function for the given model
-                 infer <- process$hyperparameters %>% create_inference_function_from_config()
-                 
-                 # Infer on input volumes
-                 input_imgs <- flow$computed_outputs[my_inputs]
-                 flow$computed_outputs[[intermediate_output]] <- process %>% infer(V = input_imgs, spped = "medium")
-                 
-               })
+                 "DLmodel" = {
+                   
+                   # Inference function for the given model
+                   infer <- process$hyperparameters %>% create_inference_function_from_config()
+                   
+                   # Infer on input volumes
+                   input_imgs <- flow$computed_outputs[my_inputs]
+                   flow$computed_outputs[[intermediate_output]] <- process %>% infer(V = input_imgs, speed = "medium")
+                   
+                 })
+          
+        }
         
       }
       
@@ -117,5 +118,30 @@ reset_outputs <- function(flow) {
   flow$computed_outputs <- list()
   
   return(invisible(flow))
+  
+}
+
+which_to_compute <- function(flow, output, given_inputs = NULL) {
+  
+  if (output %in% given_inputs) return(c())
+  
+  required <- flow$inmediate_inputs[[output]]
+  
+  # available <- intersect(required, given_inputs)
+  to_compute <- setdiff(required, given_inputs)
+  
+  result <- to_compute
+  
+  if (length(to_compute) > 0) {
+    
+    for (parent in to_compute)
+    
+    result <- c(result, which_to_compute(flow, parent, given_inputs))
+    
+  }
+  
+  # result <- setdiff(result, flow$inputs)
+  
+  return(unique(result))
   
 }

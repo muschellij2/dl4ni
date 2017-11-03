@@ -63,7 +63,7 @@ create_inference_function_from_config <- function(config) {
     }
     
     counts <- V[[1]] * 0
-    last_distance <- V[[1]] * 0 + 3 * width ^ 2
+    last_distance <- V[[1]] * 0 + 3 * config$width ^ 2
     
     # Must define num_windows
     num_windows <- round(unclass(config$memory_limit / 

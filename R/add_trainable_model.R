@@ -26,7 +26,7 @@ add_trainable_model <- function(flow,
   
   if (!is.null(subset) & is.list(subset)) {
     
-    output_info <- do.call(subset_problem, args = list(info = output_info, 
+    output_info <- do.call(subset_problem, args = list(problem_info = output_info, 
                                                        subset_classes = subset$subset_classes,
                                                        unify_classes = subset$unify_classes))
     

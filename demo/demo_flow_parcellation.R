@@ -5,7 +5,7 @@
 ##%######################################################%##
 
 require(neurobase)
-require(dl4ni.data)
+devtools::load_all("../dl4ni.data/")
 load_keras()
 
 ##%######################################################%##
@@ -25,7 +25,9 @@ scheme <- list(width = 7,
                common_layers = list(dense(250), dense(100)),
                common_dropout = 0.1,
                last_hidden_layers = list(dense(20), dense(10)),
-               optimizer = keras::optimizer_nadam())
+               optimizer = keras::optimizer_nadam(),
+               scale = "z",
+               scale_y = "none")
 
 
 ##%######################################################%##
@@ -34,10 +36,8 @@ scheme <- list(width = 7,
 #                                                          #
 ##%######################################################%##
 
-
 # Create new flow
 flow <- create_flow(name = "parcellation", inputs = c("T1"))
-
 
 # Starting from a T1, add a trainable model which computes the brain_mask
 flow %>% add_trainable_model(using = scheme, 
@@ -67,7 +67,6 @@ flow %>% add_trainable_model(using = scheme,
                              output = "parcellation", 
                              subset = list(subset_classes = scgm_labels))
 
-
 ##%######################################################%##
 #                                                          #
 ####                   Flow Plotting                    ####
@@ -75,7 +74,6 @@ flow %>% add_trainable_model(using = scheme,
 ##%######################################################%##
 
 flow %>% plot_flow()
-
 
 ##%######################################################%##
 #                                                          #
@@ -118,7 +116,8 @@ flow %>% train_output(output = "parcellation",
 ##%######################################################%##
 
 file <- info_bet$inputs[1]
-result <- flow %>% execute_flow(inputs = file, desired_outputs = c("only_brain", "segmentation", "parcellation"))
+result <- flow %>% execute_flow(inputs = list(T1 = file), 
+                                desired_outputs = c("only_brain", "segmentation", "parcellation"))
 
 ortho_plot(x = readnii(file), interactiveness = FALSE, text = "Original Image")
 for (img in seq_along(result)) {

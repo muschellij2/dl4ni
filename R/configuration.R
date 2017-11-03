@@ -39,9 +39,9 @@ define_config <- function(...) {
   
   if ("last_layer_info" %in% names(args)) {
     
-    for (field in names(last_layer_info)) {
+    for (field in names(args$last_layer_info)) {
       
-      args[[field]] <- last_layer_info[[field]]
+      args[[field]] <- args$last_layer_info[[field]]
       
     }
 

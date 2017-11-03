@@ -17,7 +17,8 @@ train_output <- function(flow,
                          given_input = NULL,
                          train_split = 0.75,
                          epochs = 10, 
-                         max_sub_epochs = 5) {
+                         max_sub_epochs = 5,
+                         verbose = TRUE) {
   
   # Basic check
   stopifnot(inherits(flow, "DLflow"))
@@ -26,21 +27,40 @@ train_output <- function(flow,
   # Check that files exist
   stopifnot(all(file.exists(unlist(input_filenames))), all(file.exists(unlist(output_filenames))))
   
-  # Check that previous steps in the pipeline are trained
-  previous_steps <- flow$outputs[flow$pipeline[[output]]]
+  if (verbose)
+    cat("Checking previous steps are trained...\n")
   
-  if (!is.null(given_input) & is.list(given_input)) {
-    
-    given_names <- names(given_input)
-    previous_steps <- setdiff(previous_steps, given_names)
-    
-  }
-  all_trained <- unlist(flow$trained[previous_steps])
+  # Check that previous steps in the pipeline are trained
+  needed_outputs <- flow$inmediate_inputs[[output]]
+  # previous_outputs <- needed_outputs
+  
+  given_input <- c(input_filenames, given_input)
+  
+  given_names <- names(given_input)
+  
+  pipeline <- flow$pipeline[[output]]
+  pipeline <- flow$outputs[pipeline]
+  
+  to_compute <- flow %>% which_to_compute(output = output, given_inputs = given_names)
+  
+  processes <- intersect(pipeline, to_compute)
+  inputs_to_use <- intersect(to_compute, flow$inputs)
+  
+  all_trained <- all(unlist(flow$trained[processes]))
   if (!all(all_trained)) {
     
     stop("Not all previous models are trained.")
     
   }
+  
+  if (length(inputs_to_use) > 0) {
+    
+    stop("Not all needed inputs have been provided.")
+    
+  }
+  
+  if (verbose)
+    cat("   Everything is Ok...\n")
   
   # Mark as trained in the output
   on.exit({
@@ -59,32 +79,21 @@ train_output <- function(flow,
     num_subjects <- length(output_filenames)
     
     # Obtain the results of the needed previous steps
-    needed_outputs <- flow$inmediate_inputs[[output]]
-    # needed_inputs <- unlist(flow$inputs[flow$required_inputs[[output]]])
-    
     desired_outputs <- needed_outputs #c(needed_inputs, needed_outputs)
+    
+    if (verbose)
+      cat("Obtaining required inputs...\n")
     
     results <- list()
     
     # For each subject
     for (s in seq(num_subjects)) {
       
-      # Input files for this subject
-      input_file_list <- lapply(input_filenames, function(x) x[s])
+      if (verbose)
+        cat("Subject number", s, "out of", num_subjects, "...\n")
       
-      # If we are given any input, use it
-      if (!is.null(given_input)) {
-        
-        given_file_list <- lapply(given_input, function(x) x[s])
-        
-        for (n in seq_along(given_file_list)) {
-          
-          given_output_name <- given_names[n]
-          flow$computed_outputs[[given_output_name]] <- neurobase::readnii(given_file_list[[n]])
-          
-        }
-        
-      }
+      # Input files for this subject
+      input_file_list <- lapply(given_input, function(x) x[s])
       
       # Execute the flow to get the previous required results (they are the inputs to 
       # the block we are about to train)
@@ -101,12 +110,17 @@ train_output <- function(flow,
       for (f in seq(filenames)) {
         
         given_output <- desired_outputs[f]
-        neurobase::writenii(nim = previous_results[[given_output]], filename = file.path(tmp_folder, filenames[f]))
+        neurobase::writenii(nim = neurobase::niftiarr(arr = previous_results[[given_output]], 
+                                                      img = neurobase::readnii(input_file_list[[1]])),
+                            filename = file.path(tmp_folder, filenames[f]))
         results[[given_output]] <- c(results[[given_output]], file.path(tmp_folder, filenames[f]))
         
       }
       
     }
+    
+    if (verbose)
+      cat("Training configuration...\n")
     
     # Model configuration
     config <- model$hyperparameters
@@ -130,12 +144,17 @@ train_output <- function(flow,
     saving_prefix <- paste0("flow_", flow$name, "_", output, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
     
     # Actual training
+    if (verbose)
+      cat("Actual training...\n")
     model %>% fit_with_generator(train_config = train_config, 
                                  validation_config = test_config,
                                  epochs = epochs,
                                  keep_best = keep_best,
                                  path = saving_path,
                                  prefix = saving_prefix)
+    
+    if (verbose)
+      cat("Done.\n")
     
   }
   
