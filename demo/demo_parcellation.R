@@ -19,8 +19,14 @@ info <- problem %>% get_problem_info()
 
 info %>% split_train_test_sets()
 
+cortex <- c(6, 45, 630:3000)
 scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
-info %>% subset_problem(subset_classes = scgm_labels)
+spinal_cord_labels <- 16
+ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
+info %>% subset_problem(subset_classes = scgm_labels, 
+                        unify_classes = list(cortex, 
+                                             spinal_cord_labels, 
+                                             ventricles_labels))
 
 ##%######################################################%##
 #                                                          #

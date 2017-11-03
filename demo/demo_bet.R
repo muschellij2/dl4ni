@@ -132,6 +132,8 @@ saving_prefix <- paste0(saving_prefix, "_final")
 
 bet_model %>% save_model(path = saving_path, prefix = saving_prefix, comment = "After training")
 
+# bet_model <- load_model(path = saving_path, prefix = saving_prefix)
+
 ##%######################################################%##
 #                                                          #
 ####                     Test Image                     ####
