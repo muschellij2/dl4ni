@@ -223,7 +223,7 @@ create_generator_from_config <- function(config,
         
         if (!is.null(config$class_balance) & !is.null(config$y_label)) {
           
-          Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+          Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
           unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
           
           if (config$class_balance == "extensive") {

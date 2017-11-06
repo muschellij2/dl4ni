@@ -132,7 +132,7 @@ train_output <- function(flow,
       
     }
     
-    if (inherits(model, "DLconfig")) {
+    if (inherits(model, "DLscheme")) {
       
       if (verbose)
         cat("Actually building model...\n")
@@ -141,7 +141,9 @@ train_output <- function(flow,
       num_volumes <- c()
       for (res in results) {
         
-        this_dim <- dim(res[[1]])
+        img <- neurobase::readnii(res[1])
+        this_dim <- dim(img)
+        print(this_dim)
         nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
         num_volumes <- c(num_volumes, nv)
         
@@ -168,7 +170,7 @@ train_output <- function(flow,
                                                            multioutput = TRUE, 
                                                            hidden_layers = params$last_hidden_layers)
       
-      
+      last_layer_info$num_volumes <- num_volumes
       params$last_layer_info <- last_layer_info
       
       # Configuration of the model
