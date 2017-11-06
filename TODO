@@ -24,19 +24,21 @@ ALREADY DONE:
   + Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
   + Por cada nuevo output en el flow, estimar el camino hasta los inputs: habrá de cambiar la dirección en el grafo.
   + Grafo de cada red, que se pueda dibujar con graphviz o con el método que sea. Nombres a los nodos/capas autogenerados a partir de un "prefix" que se proporciona.
+  + class_balance cuando se hace subset_problem y demás. Basta con hacer el map_ids a Vy al principio de create_generator_from_config.
+  + gaussian kernel para config$regularize no NULL
+  + map_ids e inverso para la inferencia y al hacer plot
 
 WIP:
   = Comentarios y documentación en todas las funciones
+  = Funciones de "scale". Así todos los modelos de un flujo tendrán "scale == 'none'".
+  = Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
+  = "save_flow" y "load_flow".
+  = Diferentes tipos de salida en execute_flow (guardar en nii.gz y en RDS).
+  = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
+  = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
+  = Clonar o copiar partes de un flujo.
   
 TODO:
-  - class_balance cuando se hace subset_problem y demás. Basta con hacer el map_ids a Vy al principio de create_generator_from_config.
-  - gaussian kernel para config$regularize no NULL
-  - map_ids e inverso para la inferencia y al hacer plot
-  - "save_flow" y "load_flow".
-  - Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
-  - Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
-  - Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
-  - Clonar o copiar partes de un flujo.
   - README.md para github
   - Meter el info del problema en el config.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.

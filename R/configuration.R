@@ -89,9 +89,9 @@ define_config <- function(...) {
     
   }
   
-  if (config$regularize && config$categorize_output && config$category_method == "simple") {
+  if (!is.null(config$regularize) && config$categorize_output && config$category_method == "simple") {
     
-    config$regularize <- FALSE
+    config$regularize <- NULL
     
   }
 
