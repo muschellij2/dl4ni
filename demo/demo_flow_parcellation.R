@@ -64,6 +64,11 @@ flow %>% add_trainable_model(scheme = scheme_bigger,
                              inputs = list("only_brain_scaled"),
                              output = "segmentation")
 
+# Convert segmentation in 4D-volume
+flow %>% add_process(proc = to_categorical_volume, 
+                     inputs = list("segmentation"), 
+                     output = "segmentation_4D")
+
 # Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
 # to compute the parcellation
 cortex <- c(6, 45, 630:3000)
@@ -71,7 +76,7 @@ scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
 spinal_cord_labels <- 16
 ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
 flow %>% add_trainable_model(scheme = scheme_bigger, 
-                             inputs = list("only_brain_scaled", "segmentation"),
+                             inputs = list("only_brain_scaled", "segmentation_4D"),
                              output = "parcellation", 
                              subset = list(subset_classes = scgm_labels,
                                            unify_classes = list(cortex, 
@@ -111,7 +116,7 @@ info_parc <- problem %>% get_problem_info()
 flow %>% train_output(output = "brain_mask", 
                       input_filenames = info_bet$inputs, 
                       output_filenames = info_bet$outputs, 
-                      epochs = 1)
+                      epochs = 20)
 
 # Train segmentation
 flow %>% train_output(output = "segmentation", 
