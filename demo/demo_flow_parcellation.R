@@ -128,6 +128,15 @@ flow %>% train_output(output = "parcellation",
                       output_filenames = info_parc$outputs, 
                       epochs = 30)
 
+
+##%######################################################%##
+#                                                          #
+####                     Save Flow                      ####
+#                                                          #
+##%######################################################%##
+
+flow %>% save_flow(path = system.file("models", package = "dl4ni.models"), file_prefix = flow$name)
+
 ##%######################################################%##
 #                                                          #
 ####               Execute on Test Image                ####

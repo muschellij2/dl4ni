@@ -27,10 +27,10 @@ ALREADY DONE:
   + class_balance cuando se hace subset_problem y demás. Basta con hacer el map_ids a Vy al principio de create_generator_from_config.
   + gaussian kernel para config$regularize no NULL
   + map_ids e inverso para la inferencia y al hacer plot
+  + Funciones de "scale". Así todos los modelos de un flujo tendrán "scale == 'none'".
 
 WIP:
   = Comentarios y documentación en todas las funciones
-  = Funciones de "scale". Así todos los modelos de un flujo tendrán "scale == 'none'".
   = Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
   = "save_flow" y "load_flow".
   = Diferentes tipos de salida en execute_flow (guardar en nii.gz y en RDS).
