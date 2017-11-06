@@ -13,80 +13,6 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-NumericVector volume_to_windows(NumericVector V, int stride, int width, int displacement = 0) {
-  
-  if (width % 2 == 0) width++;
-  
-  int radius = (width + 1) / 2;
-  
-  IntegerVector dims = V.attr("dim");
-  
-  int n_neighbours = pow(width, 3);
-  
-  
-  // Count how many windows we'll have
-  int count = 0;
-  for (int z = displacement + radius - 1; z < dims[2] - width + radius; z += stride) {
-    
-    for (int y = displacement + radius - 1; y < dims[1] - width + radius; y += stride) {
-      
-      for (int x = displacement + radius - 1; x < dims[0] - width + radius; x += stride) {
-        
-        count++;
-        
-      }
-      
-    }
-    
-  }
-  
-  
-  NumericMatrix res(count, n_neighbours + 3);
-  count = 0;
-  // For every seed voxel, compute the window
-  for (int z = displacement + radius - 1; z < dims[2] - width + radius - 1; z += stride) {
-    
-    for (int y = displacement + radius - 1; y < dims[1] - width + radius - 1; y += stride) {
-      
-      for (int x = displacement + radius - 1; x < dims[0] - width + radius - 1; x += stride) {
-        
-        res(count, 0) = x;
-        res(count, 1) = y;
-        res(count, 2) = z;
-        
-        int inner_count = 0;
-        
-        for (int dz = -radius + 1; dz < radius; dz++) {
-          
-          for (int dy = -radius + 1; dy < radius; dy++) {
-            
-            for (int dx = -radius + 1; dx < radius; dx++) {
-              
-              int offset = (x + dx) + dims[0] * (y + dy) + dims[0] * dims[1] * (z + dz);
-              
-              res(count, inner_count + 3) = V[offset];
-              inner_count++;
-              
-            }
-            
-          }
-          
-        }
-        
-        count++;
-        
-      }
-      
-    }
-    
-  }
-  
-  return res;
-  
-}
-
-
-// [[Rcpp::export]]
 NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, IntegerVector y, IntegerVector z) {
   
   if (width % 2 == 0) width++;
@@ -94,8 +20,9 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
   int radius = (width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
+  int n_volumes = dims[3];
   
-  int n_neighbours = pow(width, 3);
+  int n_neighbours = pow(width, 3) * n_volumes;
   
   // Count how many windows we'll have
   int count = 0;
@@ -111,21 +38,26 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
     
     int inner_count = 0;
     
-    for (int dz = -radius + 1; dz < radius; dz++) {
+    for (int volume = 0; volume < n_volumes; volume++) {
       
-      for (int dy = -radius + 1; dy < radius; dy++) {
+      for (int dz = -radius + 1; dz < radius; dz++) {
         
-        for (int dx = -radius + 1; dx < radius; dx++) {
+        for (int dy = -radius + 1; dy < radius; dy++) {
           
-          if ((x[i] + dx >= 0) & (x[i] + dx < dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < dims[2])) {
+          for (int dx = -radius + 1; dx < radius; dx++) {
             
-            int offset = (x[i] + dx) + dims[0] * (y[i] + dy) + dims[0] * dims[1] * (z[i] + dz);
+            if ((x[i] + dx >= 0) & (x[i] + dx < dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < dims[2])) {
+              
+              int offset = (x[i] + dx) + dims[0] * (y[i] + dy) + dims[0] * dims[1] * (z[i] + dz);
+              offset += volume * dims[0] * dims[1] * dims[2];
+              
+              res(count, inner_count + 3) = V[offset];
+              
+            }
             
-            res(count, inner_count + 3) = V[offset];
+            inner_count++;
             
           }
-          
-          inner_count++;
           
         }
         
@@ -136,146 +68,6 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
     count++;
     
   }
-  
-  return res;
-  
-}
-
-
-// [[Rcpp::export]]
-NumericVector windows_to_volume(NumericVector V, int stride, int width, IntegerVector target_dims,
-                                int displacement = 0) {
-  
-  if (width % 2 == 0) width++;
-  
-  int radius = (width + 1) / 2;
-  
-  IntegerVector dims = V.attr("dim");
-  
-  Rprintf("Vector dims = (%u,%u)\n", dims[0], dims[1]);
-  
-  NumericVector res(target_dims[0] * target_dims[1] * target_dims[2], 0.0);
-  NumericVector counts(target_dims[0] * target_dims[1] * target_dims[2], 0.0);
-  
-  int count = 0;
-  // For every seed voxel, compute the window
-  for (int z = displacement + radius - 1; z < target_dims[2] - width + radius - 1; z += stride) {
-    
-    for (int y = displacement + radius - 1; y < target_dims[1] - width + radius - 1; y += stride) {
-      
-      for (int x = displacement + radius - 1; x < target_dims[0] - width + radius - 1; x += stride) {
-        
-        int inner_count = 0;
-        
-        for (int dz = -radius + 1; dz < radius; dz++) {
-          
-          for (int dy = -radius + 1; dy < radius; dy++) {
-            
-            for (int dx = -radius + 1; dx < radius; dx++) {
-              
-              int offset = (x + dx) + target_dims[0] * (y + dy) + target_dims[0] * target_dims[1] * (z + dz);
-              
-              if (offset >= target_dims[0] * target_dims[1] * target_dims[2] ) {
-                
-                Rprintf("Offset = %u\n", offset);
-                Rprintf("Index = %u\n", count + dims[0] * inner_count);
-                
-              }
-              
-              // if (V[count + dims[0] * inner_count] > res[offset])
-              res[offset] += V[count + dims[0] * inner_count];
-              counts[offset] += 1;
-              
-              inner_count++;
-              
-            }
-            
-          }
-          
-        }
-        
-        count++;
-        
-      }
-      
-    }
-    
-  }
-  
-  for (int i = 0; i < res.size(); i++) {
-    
-    if (counts[i] > 0) {
-      
-      res[i] /= counts[i];
-      
-    }
-    
-  }
-  
-  res.attr("dim") = target_dims;
-  
-  return res;
-  
-}
-
-// [[Rcpp::export]]
-NumericVector windows_to_volume_label(NumericVector V, int stride, int width, IntegerVector target_dims,
-                                      int displacement = 0) {
-  
-  if (width % 2 == 0) width++;
-  int radius = (width + 1) / 2;
-  
-  IntegerVector dims = V.attr("dim");
-  
-  Rprintf("Vector dims = (%u,%u)\n", dims[0], dims[1]);
-  
-  NumericVector res(target_dims[0] * target_dims[1] * target_dims[2], 0.0);
-  
-  int count = 0;
-  // For every seed voxel, compute the window
-  for (int z = displacement + radius - 1; z < target_dims[2] - width + radius - 1; z += stride) {
-    
-    for (int y = displacement + radius - 1; y < target_dims[1] - width + radius - 1; y += stride) {
-      
-      for (int x = displacement + radius - 1; x < target_dims[0] - width + radius - 1; x += stride) {
-        
-        int inner_count = 0;
-        
-        for (int dz = -radius + 1; dz < radius; dz++) {
-          
-          for (int dy = -radius + 1; dy < radius; dy++) {
-            
-            for (int dx = -radius + 1; dx < radius; dx++) {
-              
-              int offset = (x + dx) + target_dims[0] * (y + dy) + target_dims[0] * target_dims[1] * (z + dz);
-              
-              if (offset >= target_dims[0] * target_dims[1] * target_dims[2] ) {
-                
-                Rprintf("Offset = %u\n", offset);
-                Rprintf("Index = %u\n", count + dims[0] * inner_count);
-                
-              }
-              
-              if (V[count + dims[0] * inner_count] > res[offset])
-                res[offset] = V[count + dims[0] * inner_count];
-              
-              inner_count++;
-              
-            }
-            
-          }
-          
-        }
-        
-        count++;
-        
-      }
-      
-    }
-    
-  }
-  
-  res.attr("dim") = target_dims;
   
   return res;
   
@@ -327,58 +119,6 @@ void results_to_volume(NumericVector V,
   }
   
 }
-
-// [[Rcpp::export]]
-void results_to_fuzzy_volume(NumericVector V, 
-                             int width,
-                             int num_classes,
-                             NumericVector res, 
-                             NumericVector counts, 
-                             IntegerVector x, IntegerVector y, IntegerVector z) {
-  
-  if (width % 2 == 0) width ++;
-  int radius = (width + 1) / 2;
-  
-  IntegerVector dims = V.attr("dim");
-  IntegerVector target_dims = res.attr("dim");
-  
-  // Rprintf("Vector dims = (%u,%u)\n", dims[0], dims[1]);
-  
-  for (int i = 0; i < x.size(); i++) {
-    
-    int inner_count = 0;
-    
-    for (int dz = -radius + 1; dz < radius; dz++) {
-      
-      for (int dy = -radius + 1; dy < radius; dy++) {
-        
-        for (int dx = -radius + 1; dx < radius; dx++) {
-          
-          int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
-          
-          for (int k = 0; k < num_classes; k++) {
-            
-            int offset_4d = offset + k * target_dims[0] * target_dims[1] * target_dims[2];
-            
-            res[offset_4d] += V[i + dims[0] * inner_count];
-            inner_count++;
-            
-            
-          }
-          
-          counts[offset] += 1;
-          
-          
-        }
-        
-      }
-      
-    }
-    
-  }
-  
-}
-
 
 // [[Rcpp::export]]
 void results_to_volume_label(NumericVector V, 
@@ -563,12 +303,6 @@ void regularize(double* input, int ndims, int* dims, double* kernel, int kernel_
   }
   
 }
-
-
-
-
-
-
 
 
 //[[Rcpp::export]]

@@ -132,6 +132,25 @@ train_output <- function(flow,
       
     }
     
+    if (inherits(model, "DLconfig")) {
+      
+      if (verbose)
+        cat("Actually building model...\n")
+      
+      config <- model
+      num_volumes <- c()
+      for (res in results) {
+        
+        this_dim <- dim(res[[1]])
+        nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
+        num_volumes <- c(num_volumes, nv)
+        
+      }
+      config$num_volumes <- num_volumes
+
+      
+    }
+    
     if (verbose)
       cat("Training configuration...\n")
     
