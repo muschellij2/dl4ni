@@ -94,27 +94,34 @@ flow %>% plot_flow()
 ##%######################################################%##
 
 # Let's train the different models:
+# Define the training sets:
+
 # First, the brain_mask
 problem <- "brain_extraction"
 info_bet <- problem %>% get_problem_info()
+
+# Now, segmentation
+problem <- "segmentation2"
+info_seg <- problem %>% get_problem_info()
+
+# To end, parcellation
+problem <- "parcellation"
+info_parc <- problem %>% get_problem_info()
+
+# Train BET
 flow %>% train_output(output = "brain_mask", 
                       input_filenames = info_bet$inputs, 
                       output_filenames = info_bet$outputs, 
                       epochs = 20)
 
-
-# Now, segmentation
-problem <- "segmentation2"
-info_seg <- problem %>% get_problem_info()
+# Train segmentation
 flow %>% train_output(output = "segmentation", 
                       input_filenames = info_seg$inputs,
                       given_input = list("only_brain" = info_seg$inputs$T1),
                       output_filenames = info_seg$outputs, 
                       epochs = 30)
 
-# To end, parcellation
-problem <- "parcellation"
-info_parc <- problem %>% get_problem_info()
+# Train parcellation
 flow %>% train_output(output = "parcellation", 
                       input_filenames = info_parc$inputs,
                       given_input = list("only_brain" = info_parc$inputs$T1),

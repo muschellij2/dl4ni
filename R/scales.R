@@ -1,6 +1,6 @@
 scale_z <- function(V) {
   
-  return((V - mean(as.vector(V))) / (std(as.vector(V)) + .Machine$double.eps))
+  return((V - mean(as.vector(V))) / (sd(as.vector(V)) + .Machine$double.eps))
   
 }
 
