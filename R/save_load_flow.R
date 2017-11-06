@@ -9,7 +9,7 @@
 #'
 #' @details DETAILS
 #' @export 
-save_flow <- function(flow, path = tempdir(), file_prefix = basename(tempfile())) {
+save_flow <- function(flow, path = tempdir(), file_prefix = flow$name) {
   
   # Output directory
   output_dir <- file.path(path, file_prefix)
@@ -57,6 +57,8 @@ save_flow <- function(flow, path = tempdir(), file_prefix = basename(tempfile())
   
   setwd(current_dir)
   unlink(output_dir, recursive = TRUE, force = TRUE)
+  
+  return(invisible(output_file))
   
 }
 
@@ -120,5 +122,23 @@ load_flow <- function(filename, verbose = TRUE) {
   
   # Return the flow
   return(flow)
+  
+}
+
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow    (name) PARAM_DESCRIPTION
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @export
+clone_flow <- function(flow) {
+  
+  new_flow <- flow %>% save_flow() %>% load_flow()
+  
+  return(new_flow)
   
 }

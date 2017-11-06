@@ -79,7 +79,7 @@ train_output <- function(flow,
     num_subjects <- length(output_filenames)
     
     # Obtain the results of the needed previous steps
-    desired_outputs <- needed_outputs #c(needed_inputs, needed_outputs)
+    desired_outputs <- needed_outputs 
     
     if (verbose)
       cat("Obtaining required inputs...\n")
@@ -105,14 +105,27 @@ train_output <- function(flow,
       flow %>% reset_outputs()
       
       # Save the results in a temp folder and store its location in the results list
-      filenames <- paste0(desired_outputs, "_", s, ".nii.gz")
+      filenames <- paste0(desired_outputs, "_", s)
       
       for (f in seq(filenames)) {
         
         given_output <- desired_outputs[f]
-        neurobase::writenii(nim = neurobase::niftiarr(arr = previous_results[[given_output]], 
-                                                      img = neurobase::readnii(input_file_list[[1]])),
-                            filename = file.path(tmp_folder, filenames[f]))
+        
+        if (inherits(previous_results[[given_output]], "nifti")) {
+          
+          filenames[f] <- paste0(filenames[f], ".nii.gz")
+          
+          neurobase::writenii(nim = neurobase::niftiarr(arr = previous_results[[given_output]], 
+                                                        img = neurobase::readnii(input_file_list[[1]])),
+                              filename = file.path(tmp_folder, filenames[f]))
+          
+        } else {
+          
+          filenames[f] <- paste0(filenames[f], ".rds")
+          saveRDS(previous_results[[given_output]], file = file.path(tmp_folder, filenames[f]))
+          
+        }
+        
         results[[given_output]] <- c(results[[given_output]], file.path(tmp_folder, filenames[f]))
         
       }

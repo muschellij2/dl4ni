@@ -28,15 +28,16 @@ ALREADY DONE:
   + gaussian kernel para config$regularize no NULL
   + map_ids e inverso para la inferencia y al hacer plot
   + Funciones de "scale". Así todos los modelos de un flujo tendrán "scale == 'none'".
-
+  + "save_flow" y "load_flow".
+  + Diferentes tipos de salida en execute_flow (guardar en nii.gz y en RDS).
+  + Clonar un flujo.
+  
 WIP:
   = Comentarios y documentación en todas las funciones
   = Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
-  = "save_flow" y "load_flow".
-  = Diferentes tipos de salida en execute_flow (guardar en nii.gz y en RDS).
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
-  = Clonar o copiar partes de un flujo.
+  = Copiar partes de un flujo.
   
 TODO:
   - README.md para github
