@@ -18,6 +18,7 @@ train_output <- function(flow,
                          train_split = 0.75,
                          epochs = 10, 
                          max_sub_epochs = 5,
+                         mode = c("debug", "faster", "medium", "slower"),
                          verbose = TRUE) {
   
   # Basic check
@@ -99,7 +100,8 @@ train_output <- function(flow,
       # the block we are about to train)
       previous_results <- flow %>% execute_flow(inputs = input_file_list, 
                                                 desired_outputs = desired_outputs, 
-                                                initialize_outputs = FALSE)
+                                                initialize_outputs = FALSE,
+                                                mode = mode[1])
       
       # Reset computed outputs for next interation
       flow %>% reset_outputs()

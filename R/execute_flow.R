@@ -10,7 +10,11 @@
 #'
 #' @details DETAILS
 #' @export 
-execute_flow <- function(flow, inputs = list(), given_inputs = NULL, desired_outputs = NULL, initialize_outputs = TRUE) {
+execute_flow <- function(flow, inputs = list(), 
+                         given_inputs = NULL, 
+                         desired_outputs = NULL, 
+                         initialize_outputs = TRUE,
+                         mode = c("debug", "faster", "medium", "slower")) {
   
   require(igraph)
   
@@ -89,11 +93,19 @@ execute_flow <- function(flow, inputs = list(), given_inputs = NULL, desired_out
                  "DLmodel" = {
                    
                    # Inference function for the given model
-                   infer <- process$hyperparameters %>% create_inference_function_from_config()
+                   config <- process$hyperparameters
+                   
+                   if (mode[1] == "debug") {
+                     
+                     mode <- "faster"
+                     config$regularize <- NULL
+                     
+                   }
+                   infer <- config %>% create_inference_function_from_config()
                    
                    # Infer on input volumes
                    input_imgs <- flow$computed_outputs[my_inputs]
-                   flow$computed_outputs[[intermediate_output]] <- process %>% infer(V = input_imgs, speed = "medium")
+                   flow$computed_outputs[[intermediate_output]] <- process %>% infer(V = input_imgs, speed = mode[1])
                    
                  })
           
