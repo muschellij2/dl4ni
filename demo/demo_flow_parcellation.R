@@ -45,8 +45,7 @@ flow %>% add_process(proc = scale_z,
                      output = "T1_scaled")
 
 # Starting from a T1, add a trainable model which computes the brain_mask
-flow %>% add_trainable_model(using = scheme_bigger, 
-                             output_template = get_problem_info("brain_extraction")$outputs[1], 
+flow %>% add_trainable_model(scheme = scheme_bigger, 
                              inputs = list("T1_scaled"),
                              output = "brain_mask")
 
@@ -61,7 +60,7 @@ flow %>% add_process(proc = scale_z,
 
 # Starting form the brain extracted image ("only_brain"), add a trainable model which computes the 
 # segmentation
-flow %>% add_trainable_model(using = scheme_bigger,
+flow %>% add_trainable_model(scheme = scheme_bigger,
                              inputs = list("only_brain_scaled"),
                              output = "segmentation")
 
@@ -71,7 +70,7 @@ cortex <- c(6, 45, 630:3000)
 scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
 spinal_cord_labels <- 16
 ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
-flow %>% add_trainable_model(using = scheme_bigger, 
+flow %>% add_trainable_model(scheme = scheme_bigger, 
                              inputs = list("only_brain_scaled", "segmentation"),
                              output = "parcellation", 
                              subset = list(subset_classes = scgm_labels,
@@ -112,7 +111,7 @@ info_parc <- problem %>% get_problem_info()
 flow %>% train_output(output = "brain_mask", 
                       input_filenames = info_bet$inputs, 
                       output_filenames = info_bet$outputs, 
-                      epochs = 20)
+                      epochs = 1)
 
 # Train segmentation
 flow %>% train_output(output = "segmentation", 

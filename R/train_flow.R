@@ -71,7 +71,7 @@ train_output <- function(flow,
   
   model <- flow$processes[[output]]
   
-  if (inherits(model, "DLmodel") & !flow$trained[[output]]) {
+  if ((inherits(model, "DLmodel") | inherits(model, "DLscheme")) & !flow$trained[[output]]) {
     
     # Temporary results
     tmp_folder <- tempdir()
@@ -137,7 +137,7 @@ train_output <- function(flow,
       if (verbose)
         cat("Actually building model...\n")
       
-      config <- model
+      params <- model
       num_volumes <- c()
       for (res in results) {
         
@@ -146,8 +146,42 @@ train_output <- function(flow,
         num_volumes <- c(num_volumes, nv)
         
       }
-      config$num_volumes <- num_volumes
-
+      params$num_volumes <- num_volumes
+      
+      # Parameters from the output template
+      if (verbose)
+        cat("Preparing output...\n")
+      output_template <- output_filenames[1]
+      output_info <- analyze_output(output_template)
+      
+      if (!is.null(params$subset) & is.list(params$subset)) {
+        
+        output_info <- do.call(subset_problem, args = list(problem_info = output_info, 
+                                                           subset_classes = params$subset$subset_classes,
+                                                           unify_classes = params$subset$unify_classes))
+        
+      }
+      
+      # Definition of the last layer
+      last_layer_info <- output_info %>% define_last_layer(units = params$units, 
+                                                           force_categorical = TRUE, 
+                                                           multioutput = TRUE, 
+                                                           hidden_layers = params$last_hidden_layers)
+      
+      
+      params$last_layer_info <- last_layer_info
+      
+      # Configuration of the model
+      if (verbose)
+        cat("Preparing model configuration...\n")
+      config <- do.call(define_config, args = params)
+      
+      # Model creation
+      if (verbose)
+        cat("Creating model...\n")
+      model <- config %>% create_model_from_config()
+      
+      flow$processes[[output]] <- model
       
     }
     

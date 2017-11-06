@@ -413,37 +413,7 @@ create_generator_from_config <- function(config,
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
     
-    # cat("Read Y...\n")
-    
-    # if (!is.null(config$remap_classes)) {
-    #   
-    #   s <- config$remap_classes$source
-    #   t <- config$remap_classes$target
-    #   
-    #   Y_ <- Y
-    #   
-    #   for (i in seq_along(s)) {
-    #     
-    #     Y_[Y == s[i]] <- t[i]
-    #     
-    #   }
-    #   
-    #   extra_classes <- setdiff(unique(as.vector(Y[Y > 0])), s)
-    #   remaining <- 0
-    #   
-    #   if (!is.null(config$remap_classes$remaining)) 
-    #     remaining <- config$remap_classes$remaining
-    #   
-    #   for (k in extra_classes) {
-    #     
-    #     Y_[Y == k] <- remaining
-    #     
-    #   }
-    #   
-    #   Y <- Y_
-    #   
-    # }
-    
+
     if (config$categorize_output) {
       
       Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
