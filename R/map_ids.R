@@ -7,9 +7,13 @@ map_ids <- function(image, remap_classes, invert = FALSE) {
   
   if (!invert) {
     
-    for (i in seq_along(s)) {
+    t_ <- unique(t)
+    
+    for (i in seq_along(t_)) {
+
+      original_indices <- s[which(t == t_[i])]
       
-      Y[image == s[i]] <- t[i]
+      Y[image %in% original_indices] <- t_[i]
       
     }
     
@@ -19,19 +23,17 @@ map_ids <- function(image, remap_classes, invert = FALSE) {
     if (!is.null(remap_classes$remaining)) 
       remaining <- remap_classes$remaining
     
-    for (k in extra_classes) {
-      
-      Y[image == k] <- remaining
-      
-    }
-    
+    Y[image %in% extra_classes] <- remaining
+
   } else {
     
-    for (i in seq_along(t)) {
+    t_ <- unique(t)
+    
+    for (i in seq_along(t_)) {
       
-      original_indices <- s[which(t == t[i])]
+      original_indices <- s[which(t == t_[i])]
       
-      Y[image == t[i]] <- original_indices[1]
+      Y[image == t_[i]] <- original_indices[1]
       
     }
     

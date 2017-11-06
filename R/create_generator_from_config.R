@@ -110,7 +110,7 @@ create_generator_from_config <- function(config,
       
       Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
       unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
-      
+
       if (config$class_balance == "extensive") {
         
         balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
@@ -219,11 +219,11 @@ create_generator_from_config <- function(config,
       
       if (mode == "sampling") {
         
-        sampling_indices <- sample(all_idx, length(all_idx))
+        sampling_indices <<- sample(all_idx, length(all_idx))
         
         if (!is.null(config$class_balance) & !is.null(config$y_label)) {
           
-          Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+          Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
           unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
           
           if (config$class_balance == "extensive") {
@@ -269,7 +269,7 @@ create_generator_from_config <- function(config,
             }
             
             sampling_indices <- c(which_idx, not_idx)
-            sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
+            sampling_indices <<- sample(sampling_indices, size = length(sampling_indices))
             
           }
           
@@ -277,14 +277,13 @@ create_generator_from_config <- function(config,
         
         num_batches <- ceiling(length(sampling_indices) / num_windows)
         if (num_batches > 1)
-          batch_idx <- as.numeric(cut(seq_along(sampling_indices), num_batches))
+          batch_idx <<- as.numeric(cut(seq_along(sampling_indices), num_batches))
         else
-          batch_idx <- rep(1, times = length(sampling_indices))
+          batch_idx <<- rep(1, times = length(sampling_indices))
         
       } else {
         
-        # mode == "all"
-        sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
+        sampling_indices <<- sample(sampling_indices, size = length(sampling_indices))
         
       }
       
@@ -293,14 +292,10 @@ create_generator_from_config <- function(config,
     idx <- sampling_indices[batch_idx == sub_epoch]
     
     coords <- idx %>% arrayInd(.dim = dim(Vy))
-    # str(apply(coords, 2, range))
+
     x <- coords[, 1] - 1
     y <- coords[, 2] - 1
     z <- coords[, 3] - 1
-    
-    # stopifnot(all(x >= radius - 1), all(y >= radius - 1), all(z >= radius - 1))
-    
-    # print("Reading X")
     
     X_vol <- list()
     
@@ -354,8 +349,6 @@ create_generator_from_config <- function(config,
             }
             
           } else {
-            
-            cat("Scaling X\n")
             
             switch(config$scale,
                    "none" = X_vol[[input]] <- X_vol[[input]],
@@ -412,8 +405,6 @@ create_generator_from_config <- function(config,
     
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
-    
-    # cat("Read Y...\n")
     
     # if (!is.null(config$remap_classes)) {
     #   
