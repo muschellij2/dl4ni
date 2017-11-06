@@ -69,6 +69,12 @@ create_generator_from_config <- function(config,
     if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(Vx[[input]]))
     if (config$scale %in% c("max", "meanmax")) maxX[[input]] <- max(as.vector(Vx[[input]]))
     
+    if (config$is_autoencoder & !is.null(config$remap_classes)) {
+      
+      Vx[[input]] <- map_ids(image = Vx[[input]], config$remap_classes)
+
+    }
+    
   }
   
   # cat("Reading", y_files[1], "\n")
@@ -102,14 +108,15 @@ create_generator_from_config <- function(config,
     
     if (!is.null(config$class_balance) & !is.null(config$y_label)) {
       
-      Vy[!(Vy %in% config$y_label)] <- 0
+      Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+      unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
       
       if (config$class_balance == "extensive") {
         
-        balanced_classes <- sample(c(0, config$y_label), size = length(all_idx), replace = TRUE)
+        balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
         sampling_indices <- rep(0, length(balanced_classes))
         
-        for (class in c(0, config$y_label)) {
+        for (class in unique_labels) {
           
           idx_for_class <- which(balanced_classes == class)
           idx_in_img <- which(Vy == class)
@@ -133,7 +140,7 @@ create_generator_from_config <- function(config,
         
       } else {
         
-        which_idx <- which(Vy %in% config$y_label)
+        which_idx <- which(Vy %in% unique_labels)
         not_idx <- setdiff(all_idx, which_idx)
         
         if (length(not_idx) > length(which_idx)) {
@@ -194,6 +201,12 @@ create_generator_from_config <- function(config,
         if (config$scale %in% "z") stdX[[input]] <<- sd(as.vector(Vx[[input]]))
         if (config$scale %in% c("max", "meanmax")) maxX[[input]] <<- max(as.vector(Vx[[input]]))
         
+        if (config$is_autoencoder & !is.null(config$remap_classes)) {
+          
+          Vx[[input]] <- map_ids(image = Vx[[input]], config$remap_classes)
+          
+        }
+        
       }
       
       # cat("Reading ", y_files[next_file], "\n")
@@ -210,14 +223,15 @@ create_generator_from_config <- function(config,
         
         if (!is.null(config$class_balance) & !is.null(config$y_label)) {
           
-          Vy[!(Vy %in% config$y_label)] <- 0
+          Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+          unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
           
           if (config$class_balance == "extensive") {
             
-            balanced_classes <- sample(c(0, config$y_label), size = length(all_idx), replace = TRUE)
+            balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
             sampling_indices <- rep(0, length(balanced_classes))
             
-            for (class in c(0, config$y_label)) {
+            for (class in unique_labels) {
               
               idx_for_class <- which(balanced_classes == class)
               idx_in_img <- which(Vy == class)
@@ -241,7 +255,7 @@ create_generator_from_config <- function(config,
             
           } else {
             
-            which_idx <- which(Vy %in% config$y_label)
+            which_idx <- which(Vy %in% unique_labels)
             not_idx <- setdiff(all_idx, which_idx)
             
             if (length(not_idx) > length(which_idx)) {
@@ -303,27 +317,6 @@ create_generator_from_config <- function(config,
       if (config$is_autoencoder) {
         
         if (config$categorize_input) {
-          
-          if (!is.null(config$remap_classes)) {
-            
-            X_vol[[input]][!(X_vol[[input]] %in% config$y_label)] <- 0
-            
-            s <- config$remap_classes$source
-            t <- config$remap_classes$target
-            
-            X_vol_ <- X_vol[[input]]
-            
-            for (i in seq_along(s)) {
-              
-              X_vol_[X_vol[[input]] == s[i]] <- t[i]
-              
-            }
-            
-            X_vol[[input]] <- X_vol_
-            
-          }
-          
-          # X_vol[!(X_vol %in% y_label)] <- 0
           
           X_vol2 <- keras::to_categorical(X_vol[[input]], num_classes = config$num_classes)
           X_vol[[input]] <- t(matrix(t(X_vol2), nrow = config$width ^ 3 * config$num_classes))
@@ -422,34 +415,34 @@ create_generator_from_config <- function(config,
     
     # cat("Read Y...\n")
     
-    if (!is.null(config$remap_classes)) {
-      
-      s <- config$remap_classes$source
-      t <- config$remap_classes$target
-      
-      Y_ <- Y
-      
-      for (i in seq_along(s)) {
-        
-        Y_[Y == s[i]] <- t[i]
-        
-      }
-      
-      extra_classes <- setdiff(unique(as.vector(Y[Y > 0])), s)
-      remaining <- 0
-      
-      if (!is.null(config$remap_classes$remaining)) 
-        remaining <- config$remap_classes$remaining
-      
-      for (k in extra_classes) {
-        
-        Y_[Y == k] <- remaining
-        
-      }
-      
-      Y <- Y_
-      
-    }
+    # if (!is.null(config$remap_classes)) {
+    #   
+    #   s <- config$remap_classes$source
+    #   t <- config$remap_classes$target
+    #   
+    #   Y_ <- Y
+    #   
+    #   for (i in seq_along(s)) {
+    #     
+    #     Y_[Y == s[i]] <- t[i]
+    #     
+    #   }
+    #   
+    #   extra_classes <- setdiff(unique(as.vector(Y[Y > 0])), s)
+    #   remaining <- 0
+    #   
+    #   if (!is.null(config$remap_classes$remaining)) 
+    #     remaining <- config$remap_classes$remaining
+    #   
+    #   for (k in extra_classes) {
+    #     
+    #     Y_[Y == k] <- remaining
+    #     
+    #   }
+    #   
+    #   Y <- Y_
+    #   
+    # }
     
     if (config$categorize_output) {
       

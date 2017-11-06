@@ -32,7 +32,6 @@ add_trainable_model <- function(flow,
     
   }
   
-  
   # Definition of the last layer
   last_layer_info <- output_info %>% define_last_layer(units = using$units, 
                                                        force_categorical = TRUE, 

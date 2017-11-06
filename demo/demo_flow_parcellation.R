@@ -18,13 +18,13 @@ load_keras()
 scheme <- list(width = 7,
                output_width = 3,
                num_features = 3,
-               vol_layers_pattern = list(dense(200), dense(100)),
+               vol_layers_pattern = list(clf(hidden_layers = list(dense(300), dense(200), dense(200), dense(100)))),
                vol_dropout = 0.1,
                feature_layers = list(), #list(clf(hidden_layers = list(dense(10), dense(10))))
                feature_dropout = 0.15,
-               common_layers = list(dense(250), dense(100)),
+               common_layers = list(clf(hidden_layers = list(dense(300), dense(250), dense(100)))),
                common_dropout = 0.1,
-               last_hidden_layers = list(dense(20), dense(10)),
+               last_hidden_layers = list(dense(30), dense(20)),
                optimizer = keras::optimizer_nadam(),
                scale = "z",
                scale_y = "none")
@@ -84,30 +84,30 @@ flow %>% plot_flow()
 # Let's train the different models:
 # First, the brain_mask
 problem <- "brain_extraction"
-info_bet <- problem %>% get_problem_info(num_subjects = 5)
+info_bet <- problem %>% get_problem_info()
 flow %>% train_output(output = "brain_mask", 
                       input_filenames = info_bet$inputs, 
                       output_filenames = info_bet$outputs, 
-                      epochs = 1)
+                      epochs = 20)
 
 
 # Now, segmentation
 problem <- "segmentation2"
-info_seg <- problem %>% get_problem_info(num_subjects = 5)
+info_seg <- problem %>% get_problem_info()
 flow %>% train_output(output = "segmentation", 
                       input_filenames = info_seg$inputs,
                       given_input = list("only_brain" = info_seg$inputs$T1),
                       output_filenames = info_seg$outputs, 
-                      epochs = 1)
+                      epochs = 30)
 
 # To end, parcellation
 problem <- "parcellation"
-info_parc <- problem %>% get_problem_info(num_subjects = 5)
+info_parc <- problem %>% get_problem_info()
 flow %>% train_output(output = "parcellation", 
                       input_filenames = info_parc$inputs,
                       given_input = list("only_brain" = info_parc$inputs$T1),
                       output_filenames = info_parc$outputs, 
-                      epochs = 1)
+                      epochs = 30)
 
 ##%######################################################%##
 #                                                          #
@@ -115,14 +115,24 @@ flow %>% train_output(output = "parcellation",
 #                                                          #
 ##%######################################################%##
 
-file <- info_bet$inputs[1]
-result <- flow %>% execute_flow(inputs = list(T1 = file), 
+file <- info_seg$inputs$T1[1]
+result <- flow %>% execute_flow(inputs = list(only_brain = file), 
                                 desired_outputs = c("only_brain", "segmentation", "parcellation"))
 
-ortho_plot(x = readnii(file), interactiveness = FALSE, text = "Original Image")
+original_image <- readnii(file)
+ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
 for (img in seq_along(result)) {
   
-  ortho_plot(x = result[[img]], interactiveness = FALSE, text = paste0("Predicted: ", names(result)[img]))
+  num_classes <- length(unique(as.vector(result[[img]])))
+  col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
+  if (names(result)[img] == "segmentation")
+    col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
+  
+  ortho_plot(x = original_image, 
+             y = result[[img]], 
+             col.y = col.y, 
+             interactiveness = FALSE, 
+             text = paste0("Predicted: ", names(result)[img]))
   
 }
 

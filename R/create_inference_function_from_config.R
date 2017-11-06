@@ -44,6 +44,12 @@ create_inference_function_from_config <- function(config) {
       if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(V[[input]]))
       if (config$scale %in% c("max", "meanmax")) maxX[[input]] <- max(as.vector(V[[input]]))
       
+      if (config$is_autoencoder & !is.null(config$remap_classes)) {
+        
+        V[[input]] <- map_ids(image = V[[input]], config$remap_classes)
+        
+      }
+      
     }
     
     V0 <- V[[1]] * 0 
@@ -125,27 +131,6 @@ create_inference_function_from_config <- function(config) {
         if (config$is_autoencoder) {
           
           if (config$categorize_input) {
-            
-            if (!is.null(config$remap_classes)) {
-              
-              X_vol[[input]][!(X_vol[[input]] %in% config$y_label)] <- 0
-              
-              s <- config$remap_classes$source
-              t <- config$remap_classes$target
-              
-              X_vol_ <- X_vol[[input]]
-              
-              for (i in seq_along(s)) {
-                
-                X_vol_[X_vol[[input]] == s[i]] <- t[i]
-                
-              }
-              
-              X_vol[[input]] <- X_vol_
-              
-            }
-            
-            # X_vol[!(X_vol %in% y_label)] <- 0
             
             X_vol2 <- keras::to_categorical(X_vol[[input]], num_classes = config$num_classes)
             X_vol[[input]] <- t(matrix(t(X_vol2), nrow = config$width ^ 3 * config$num_classes))
@@ -360,20 +345,12 @@ create_inference_function_from_config <- function(config) {
     
     
     if ((!config$categorize_output) | (config$categorize_output & config$category_method == "by_class"))
-      if (config$regularize) {
+      if (!is.null(config$regularize)) {
         
-        kernel <- c(0.0325130027975867, 0.0368420588246428, 0.0325130027975867, 
-                    0.0368420588246428, 0.041747521964941, 0.0368420588246428, 
-                    0.0325130027975867, 0.0368420588246428, 0.0325130027975867, 
-                    0.0368420588246428, 0.041747521964941, 0.0368420588246428, 
-                    0.041747521964941, 0.0473061399339463, 0.041747521964941, 
-                    0.0368420588246428, 0.041747521964941, 0.0368420588246428, 
-                    0.0325130027975867, 0.0368420588246428, 0.0325130027975867, 
-                    0.0368420588246428, 0.041747521964941, 0.0368420588246428, 
-                    0.0325130027975867, 0.0368420588246428, 0.0325130027975867 )
-        kernel <- array(kernel, dim = c(3, 3, 3))
-        res <- regularize(res, kernel)
-        
+        res <- smooth_by_gaussian_kernel(image = res, 
+                                         kernel_sigma = config$regularize$sigma, 
+                                         kernel_width = config$regularize$width)
+
       }
     
     if ((config$categorize_output) & (config$category_method == "by_class")) {
@@ -384,22 +361,8 @@ create_inference_function_from_config <- function(config) {
     
     if (config$categorize_output) {
       
-      res_ <- 0 * res
-      if (!is.null(config$remap_classes)) {
-        
-        s <- config$remap_classes$source
-        ta <- config$remap_classes$target
-        
-        for (cl in seq_along(s)) {
-          
-          res_[res == ta[cl]] <- s[cl]
-          
-        }
-        
-        res <- res_
-        
-      }
-      
+      res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
+
     }
     
     return(res)

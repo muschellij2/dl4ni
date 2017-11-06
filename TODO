@@ -21,17 +21,28 @@ ALREADY DONE:
   + warning en "fit_with_generator" si ya existe el directorio donde se guarda el modelo. Recuperar al principio???
   + En get_windows_at, permitir todas las coordenadas posibles, solo se rellena con ceros cuando esté fuera de la imagen original. Así se podrá inferir la imagen completa. Lo mismo a la hora de escribir las ventanas en un nuevo volumen.
   + Si hay más clases aparte de las que se predicen, hacer que se combinen en una única clase "otras", que también se debe predecir para ayudar a clasificar mejor: esto ayudaría a la parcelación.
+  + Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
+  + Por cada nuevo output en el flow, estimar el camino hasta los inputs: habrá de cambiar la dirección en el grafo.
+  + Grafo de cada red, que se pueda dibujar con graphviz o con el método que sea. Nombres a los nodos/capas autogenerados a partir de un "prefix" que se proporciona.
 
 WIP:
   = Comentarios y documentación en todas las funciones
-  = Pipeline o flujo de modelos, donde la salida de unos se utiliza como inputs para otros modelos. En definitiva, un grafo que conecta modelos y proporciona resultados.
-  = Por cada nuevo output en el flow, estimar el camino hasta los inputs: habrá de cambiar la dirección en el grafo.
-
+  
 TODO:
+  - class_balance cuando se hace subset_problem y demás. Basta con hacer el map_ids a Vy al principio de create_generator_from_config.
+  - gaussian kernel para config$regularize no NULL
+  - map_ids e inverso para la inferencia y al hacer plot
+  - "save_flow" y "load_flow".
+  - Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
+  - Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
+  - Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
+  - Clonar o copiar partes de un flujo.
+  - README.md para github
   - Meter el info del problema en el config.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
+  - GAN
   - En "graph_from_model", que se calcule un layout o que se le pueda pasar un layout para su plot.
   - default_block <- function(num_layers, initial_units, last_units, type = c("dense", "conv")).
   - Construir un grafo por cada path independiente desde cada input hasta el knot, y se usa para distribuir los nodos del grafo y pintarlo.
@@ -51,9 +62,7 @@ TODO:
   - Generación de textos a partir de las imágenes completas: empezar con output \in\{"axial", "coronal", "sagital"\} e ir complicando el modelo.
   - Autoencoder para la parcelación. Si podemos representar una parcelación por número entre -1 y 1 por ejemplo, podemos hacer que eso sea la salida de la red para que Mapee una ventana de la imagen original a la codificación de la parcelación
   - Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
-  - Grafo de cada red, que se pueda dibujar con graphviz o con el método que sea. Nombres a los nodos/capas autogenerados a partir de un "prefix" que se proporciona.
   - Mapeo de T1 a Flair...
-  - Prepararlo todo para imágenes 4d como fMRI o DTI.
   - Cálculo de la matriz de transformación homogénea del registro afín, usando la parte central de una imagen, y varias LSTM o similar para hacer regresión sobre las componentes de la matriz.
   - Reinforcement learning para clasificación, primero de una red que intenta aprender la clasificación al estilo Flappy Bird y después redes enfrentadas que luchen por ver cuál lo hace mejor y aprendan una de la otra.
   - Regresión para calcular el grosor cortical
