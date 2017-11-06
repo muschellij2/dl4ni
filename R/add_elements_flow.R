@@ -28,7 +28,7 @@ add_process <- function(flow,
   
   # Basic checks
   stopifnot(inherits(flow, "DLflow"))
-  stopifnot(inherits(proc, "DLmodel") | inherits(proc, "function"))
+  stopifnot(inherits(proc, "DLmodel") | inherits(proc, "function") | inherits(proc, "DLscheme"))
   output <- as.character(output)
   
   if (length(inputs) > 0) inputs <- unlist(inputs)

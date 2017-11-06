@@ -87,6 +87,18 @@ get_problem_info <- function(problem = "foo",
       }
 
     }
+    
+    # Manage inputs (check number of volumes per input file)
+    num_volumes <- c()
+    for (dir in seq(num_inputs)) {
+      
+      inputs[[dir]] <- inputs[[dir]][seq(num_subjects)]
+      this_dim <- dim(neurobase::readnii(inputs[[dir]][1]))
+      nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
+      num_volumes <- c(num_volumes, nv)
+      
+    }
+    
 
     # Manage outputs
     # Check if there are more than one possible output
@@ -151,6 +163,7 @@ get_problem_info <- function(problem = "foo",
     info$num_subjects <- num_subjects
     info$inputs <- inputs
     info$outputs <- outputs
+    info$num_volumes <- num_volumes
 
   }
 

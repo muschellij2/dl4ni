@@ -145,6 +145,7 @@ define_last_layer <- function(info,
                                    remap_classes = remap_classes,
                                    binarise = binarise,
                                    num_classes = num_classes,
+                                   num_volumes = info$num_volumes,
                                    y_label = y_label, 
                                    multioutput = multioutput)
                               
@@ -191,6 +192,7 @@ define_last_layer <- function(info,
                                    remap_classes = remap_classes,
                                    binarise = binarise,
                                    num_classes = num_classes,
+                                   num_volumes = info$num_volumes,
                                    y_label = y_label, 
                                    multioutput = multioutput)
                               
