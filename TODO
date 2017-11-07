@@ -46,6 +46,7 @@ WIP:
   
 TODO:
   - Meter el info del problema en el config.
+  - Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
