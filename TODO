@@ -34,17 +34,17 @@ ALREADY DONE:
   + Modo debug al ejecutar y entrenar un flujo
   + Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
   + Copiar partes de un flujo.
+  + Lectura de inputs y demás al ejecutar flujos más rápida.
   
 WIP:
   = Comentarios y documentación en todas las funciones
+  = README.md para github
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
-  = Lectura de inputs y demás al ejecutar flujos más rápida.
   = Sistema de logs
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
   
 TODO:
-  - README.md para github
   - Meter el info del problema en el config.
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)

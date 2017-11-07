@@ -116,8 +116,8 @@ train_output <- function(flow,
           
           filenames[f] <- paste0(filenames[f], ".nii.gz")
           
-          neurobase::writenii(nim = previous_results[[given_output]],
-                              filename = file.path(tmp_folder, filenames[f]))
+          RNifti::writeNifti(image = previous_results[[given_output]],
+                              file = file.path(tmp_folder, filenames[f]))
           
         } else {
           
@@ -141,7 +141,7 @@ train_output <- function(flow,
       num_volumes <- c()
       for (res in results) {
         
-        img <- neurobase::readnii(res[1])
+        img <- neurobase::fast_readnii(res[1])
         this_dim <- dim(img)
         nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
         num_volumes <- c(num_volumes, nv)
