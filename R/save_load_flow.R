@@ -2,13 +2,18 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param flow    (name) PARAM_DESCRIPTION
-#' @param path    (call) PARAM_DESCRIPTION, Default: tempdir()
+#' @param flow           (name) PARAM_DESCRIPTION
+#' @param path           (call) PARAM_DESCRIPTION, Default: tempdir()
+#' @param file_prefix    (call) PARAM_DESCRIPTION, Default: flow$name
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
 #' @details DETAILS
+#' @seealso 
+#'  \code{\link[zip]{zip}}
 #' @export 
+#' @importFrom zip zip
+#' @import zip
 save_flow <- function(flow, path = tempdir(), file_prefix = flow$name) {
   
   # Output directory
@@ -67,6 +72,7 @@ save_flow <- function(flow, path = tempdir(), file_prefix = flow$name) {
 #' @description FUNCTION_DESCRIPTION
 #'
 #' @param filename    (name) PARAM_DESCRIPTION
+#' @param verbose     (logical) PARAM_DESCRIPTION, Default: TRUE
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -134,7 +140,7 @@ load_flow <- function(filename, verbose = TRUE) {
 #' @return OUTPUT_DESCRIPTION
 #'
 #' @details DETAILS
-#' @export
+#' @export 
 clone_flow <- function(flow) {
   
   new_flow <- flow %>% save_flow() %>% load_flow()

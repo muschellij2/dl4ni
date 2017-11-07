@@ -1,3 +1,15 @@
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param image            (name) PARAM_DESCRIPTION
+#' @param remap_classes    (name) PARAM_DESCRIPTION
+#' @param invert           (logical) PARAM_DESCRIPTION, Default: FALSE
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @export 
 map_ids <- function(image, remap_classes, invert = FALSE) {
 
   s <- remap_classes$source

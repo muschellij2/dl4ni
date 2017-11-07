@@ -1,13 +1,13 @@
-#' @title FUNCTION_TITLE
+#' @title Read Multiple Files
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function reads several NIfTI files.
 #'
-#' @param file_list    (name) PARAM_DESCRIPTION
+#' @param file_list    (list) Path of files to import
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with one entry for each file read.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 prepare_files_for_inference <- function(file_list) {
   
   return(lapply(file_list, read_nifti_to_array))

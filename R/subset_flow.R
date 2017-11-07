@@ -1,3 +1,18 @@
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow       (name) PARAM_DESCRIPTION
+#' @param outputs    (name) PARAM_DESCRIPTION
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @seealso 
+#'  \code{\link[igraph]{topo_sort}},\code{\link[igraph]{make_empty_graph}},\code{\link[igraph]{add_vertices}},\code{\link[igraph]{add_edges}}
+#' @export 
+#' @importFrom igraph topo_sort make_empty_graph add_vertices add_edges
+#' @import igraph
 subset_flow <- function(flow, outputs) {
   
   suppressPackageStartupMessages(require(igraph))

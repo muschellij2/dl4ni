@@ -1,3 +1,21 @@
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow       (name) PARAM_DESCRIPTION
+#' @param scheme     (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param inputs     (call) PARAM_DESCRIPTION, Default: list()
+#' @param output     (name) PARAM_DESCRIPTION
+#' @param subset     (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param verbose    (logical) PARAM_DESCRIPTION, Default: TRUE
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @seealso 
+#'  
+#' @export 
+#' @import igraph
 add_trainable_model <- function(flow, 
                                 scheme = NULL, 
                                 inputs = list(),

@@ -2,14 +2,21 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param flow               (name) PARAM_DESCRIPTION
-#' @param inputs             (call) PARAM_DESCRIPTION, Default: list()
-#' @param desired_outputs    (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param flow                  (name) PARAM_DESCRIPTION
+#' @param inputs                (call) PARAM_DESCRIPTION, Default: list()
+#' @param given_inputs          (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param desired_outputs       (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param initialize_outputs    (logical) PARAM_DESCRIPTION, Default: TRUE
+#' @param mode                  (call) PARAM_DESCRIPTION, Default: c("debug", "faster", "medium", "slower")
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
 #' @details DETAILS
+#' @seealso 
+#'  \code{\link[neurobase]{readnii}}
 #' @export 
+#' @importFrom neurobase readnii
+#' @import igraph
 execute_flow <- function(flow, inputs = list(), 
                          given_inputs = NULL, 
                          desired_outputs = NULL, 
@@ -125,6 +132,16 @@ execute_flow <- function(flow, inputs = list(),
   
 }
 
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow    (name) PARAM_DESCRIPTION
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @export 
 reset_outputs <- function(flow) {
   
   flow$computed_outputs <- list()
@@ -133,6 +150,21 @@ reset_outputs <- function(flow) {
   
 }
 
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow            (name) PARAM_DESCRIPTION
+#' @param output          (name) PARAM_DESCRIPTION
+#' @param given_inputs    (NULL) PARAM_DESCRIPTION, Default: NULL
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @seealso 
+#'  
+#' @export 
+#' @import 
 which_to_compute <- function(flow, output, given_inputs = NULL) {
   
   if (output %in% given_inputs) return(c())

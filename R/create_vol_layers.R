@@ -1,14 +1,14 @@
-#' @title FUNCTION_TITLE
+#' @title Create Volume Layers Definition from Pattern
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function replicates the given pattern of layers definition according to a problem definition.
 #'
-#' @param info       (name) PARAM_DESCRIPTION
-#' @param pattern    (name) PARAM_DESCRIPTION
+#' @param info       (\code{DLproblem} object) Problem defintion as given by \code{\link{get_problem_info}}
+#' @param pattern    (list, a set of layer definitions) The pattern of layers to replicate
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with as many replications of the pattern as inputs are defined in the \code{info} object.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 create_vol_layers <- function(info, pattern) {
   
   rep(list(pattern), times = info$num_inputs)

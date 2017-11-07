@@ -1,30 +1,35 @@
-#' @title FUNCTION_TITLE
+#' @title Block Downsample
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function creates a block of convolutional layers with max pooling such that the dimension
+#' of the outputs is halved after each layer.
 #'
-#' @param object             (name) PARAM_DESCRIPTION
-#' @param initial_filters    (numeric) PARAM_DESCRIPTION, Default: 2
-#' @param kernel_size        (call) PARAM_DESCRIPTION, Default: list(c(3, 3, 3))
-#' @param num_steps          (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param activation         (character) PARAM_DESCRIPTION, Default: 'relu'
+#' @param object             (\code{keras} object) Object to which append this block
+#' @param initial_filters    (numeric) Number of filters in the first convolutional layer, Default: 2
+#' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
+#' @param num_steps          (integer) Number of steps to perform downsampling, Default: 1 if \code{kernel_size} is a vector or its length if it's a list.
+#' @param activation         (character) Activation function in the block layers, Default: 'relu'
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return The composed object.
 #'
-#' @details DETAILS
-#' @seealso 
+#' @details In each step, the number of filters is doubled wrt the previous step. Thus, if \code{initial_filters == 2}, the number of filters in the layers in this block is: 2, 4, 8, 16...
+#' @seealso block_upsample block_unet
+#' @family blocks
 #'  
 #' @export 
 #' @import keras
+#' 
 block_downsample <- function(object, 
                              initial_filters = 2, 
-                             kernel_size = list(c(3, 3, 3)),
+                             kernel_size = c(3, 3, 3),
                              num_steps = NULL,
                              activation = "relu") {
   
   require(keras)
   
+  # Initialize the output in order to compose
   output <- object
   
+  # Basic initialization of arguments
   if (!is.list(kernel_size)) {
     
     kernel_size <- list(kernel_size)
@@ -39,6 +44,8 @@ block_downsample <- function(object,
     
   filters <- initial_filters
   
+  # In each step, add a convolutional and a max_pooling layers, doubling the
+  # number of filters with respect to the previous step
   for (step in seq(num_steps)) {
     
     output <- output %>% 
@@ -52,37 +59,45 @@ block_downsample <- function(object,
     
   }
   
+  # Return the composed object
   return(output)
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title Block Upsample
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function creates a block of convolutional layers with upsampling such that the dimension
+#' of the outputs is doubled after each layer.
 #'
-#' @param object             (name) PARAM_DESCRIPTION
-#' @param initial_filters    (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param kernel_size        (call) PARAM_DESCRIPTION, Default: list(c(3, 3, 3))
-#' @param num_steps          (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param activation         (character) PARAM_DESCRIPTION, Default: 'relu'
+#' @param object             (\code{keras} object) Object to which append this block
+#' @param initial_filters    (numeric) Number of filters in the first convolutional layer, Default: 2 ^ \code{num_steps}
+#' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
+#' @param num_steps          (integer) Number of steps to perform downsampling, Default: 1 if \code{kernel_size} is a vector or its length if it's a list.
+#' @param activation         (character) Activation function in the block layers, Default: 'relu'
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return The composed object.
 #'
-#' @details DETAILS
-#' @seealso 
+#' @details In each step, the number of filters is halved wrt the previous step. Thus, if \code{num_steps == 3}, the number of filters in the layers in this block is: 8, 4, 2.
+#' 
+#' @seealso block_downsample block_unet
+#' @family blocks
 #'  
 #' @export 
 #' @import keras
+#' 
 block_upsample <- function(object, 
                            initial_filters = NULL, 
-                           kernel_size = list(c(3, 3, 3)),
+                           kernel_size = c(3, 3, 3),
                            num_steps = NULL,
                            activation = "relu") {
   
   require(keras)
   
+  
+  # Initialize the composed object
   output <- object
   
+  # Initialization of arguments
   if (!is.list(kernel_size)) {
     
     kernel_size <- list(kernel_size)
@@ -100,6 +115,8 @@ block_upsample <- function(object,
   
   filters <- initial_filters
   
+  # In each step, add convolutional and upsampling layers, halving the number
+  # of filters in each step.
   for (step in seq(num_steps)) {
     
     output <- output %>% 
@@ -114,25 +131,28 @@ block_upsample <- function(object,
     
   }
   
+  # Return the composed object
   return(output)
   
 }
 
-#' @title FUNCTION_TITLE
+
+#' @title Block U-Net
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function creates a U-Net block, that is composed by a \code{\link{block_downsample}} followed
+#' by a \code{\link{block_upsample}}.
 #'
-#' @param object             (name) PARAM_DESCRIPTION
-#' @param initial_filters    (numeric) PARAM_DESCRIPTION, Default: 2
-#' @param num_down_steps     (numeric) PARAM_DESCRIPTION, Default: 3
-#' @param num_up_steps       (name) PARAM_DESCRIPTION, Default: num_down_steps
-#' @param kernel_size        (call) PARAM_DESCRIPTION, Default: c(3, 3, 3)
-#' @param activation         (character) PARAM_DESCRIPTION, Default: 'relu'
+#' @param object             (\code{keras} object) Object used as input
+#' @param initial_filters    (integer) Number of initial filters used in the first layer, Default: 2
+#' @param num_down_steps     (integer) Steps for the downsampling path, Default: 3
+#' @param num_up_steps       (integer) Steps for the upsampling path, Default: the same value as \code{num_down_steps}
+#' @param kernel_size        (list or vector) size of the kernels to use, Default: c(3, 3, 3)
+#' @param activation         (character) Activation function in the inner layers, Default: 'relu'
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return The composed object.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 block_unet <- function(object, 
                        initial_filters = 2, 
                        num_down_steps = 3, 
@@ -140,6 +160,7 @@ block_unet <- function(object,
                        kernel_size = c(3, 3, 3),
                        activation = "relu") {
   
+  # Just concatenate both blocks, a downsampling and an upsampling one.
   output <- object %>% 
     block_downsample(initial_filters = initial_filters,
                      kernel_size = kernel_size,
@@ -149,6 +170,7 @@ block_unet <- function(object,
                    num_steps = num_up_steps,
                    activation = activation)
   
+  # Return the composed object
   return(output)
   
 }

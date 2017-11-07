@@ -2,14 +2,37 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param flow              (name) PARAM_DESCRIPTION
-#' @param epochs            (numeric) PARAM_DESCRIPTION, Default: 10
-#' @param max_sub_epochs    (numeric) PARAM_DESCRIPTION, Default: 5
+#' @param flow                (name) PARAM_DESCRIPTION
+#' @param output              (name) PARAM_DESCRIPTION
+#' @param input_filenames     (name) PARAM_DESCRIPTION
+#' @param output_filenames    (name) PARAM_DESCRIPTION
+#' @param given_input         (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param train_split         (numeric) PARAM_DESCRIPTION, Default: 0.75
+#' @param epochs              (numeric) PARAM_DESCRIPTION, Default: 10
+#' @param max_sub_epochs      (numeric) PARAM_DESCRIPTION, Default: 5
+#' @param mode                (call) PARAM_DESCRIPTION, Default: c("debug", "faster", "medium", "slower")
+#' @param verbose             (logical) PARAM_DESCRIPTION, Default: TRUE
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
 #' @details DETAILS
+#' @seealso 
+#'  \code{\link[neurobase]{fast_readnii}}
+
+#'  \code{\link[oro.nifti]{as.nifti}}
+
+#'  \code{\link[RNifti]{writeNifti}}
+
+#'  \code{\link[oro.nifti]{as.nifti}}
+
+#'  \code{\link[RNifti]{writeNifti}}
 #' @export 
+#' @importFrom neurobase fast_readnii
+#' @importFrom oro.nifti as.nifti
+#' @importFrom RNifti writeNifti
+#' @importFrom oro.nifti as.nifti
+#' @importFrom RNifti writeNifti
+#' @import 
 train_output <- function(flow, 
                          output, 
                          input_filenames,

@@ -1,4 +1,18 @@
 
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow      (name) PARAM_DESCRIPTION
+#' @param inputs    (call) PARAM_DESCRIPTION, Default: list()
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @seealso 
+#'  \code{\link[igraph]{add_vertices}}
+#' @export 
+#' @importFrom igraph add_vertices
 add_inputs <- function(flow, inputs = list()) {
   
   # Basic checks
@@ -20,6 +34,25 @@ add_inputs <- function(flow, inputs = list()) {
   
 }
 
+#' @title FUNCTION_TITLE
+#'
+#' @description FUNCTION_DESCRIPTION
+#'
+#' @param flow       (name) PARAM_DESCRIPTION
+#' @param proc       (name) PARAM_DESCRIPTION
+#' @param inputs     (call) PARAM_DESCRIPTION, Default: ifelse(inherits(proc, "function"), list(names(formals(proc))), 
+#'    list())
+#' @param output     (name) PARAM_DESCRIPTION
+#' @param trained    (logical) PARAM_DESCRIPTION, Default: TRUE
+#'
+#' @return OUTPUT_DESCRIPTION
+#'
+#' @details DETAILS
+#' @seealso 
+#'  \code{\link[igraph]{add_vertices}},\code{\link[igraph]{add_edges}}
+#' @export 
+#' @importFrom igraph add_vertices add_edges
+#' @import 
 add_process <- function(flow, 
                         proc, 
                         inputs = ifelse(inherits(proc, "function"), list(names(formals(proc))), list()),

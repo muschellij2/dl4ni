@@ -5,17 +5,17 @@
 ##%######################################################%##
 
 
-#' @title FUNCTION_TITLE
+#' @title Dense Layer
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a dense layer, which is built in \code{\link{create_model_from_config}}.
 #'
-#' @param units    (name) PARAM_DESCRIPTION
-#' @param ...      (name) PARAM_DESCRIPTION
+#' @param units    (integer) Number of units in the dense layer
+#' @param ...      other arguments for the creation of a dense layer.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "dense" and \code{params} with the rest of parameters for the dense layer.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 dense <- function(units, ...) {
   
   list(type = "dense", 
@@ -23,18 +23,18 @@ dense <- function(units, ...) {
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title Categorical Block
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a categorical block, which is built in \code{\link{create_model_from_config}}.
 #'
-#' @param num_classes    (name) PARAM_DESCRIPTION
-#' @param units          (name) PARAM_DESCRIPTION
-#' @param ...            (name) PARAM_DESCRIPTION
+#' @param num_classes    (integer) Number of classes for the block
+#' @param units          (integer) Number of units in the output block
+#' @param ...            other arguments for the creation of a categorical block.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "categorical" and \code{params} with the rest of parameters for the categorical block.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 categorical <- function(num_classes, units, ...) {
   
   list(type = "categorical", 
@@ -43,18 +43,18 @@ categorical <- function(num_classes, units, ...) {
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title Multivalued Block
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a multivalued block, which is built in \code{\link{create_model_from_config}}.
 #'
-#' @param num_values    (name) PARAM_DESCRIPTION
-#' @param units         (name) PARAM_DESCRIPTION
-#' @param ...           (name) PARAM_DESCRIPTION
+#' @param num_values     (integer) Number of values for the block
+#' @param units          (integer) Number of units in the output block
+#' @param ...            other arguments for the creation of a multivalued block.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "multivalued" and \code{params} with the rest of parameters for the categorical block.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 multivalued <- function(num_values, units, ...) {
   
   list(type = "multivalued", 
@@ -63,17 +63,17 @@ multivalued <- function(num_values, units, ...) {
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title Regression Block
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a regression block, which is built in \code{\link{create_model_from_config}}.
 #'
-#' @param units    (name) PARAM_DESCRIPTION
-#' @param ...      (name) PARAM_DESCRIPTION
+#' @param units    (integer) Number of units in the output layer.
+#' @param ...      other arguments for the creation of a regression block.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "regression" and \code{params} with the rest of parameters for the output block.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 regression <- function(units, ...) {
   
   list(type = "regression", 
@@ -82,18 +82,18 @@ regression <- function(units, ...) {
 }
 
 
-#' @title FUNCTION_TITLE
+#' @title Convolutional Layer
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a convolutional layer, which is built in \code{\link{create_model_from_config}}.
 #'
-#' @param filters        (name) PARAM_DESCRIPTION
-#' @param kernel_size    (name) PARAM_DESCRIPTION
-#' @param ...            (name) PARAM_DESCRIPTION
+#' @param filters        (integer) Number of filters
+#' @param kernel_size    (vector) Size of the kernel
+#' @param ...            other arguments for the convolutional layer.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "conv3d" and \code{params} with the rest of parameters for the layer.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 conv3d <- function(filters, kernel_size, ...) {
   
   list(type = "conv3d",
@@ -102,16 +102,16 @@ conv3d <- function(filters, kernel_size, ...) {
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title ResNet Block
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a ResNet block.
 #'
-#' @param ...    (name) PARAM_DESCRIPTION
+#' @param ...    arguments for the \code{\link{block_resnet}} function.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "resnet" and \code{params} with the rest of parameters that define the block.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 resnet <- function(...) {
   
   list(type = "resnet",
@@ -119,16 +119,16 @@ resnet <- function(...) {
   
 }
 
-#' @title FUNCTION_TITLE
+#' @title Continuous Leraning of Features Block
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is a wrapper to define a CLF block.
 #'
-#' @param ...    (name) PARAM_DESCRIPTION
+#' @param ...    arguments for the \code{\link{block_clf}} function.
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return A list with \code{type} = "clf" and \code{params} with the rest of parameters that define the block.
 #'
-#' @details DETAILS
 #' @export 
+#' 
 clf <- function(...) {
   
   list(type = "clf",
