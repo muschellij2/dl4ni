@@ -15,7 +15,7 @@ map_ids <- function(image, remap_classes, invert = FALSE) {
   s <- remap_classes$source
   t <- remap_classes$target
   
-  Y <- image
+  Y <- 0 * image
   
   if (!invert) {
     
@@ -50,7 +50,6 @@ map_ids <- function(image, remap_classes, invert = FALSE) {
     }
     
   }
-  
   
   return(Y)
 

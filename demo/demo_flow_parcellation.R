@@ -15,20 +15,33 @@ load_keras()
 ##%######################################################%##
 
 # Basic scheme for all networks in the flow
+# scheme_bigger <- list(width = 7,
+#                       output_width = 3,
+#                       num_features = 3,
+#                       vol_layers_pattern = list(clf(hidden_layers = list(dense(300), dense(200), dense(200), dense(100)))),
+#                       vol_dropout = 0.1,
+#                       feature_layers = list(clf(hidden_layers = list(dense(10), dense(10)))),
+#                       feature_dropout = 0.15,
+#                       common_layers = list(clf(hidden_layers = list(dense(300), dense(250), dense(100)))),
+#                       common_dropout = 0.1,
+#                       last_hidden_layers = list(dense(30), dense(20)),
+#                       optimizer = keras::optimizer_adadelta(),
+#                       scale = "none",
+#                       scale_y = "none")
+
 scheme_bigger <- list(width = 7,
                       output_width = 3,
                       num_features = 3,
-                      vol_layers_pattern = list(clf(hidden_layers = list(dense(300), dense(200), dense(200), dense(100)))),
+                      vol_layers_pattern = list(dense(100)),
                       vol_dropout = 0.1,
-                      feature_layers = list(clf(hidden_layers = list(dense(10), dense(10)))),
+                      feature_layers = list(),#list(clf(hidden_layers = list(dense(10), dense(10)))),
                       feature_dropout = 0.15,
-                      common_layers = list(clf(hidden_layers = list(dense(300), dense(250), dense(100)))),
+                      common_layers = list(dense(100)),
                       common_dropout = 0.1,
-                      last_hidden_layers = list(dense(30), dense(20)),
+                      last_hidden_layers = list(dense(20)),
                       optimizer = keras::optimizer_adadelta(),
                       scale = "none",
                       scale_y = "none")
-
 
 ##%######################################################%##
 #                                                          #
@@ -102,35 +115,35 @@ flow %>% plot_flow()
 
 # First, the brain_mask
 problem <- "brain_extraction"
-info_bet <- problem %>% get_problem_info()
+info_bet <- problem %>% get_problem_info(num_subjects = 10)
 
 # Now, segmentation
 problem <- "segmentation2"
-info_seg <- problem %>% get_problem_info()
+info_seg <- problem %>% get_problem_info(num_subjects = 10)
 
 # To end, parcellation
 problem <- "parcellation"
-info_parc <- problem %>% get_problem_info()
+info_parc <- problem %>% get_problem_info(num_subjects = 10)
 
 # Train BET
 flow %>% train_output(output = "brain_mask", 
                       input_filenames = info_bet$inputs, 
                       output_filenames = info_bet$outputs, 
-                      epochs = 20)
+                      epochs = 2)
 
 # Train segmentation
 flow %>% train_output(output = "segmentation", 
                       input_filenames = info_seg$inputs,
                       given_input = list("only_brain" = info_seg$inputs$T1),
                       output_filenames = info_seg$outputs, 
-                      epochs = 30)
+                      epochs = 3)
 
 # Train parcellation
 flow %>% train_output(output = "parcellation", 
                       input_filenames = info_parc$inputs,
                       given_input = list("only_brain" = info_parc$inputs$T1),
                       output_filenames = info_parc$outputs, 
-                      epochs = 30)
+                      epochs = 3)
 
 
 ##%######################################################%##

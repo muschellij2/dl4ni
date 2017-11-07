@@ -176,7 +176,7 @@ create_generator_from_config <- function(config,
     
     sub_epoch <<- sub_epoch + 1
     
-    # print(paste0("Subepoch ", sub_epoch))
+    cat("Subepoch", sub_epoch, "\n")
     
     if (sub_epoch > max_epochs) {
       
@@ -246,10 +246,10 @@ create_generator_from_config <- function(config,
               
             }
             
-            sampling_indices <- sampling_indices[sampling_indices > 0]
+            sampling_indices <<- sampling_indices[sampling_indices > 0]
             
             if (length(sampling_indices) < length(all_idx))
-              sampling_indices <- sample(sampling_indices, 
+              sampling_indices <<- sample(sampling_indices, 
                                          size = length(all_idx),
                                          replace = TRUE)
             
@@ -300,6 +300,8 @@ create_generator_from_config <- function(config,
     X_vol <- list()
     
     for (input in seq(num_inputs)) {
+      
+      # cat("MD5 of input number", input, "is:", digest::digest(Vx[[input]]), "\n")
       
       X <- get_windows_at(Vx[[input]], config$width, x, y, z)
       X_coords <- X[, 1:3]
@@ -402,6 +404,9 @@ create_generator_from_config <- function(config,
     # str(config$output_width)
     
     # stopifnot(all(x_ >= radius - 1), all(y_ >= radius - 1), all(z_ >= radius - 1))
+    
+    # cat("MD5 of output is:", digest::digest(Vy), "\n")
+    
     
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]

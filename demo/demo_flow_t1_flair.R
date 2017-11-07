@@ -80,6 +80,23 @@ flow %>% plot_flow()
 
 ##%######################################################%##
 #                                                          #
+####                      New flow                      ####
+#                                                          #
+##%######################################################%##
+
+
+flow <- load_flow("parcellation.zip")
+flow <- flow %>% subset_flow("segmentation")
+
+# Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
+flow %>% add_trainable_model(scheme = scheme_bigger, 
+                             inputs = list("only_brain_scaled", "segmentation"),
+                             output = "flair")
+
+flow %>% plot_flow()
+
+##%######################################################%##
+#                                                          #
 ####                   Model Training                   ####
 #                                                          #
 ##%######################################################%##
@@ -95,7 +112,7 @@ info_bet <- problem %>% get_problem_info(num_subjects = 15)
 problem <- "segmentation2"
 info_seg <- problem %>% get_problem_info(num_subjects = 15)
 
-# To end, parcellation
+# To end, t1 to flair
 problem <- "t1_flair"
 info_flair <- problem %>% get_problem_info(num_subjects = 15)
 
@@ -112,12 +129,13 @@ flow %>% train_output(output = "segmentation",
                       output_filenames = info_seg$outputs, 
                       epochs = 5)
 
-# Train parcellation
+# Train T1 to FLAIR
 flow %>% train_output(output = "flair", 
                       input_filenames = info_flair$inputs,
                       given_input = list("only_brain" = info_flair$inputs$T1),
                       output_filenames = info_flair$outputs, 
-                      epochs = 5)
+                      epochs = 5,
+                      mode = "faster")
 
 
 ##%######################################################%##
@@ -135,9 +153,12 @@ flow %>% save_flow(path = system.file("models", package = "dl4ni.models"), file_
 ##%######################################################%##
 
 # Starting from original image
-file <- info_bet$inputs$T1[1]
-result <- flow %>% execute_flow(inputs = list(only_brain = file), 
-                                desired_outputs = c("only_brain", "segmentation", "parcellation"))
+file <- info_bet$inputs$T1[5]
+result <- flow %>% execute_flow(inputs = list(T1 = file), 
+                                desired_outputs = c("brain_mask", "segmentation", "flair"))
+
+flair_img <- result$flair
+result$flair <- NULL
 
 original_image <- readnii(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
@@ -156,10 +177,16 @@ for (img in seq_along(result)) {
   
 }
 
-# Starting from betted image
+ortho_plot(x = flair_img, 
+           col.y = col.y, 
+           interactiveness = FALSE, 
+           text = paste0("Predicted: FLAIR"))
+
+
+# Starting from segmented image
 file <- info_seg$inputs$T1[1]
 result <- flow %>% execute_flow(inputs = list(only_brain = file), 
-                                desired_outputs = c("segmentation", "parcellation"))
+                                desired_outputs = c("segmentation", "flair"))
 
 original_image <- readnii(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")

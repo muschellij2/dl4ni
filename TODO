@@ -39,6 +39,8 @@ ALREADY DONE:
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = which.max en 4D
+  = reset_model en un flujo.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
   = Sistema de logs
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
