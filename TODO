@@ -31,12 +31,14 @@ ALREADY DONE:
   + "save_flow" y "load_flow".
   + Diferentes tipos de salida en execute_flow (guardar en nii.gz y en RDS).
   + Clonar un flujo.
+  + Modo debug al ejecutar y entrenar un flujo
+  + Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
   
 WIP:
   = Comentarios y documentación en todas las funciones
-  = Modo debug al ejecutar y entrenar un flujo
+  = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
+  = Lectura de inputs y demás al ejecutar flujos más rápida.
   = Sistema de logs
-  = Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
   = Copiar partes de un flujo.

@@ -74,11 +74,11 @@ create_inference_function_from_config <- function(config) {
     # Must define num_windows
     num_windows <- round(unclass(config$memory_limit / 
                                    object.size(vector(mode = "double",
-                                                      length = config$width ^ 3 + 
+                                                      length = sum(config$num_volumes) * config$width ^ 3 + 
                                                         config$num_features + 
                                                         config$output_width ^ 3))))
     
-    num_windows <- round(num_windows / (num_inputs + 2))
+    num_windows <- round(num_windows / (num_inputs + 1))
     
     sampling_indices <- all_idx
     num_batches <- ceiling(length(sampling_indices) / num_windows)
@@ -338,6 +338,25 @@ create_inference_function_from_config <- function(config) {
       } else {
         
         res[which_to_divide] <- res[which_to_divide] / counts[which_to_divide]
+        
+      }
+      
+    }
+    
+    # Normalize sum of probabilities
+    if (config$categorize_output & config$category_method == "by_class") {
+      
+      total_prob <- 0 * res[, , , 1]
+      
+      for (k in seq(num_classes)) {
+        
+        total_prob <- total_prob + res[, , , k]
+        
+      }
+      
+      for (k in seq(num_classes)) {
+        
+        res[, , , k] <- res[, , , k] / total_prob
         
       }
       

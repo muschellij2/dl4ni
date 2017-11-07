@@ -63,13 +63,6 @@ train_output <- function(flow,
   if (verbose)
     cat("   Everything is Ok...\n")
   
-  # Mark as trained in the output
-  on.exit({
-    
-    flow$trained[[output]] <- TRUE
-    
-  })
-  
   model <- flow$processes[[output]]
   
   if ((inherits(model, "DLmodel") | inherits(model, "DLscheme")) & !flow$trained[[output]]) {
@@ -113,12 +106,17 @@ train_output <- function(flow,
         
         given_output <- desired_outputs[f]
         
+        if (inherits(previous_results[[given_output]], "array")) {
+          
+          previous_results[[given_output]] <- oro.nifti::as.nifti(previous_results[[given_output]])
+          
+        }
+        
         if (inherits(previous_results[[given_output]], "nifti")) {
           
           filenames[f] <- paste0(filenames[f], ".nii.gz")
           
-          neurobase::writenii(nim = neurobase::niftiarr(arr = previous_results[[given_output]], 
-                                                        img = neurobase::readnii(input_file_list[[1]])),
+          neurobase::writenii(nim = previous_results[[given_output]],
                               filename = file.path(tmp_folder, filenames[f]))
           
         } else {
@@ -145,7 +143,6 @@ train_output <- function(flow,
         
         img <- neurobase::readnii(res[1])
         this_dim <- dim(img)
-        print(this_dim)
         nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
         num_volumes <- c(num_volumes, nv)
         
@@ -179,6 +176,7 @@ train_output <- function(flow,
       if (verbose)
         cat("Preparing model configuration...\n")
       config <- do.call(define_config, args = params)
+      config$num_volumes <- num_volumes
       
       # Model creation
       if (verbose)
@@ -200,9 +198,9 @@ train_output <- function(flow,
     test_indices <- setdiff(seq(num_subjects), train_indices)
     
     train_config <- config %>% create_generator_from_config(x_files = lapply(results, function(x) x[train_indices]),
-                                                            y_files = output_filenames[train_indices],
-                                                            mode = "sampling",
-                                                            max_sub_epochs = max_sub_epochs)
+                                                             y_files = output_filenames[train_indices],
+                                                             mode = "sampling",
+                                                             max_sub_epochs = max_sub_epochs)
     
     test_config <- config %>% create_generator_from_config(x_files = lapply(results, function(x) x[test_indices]),
                                                            y_files = output_filenames[test_indices],
@@ -216,6 +214,14 @@ train_output <- function(flow,
     # Actual training
     if (verbose)
       cat("Actual training...\n")
+    
+    # Mark as trained in the output
+    on.exit({
+      
+      flow$trained[[output]] <- TRUE
+      
+    })
+    
     model %>% fit_with_generator(train_config = train_config, 
                                  validation_config = test_config,
                                  epochs = epochs,

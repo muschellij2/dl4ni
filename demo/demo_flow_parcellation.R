@@ -147,6 +147,9 @@ flow %>% save_flow(path = system.file("models", package = "dl4ni.models"), file_
 #                                                          #
 ##%######################################################%##
 
+test_index <- sample(info_bet$test$subject_indices, size = 1)
+
+
 # Starting from original image
 file <- info_bet$inputs$T1[1]
 result <- flow %>% execute_flow(inputs = list(only_brain = file), 

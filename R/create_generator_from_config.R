@@ -36,10 +36,10 @@ create_generator_from_config <- function(config,
     
     num_windows <- round(unclass(config$memory_limit / 
                                    object.size(vector(mode = "double",
-                                                      length = config$width ^ 3 + 
+                                                      length = sum(config$num_volumes) * config$width ^ 3 + 
                                                         config$num_features + config$output_width ^ 3))))
     
-    num_windows <- round(num_windows / (num_inputs + 2))
+    num_windows <- round(num_windows / (num_inputs + 1))
     
     message("Set number of windows to ", num_windows)
     

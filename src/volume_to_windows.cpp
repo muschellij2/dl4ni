@@ -20,7 +20,13 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
   int radius = (width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
-  int n_volumes = dims[3];
+  int n_volumes = 1;
+  
+  if (dims.size() >= 4) {
+    
+    n_volumes = dims[3];
+    
+  }
   
   int n_neighbours = pow(width, 3) * n_volumes;
   
