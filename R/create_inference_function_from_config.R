@@ -78,7 +78,7 @@ create_inference_function_from_config <- function(config) {
                                                         config$num_features + 
                                                         config$output_width ^ 3))))
     
-    num_windows <- round(num_windows / (num_inputs + 1))
+    num_windows <- round(num_windows / (num_inputs + 2))
     
     sampling_indices <- all_idx
     num_batches <- ceiling(length(sampling_indices) / num_windows)

@@ -11,148 +11,140 @@
 #' 
 create_model_from_config <- function(config) {
   
+  suppressPackageStartupMessages(require(keras))
+  
   # Basic check
   stopifnot(inherits(config, "DLconfig"))
   
   result <- list()
   
-  path <- config$path[1]
+  input_features <- layer_input(shape = c(config$num_features))
   
-  result <- with(config, {
+  output_features <- input_features %>% 
+    add_layers(layers_definition = config$feature_layers,
+               batch_normalization = config$feature_batch_normalization,
+               activation = config$feature_activation,
+               dropout = config$feature_dropout,
+               clf = FALSE)
+  
+  num_vol_inputs <- length(config$vol_layers)
+  
+  vol_inputs <- list()
+  vol_outputs <- list()
+  
+  for (v_input in seq(num_vol_inputs)) {
     
-    input_features <- layer_input(shape = c(num_features))
+    vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3))
+    vol_outputs[[v_input]] <- vol_inputs[[v_input]]
     
-    output_features <- input_features %>% 
-      add_layers(layers_definition = feature_layers,
-                 batch_normalization = feature_batch_normalization,
-                 activation = feature_activation,
-                 dropout = feature_dropout,
-                 clf = FALSE)
-    
-    num_vol_inputs <- length(vol_layers)
-    
-    vol_inputs <- list()
-    vol_outputs <- list()
-    
-    for (v_input in seq(num_vol_inputs)) {
+    if (config$initialize_with_lstm && all(is.numeric(config$lstm_units)) && (length(config$lstm_units) >= 2)) {
       
-      vol_inputs[[v_input]] <- layer_input(shape = c(num_volumes[v_input] * width ^ 3))
-      vol_outputs[[v_input]] <- vol_inputs[[v_input]]
+      lstm_units <- as.integer(config$lstm_units)
       
-      if (initialize_with_lstm && all(is.numeric(lstm_units)) && (length(lstm_units) >= 2)) {
-        
-        lstm_units <- as.integer(lstm_units)
-        
-        vol_outputs[[v_input]] <- vol_outputs[[v_input]] %>% 
-          layer_reshape(target_shape = c(width, width, width)) %>%
-          time_distributed(layer_lstm(units = lstm_units[1]), batch_input_shape = list(NULL, width, width, width)) %>%
-          layer_lstm(units = lstm_units[2])
-        
-      }
-      
-      # print(v_input)
-      # print(str(vol_layers[[v_input]]))
-      
-      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
-        add_layers(layers_definition = vol_layers[[v_input]],
-                   batch_normalization = vol_batch_normalization,
-                   activation = vol_activation,
-                   dropout = vol_dropout,
-                   clf = FALSE)
-      
-      
-      if (v_input == 1) {
-        
-        individual_outputs <- vol_outputs[[v_input]]
-        
-      } else {
-        
-        individual_outputs <- layer_concatenate(list(individual_outputs, vol_outputs[[v_input]]))
-        
-      }
+      vol_outputs[[v_input]] <- vol_outputs[[v_input]] %>% 
+        layer_reshape(target_shape = c(config$width, config$width, config$width)) %>%
+        time_distributed(layer_lstm(units = lstm_units[1]), 
+                         batch_input_shape = list(NULL, config$width, config$width, config$width)) %>%
+        layer_lstm(units = config$lstm_units[2])
       
     }
     
-    output_vol <- individual_outputs
-    
-    main_output <- switch(path[1],
-                          "both"     = layer_concatenate(list(output_features, output_vol)),
-                          "features" = output_features,
-                          "volumes"  = output_vol)
-    
-    main_output <- main_output %>% 
-      add_layers(layers_definition = common_layers,
-                 batch_normalization = common_batch_normalization,
-                 activation = common_activation,
-                 dropout = common_dropout,
+    vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
+      add_layers(layers_definition = config$vol_layers[[v_input]],
+                 batch_normalization = config$vol_batch_normalization,
+                 activation = config$vol_activation,
+                 dropout = config$vol_dropout,
                  clf = FALSE)
     
-    # Finalize with convolutional?
     
-    # Add last layer
-    if (add_last_layer) {
+    if (v_input == 1) {
       
-      main_output <- main_output %>% 
-        add_layers(layers_definition = list(last_layer),
-                   batch_normalization = FALSE,
-                   activation = output_activation,
-                   dropout = 0,
-                   clf = FALSE)
-      
-    }
-    
-    if (!is.null(decoder_layers)) {
-      
-      encoder <- keras_model(inputs = list(input_features, input_vol),
-                             outputs = main_output)
-      
-      decoder_input <- layer_input(shape = c(last_layer$params$units))
-      
-      decoder_output <- decoder_input %>%
-        add_layers(layers_definition = decoder_layers,
-                   batch_normalization = FALSE,
-                   activation = decoder_activation,
-                   dropout = 0,
-                   clf = FALSE)
-      
-      decoder <- keras_model(inputs = decoder_input,
-                             outputs = decoder_output)
-      
-      main_output <- main_output %>% 
-        add_layers(layers_definition = decoder_layers,
-                   batch_normalization = FALSE,
-                   activation = decoder_activation,
-                   dropout = 0,
-                   clf = FALSE)
-      
-      model <- keras_model(inputs = c(input_features, vol_inputs),
-                           outputs = main_output)
+      individual_outputs <- vol_outputs[[v_input]]
       
     } else {
       
-      model <- keras_model(inputs = c(input_features, vol_inputs),
-                           outputs = main_output)
-      
-      encoder <- NULL
-      decoder <- NULL
-      
+      individual_outputs <- layer_concatenate(list(individual_outputs, vol_outputs[[v_input]]))
       
     }
     
-    
-    if (!is.null(optimizer) && !is.null(loss))
-      model %>% compile(optimizer = optimizer, loss = loss)
-    
-    result <- list(model = model, 
-                   width = width, 
-                   best_loss = Inf, 
-                   encoder = encoder, 
-                   decoder = decoder)
-    
-    as.environment(result)
-    
-  })
+  }
   
+  output_vol <- individual_outputs
+  
+  main_output <- switch(config$path[1],
+                        "both"     = layer_concatenate(list(output_features, output_vol)),
+                        "features" = output_features,
+                        "volumes"  = output_vol)
+  
+  main_output <- main_output %>% 
+    add_layers(layers_definition = config$common_layers,
+               batch_normalization = config$common_batch_normalization,
+               activation = config$common_activation,
+               dropout = config$common_dropout,
+               clf = FALSE)
+  
+  # Finalize with convolutional?
+  
+  # Add last layer
+  if (config$add_last_layer) {
+    
+    main_output <- main_output %>% 
+      add_layers(layers_definition = list(config$last_layer),
+                 batch_normalization = FALSE,
+                 activation = config$output_activation,
+                 dropout = 0,
+                 clf = FALSE)
+    
+  }
+  
+  if (!is.null(config$decoder_layers)) {
+    
+    encoder <- keras_model(inputs = list(input_features, vol_inputs),
+                           outputs = main_output)
+    
+    decoder_input <- layer_input(shape = c(config$last_layer$params$units))
+    
+    decoder_output <- decoder_input %>%
+      add_layers(layers_definition = config$decoder_layers,
+                 batch_normalization = FALSE,
+                 activation = config$decoder_activation,
+                 dropout = 0,
+                 clf = FALSE)
+    
+    decoder <- keras_model(inputs = decoder_input,
+                           outputs = decoder_output)
+    
+    main_output <- main_output %>% 
+      add_layers(layers_definition = config$decoder_layers,
+                 batch_normalization = FALSE,
+                 activation = config$decoder_activation,
+                 dropout = 0,
+                 clf = FALSE)
+    
+    model <- keras_model(inputs = c(input_features, vol_inputs),
+                         outputs = main_output)
+    
+  } else {
+    
+    model <- keras_model(inputs = c(input_features, vol_inputs),
+                         outputs = main_output)
+    
+    encoder <- NULL
+    decoder <- NULL
+    
+    
+  }
+  
+  
+  if (!is.null(config$optimizer) && !is.null(config$loss))
+    model %>% compile(optimizer = optimizer, loss = loss)
+  
+  result <- new.env()
+  result$model <- model
+  result$width <- width
+  result$best_loss <- Inf
+  result$encoder <- encoder
+  result$decoder <- decoder
   result$hyperparameters <- config
   
   class(result) <- c("DLmodel", class(result))

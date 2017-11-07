@@ -33,6 +33,7 @@ ALREADY DONE:
   + Clonar un flujo.
   + Modo debug al ejecutar y entrenar un flujo
   + Entrada 4D. Preparar todo para volúmenes 4D como DTI o fMRI.
+  + Copiar partes de un flujo.
   
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -41,7 +42,6 @@ WIP:
   = Sistema de logs
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
-  = Copiar partes de un flujo.
   
 TODO:
   - README.md para github
