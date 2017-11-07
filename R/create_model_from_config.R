@@ -137,11 +137,11 @@ create_model_from_config <- function(config) {
   
   
   if (!is.null(config$optimizer) && !is.null(config$loss))
-    model %>% compile(optimizer = optimizer, loss = loss)
+    model %>% compile(optimizer = config$optimizer, loss = config$loss)
   
   result <- new.env()
   result$model <- model
-  result$width <- width
+  result$width <- config$width
   result$best_loss <- Inf
   result$encoder <- encoder
   result$decoder <- decoder

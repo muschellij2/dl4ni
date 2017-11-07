@@ -45,8 +45,7 @@ flow %>% add_process(proc = scale_z,
                      output = "T1_scaled")
 
 # Starting from a T1, add a trainable model which computes the brain_mask
-flow %>% add_trainable_model(using = scheme_bigger, 
-                             output_template = get_problem_info("brain_extraction")$outputs[1], 
+flow %>% add_trainable_model(scheme = scheme_bigger, 
                              inputs = list("T1_scaled"),
                              output = "brain_mask")
 
@@ -61,13 +60,12 @@ flow %>% add_process(proc = scale_z,
 
 # Starting form the brain extracted image ("only_brain"), add a trainable model which computes the 
 # segmentation
-flow %>% add_trainable_model(using = scheme_bigger,
+flow %>% add_trainable_model(scheme = scheme_bigger,
                              inputs = list("only_brain_scaled"),
                              output = "segmentation")
 
 # Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
-flow %>% add_trainable_model(using = scheme_bigger, 
-                             output_template = get_problem_info("t1_flair")$outputs[1],
+flow %>% add_trainable_model(scheme = scheme_bigger, 
                              inputs = list("only_brain_scaled", "segmentation"),
                              output = "flair")
 
