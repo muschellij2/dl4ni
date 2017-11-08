@@ -176,7 +176,7 @@ create_generator_from_config <- function(config,
     
     sub_epoch <<- sub_epoch + 1
     
-    cat("Subepoch", sub_epoch, "\n")
+    # cat("Subepoch", sub_epoch, "\n")
     
     if (sub_epoch > max_epochs) {
       
