@@ -31,7 +31,7 @@ create_generator_from_config <- function(config,
   radius <- 0.5 * (config$width + 1)
   
   stride <- ifelse(mode == "all", radius, 1)
-
+  
   if (is.null(num_windows)) {
     
     num_windows <- round(unclass(config$memory_limit / 
@@ -72,7 +72,7 @@ create_generator_from_config <- function(config,
     if (config$is_autoencoder & !is.null(config$remap_classes)) {
       
       Vx[[input]] <- map_ids(image = Vx[[input]], config$remap_classes)
-
+      
     }
     
   }
@@ -110,53 +110,32 @@ create_generator_from_config <- function(config,
       
       Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
       unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
-
-      if (config$class_balance == "extensive") {
+      
+      balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
+      sampling_indices <- rep(0, length(balanced_classes))
+      
+      for (class in unique_labels) {
         
-        balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
-        sampling_indices <- rep(0, length(balanced_classes))
+        idx_for_class <- which(balanced_classes == class)
+        idx_in_img <- which(Vy == class)
         
-        for (class in unique_labels) {
-          
-          idx_for_class <- which(balanced_classes == class)
-          idx_in_img <- which(Vy == class)
-          
-          if (length(idx_in_img) > 0) {
-            idx <- sample(idx_in_img, 
-                          size = length(idx_for_class), 
-                          replace = length(idx_for_class) > length(idx_in_img))
-            sampling_indices[idx_for_class] <- idx
-            
-          }
+        if (length(idx_in_img) > 0) {
+          idx <- sample(idx_in_img, 
+                        size = length(idx_for_class), 
+                        replace = length(idx_for_class) > length(idx_in_img))
+          sampling_indices[idx_for_class] <- idx
           
         }
-        
-        sampling_indices <- sampling_indices[sampling_indices > 0]
-        
-        if (length(sampling_indices) < length(all_idx))
-          sampling_indices <- sample(sampling_indices, 
-                                     size = length(all_idx),
-                                     replace = TRUE)
-        
-      } else {
-        
-        which_idx <- which(Vy %in% unique_labels)
-        not_idx <- setdiff(all_idx, which_idx)
-        
-        if (length(not_idx) > length(which_idx)) {
-          
-          which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
-          
-        } else {
-          
-          which_idx <- sample(which_idx, size = length(not_idx))
-          
-        }
-        
-        sampling_indices <- c(which_idx, not_idx)
-        sampling_indices <- sample(sampling_indices, size = length(sampling_indices))
         
       }
+      
+      sampling_indices <- sampling_indices[sampling_indices > 0]
+      
+      if (length(sampling_indices) < length(all_idx))
+        sampling_indices <- sample(sampling_indices, 
+                                   size = length(all_idx),
+                                   replace = TRUE)
+      
       
     }
     
@@ -226,52 +205,32 @@ create_generator_from_config <- function(config,
           Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
           unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
           
-          if (config$class_balance == "extensive") {
+          balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
+          sampling_indices <- rep(0, length(balanced_classes))
+          
+          for (class in unique_labels) {
             
-            balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
-            sampling_indices <- rep(0, length(balanced_classes))
+            idx_for_class <- which(balanced_classes == class)
+            idx_in_img <- which(Vy == class)
             
-            for (class in unique_labels) {
-              
-              idx_for_class <- which(balanced_classes == class)
-              idx_in_img <- which(Vy == class)
-              
-              if (length(idx_in_img) > 0) {
-                idx <- sample(idx_in_img, 
-                              size = length(idx_for_class), 
-                              replace = length(idx_for_class) > length(idx_in_img))
-                sampling_indices[idx_for_class] <- idx
-                
-              }
+            if (length(idx_in_img) > 0) {
+              idx <- sample(idx_in_img, 
+                            size = length(idx_for_class), 
+                            replace = length(idx_for_class) > length(idx_in_img))
+              sampling_indices[idx_for_class] <- idx
               
             }
-            
-            sampling_indices <<- sampling_indices[sampling_indices > 0]
-            
-            if (length(sampling_indices) < length(all_idx))
-              sampling_indices <<- sample(sampling_indices, 
-                                         size = length(all_idx),
-                                         replace = TRUE)
-            
-          } else {
-            
-            which_idx <- which(Vy %in% unique_labels)
-            not_idx <- setdiff(all_idx, which_idx)
-            
-            if (length(not_idx) > length(which_idx)) {
-              
-              which_idx <- sample(which_idx, size = length(not_idx), replace = TRUE)
-              
-            } else {
-              
-              which_idx <- sample(which_idx, size = length(not_idx))
-              
-            }
-            
-            sampling_indices <- c(which_idx, not_idx)
-            sampling_indices <<- sample(sampling_indices, size = length(sampling_indices))
             
           }
+          
+          sampling_indices <<- sampling_indices[sampling_indices > 0]
+          
+          if (length(sampling_indices) < length(all_idx))
+            sampling_indices <<- sample(sampling_indices, 
+                                        size = length(all_idx),
+                                        replace = TRUE)
+          
+          
           
         }
         
@@ -292,7 +251,7 @@ create_generator_from_config <- function(config,
     idx <- sampling_indices[batch_idx == sub_epoch]
     
     coords <- idx %>% arrayInd(.dim = dim(Vy))
-
+    
     x <- coords[, 1] - 1
     y <- coords[, 2] - 1
     z <- coords[, 3] - 1
@@ -411,7 +370,7 @@ create_generator_from_config <- function(config,
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
     
-
+    
     if (config$categorize_output) {
       
       Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
