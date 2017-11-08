@@ -35,12 +35,16 @@ block_downsample <- function(object,
   if (!is.null(params)) {
     
     initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
-    kernel_size <- ifelse("kernel_size" %in% names(params), params$kernel_size, kernel_size)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
     num_steps <- ifelse("num_steps" %in% names(params), params$num_steps, num_steps)
     activation <- ifelse("activation" %in% names(params), params$activation, activation)
     
   }
-  
+
   # Basic initialization of arguments
   if (!is.list(kernel_size)) {
     
@@ -114,7 +118,11 @@ block_upsample <- function(object,
   if (!is.null(params)) {
     
     initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
-    kernel_size <- ifelse("kernel_size" %in% names(params), params$kernel_size, kernel_size)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
     num_steps <- ifelse("num_steps" %in% names(params), params$num_steps, num_steps)
     activation <- ifelse("activation" %in% names(params), params$activation, activation)
     
@@ -189,7 +197,11 @@ block_unet <- function(object,
   if (!is.null(params)) {
     
     initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
-    kernel_size <- ifelse("kernel_size" %in% names(params), params$kernel_size, kernel_size)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
     num_down_steps <- ifelse("num_down_steps" %in% names(params), params$num_down_steps, num_down_steps)
     num_up_steps <- ifelse("num_up_steps" %in% names(params), params$num_up_steps, num_up_steps)
     activation <- ifelse("activation" %in% names(params), params$activation, activation)

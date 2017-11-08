@@ -129,7 +129,7 @@ add_layers <- function(object,
              "unet" = {
                
                params <- layer_to_add$params
-               
+
                output <- output %>% block_unet(params = params)
                
              },
@@ -154,7 +154,7 @@ add_layers <- function(object,
                
                can_convolutional <- length(input_shape) == 4
                new_width <- 0
-               str(layer_to_add)
+
                if (!is.null(layer_to_add$params$force)) {
                  
                  force <- layer_to_add$params$force

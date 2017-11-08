@@ -38,14 +38,14 @@ ALREADY DONE:
   + which.max en 4D
   + En save_flow, resetear los outputs para no almacenar todo!!
   + reset_model en un flujo.
+  + Pasar de una capa no convolucional a otra que sí sea convolucional requiere de un paso intermedio.
+  + Faltan wrappers para block_downsample, block_upsample y block_unet, en "wrappers" y en "add_layers".
+  + Revisar map_ids y el remap_classes que no se almacena correctamente algunas veces.
   
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
-  = Pasar de una capa no convolucional a otra que sí sea convolucional requiere de un paso intermedio.
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
-  = Faltan wrappers para block_downsample, block_upsample y block_unet, en "wrappers" y en "add_layers".
-  = Revisar map_ids y el remap_classes que no se almacena correctamente algunas veces.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
   = Sistema de logs
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.

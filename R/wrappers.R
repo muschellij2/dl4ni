@@ -152,7 +152,7 @@ clf <- function(...) {
 #'
 #' @export 
 #' 
-downsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3)) {
+downsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
   
   list(type = "downsample",
        params = list(initial_filters = initial_filters, 
@@ -173,7 +173,7 @@ downsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3)) {
 #'
 #' @export 
 #' 
-upsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3)) {
+upsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
   
   list(type = "upsample",
        params = list(initial_filters = initial_filters, 
@@ -195,7 +195,7 @@ upsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3)) {
 #'
 #' @export 
 #' 
-unet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_down_steps = 3) {
+unet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_down_steps = 3, ...) {
   
   list(type = "unet",
        params = list(initial_filters = initial_filters, 
