@@ -37,6 +37,8 @@ analyze_output <- function(output) {
       info$type <- "image_labelling"
       
       info$values <- sort(unique(as.vector(r[r != 0])))
+      info$remap_classes <- list(source = info$values,
+                                 target = seq_along(info$values))
       
     }
     

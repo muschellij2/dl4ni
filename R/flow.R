@@ -26,6 +26,7 @@ create_flow <- function(name = "", inputs = list()) {
   
   # List of flow processes (both models and functions)
   flow$processes <- list()
+  flow$schemes <- list()
   flow$trained <- list()
   
   # List of pipelines to execute for each process and of required inputs

@@ -16,6 +16,10 @@
 #' @import zip
 save_flow <- function(flow, path = tempdir(), file_prefix = flow$name) {
   
+  # Basic input check
+  stopifnot(inherits(flow, "DLflow"))
+  flow %>% reset_outputs()
+  
   # Output directory
   output_dir <- file.path(path, file_prefix)
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -110,6 +114,24 @@ load_flow <- function(filename, verbose = TRUE) {
       cat("Loading function:", function_name, "...\n")
 
     f <- readRDS(file.path(processes_dir, file_f))
+    
+    if (inherits(f, "function")) {
+
+      if (verbose)
+        cat("Loading function:", function_name, "...\n")
+      
+    }
+    
+    if (inherits(f, "list")) {
+      
+      if (verbose)
+        cat("Loading model scheme:", function_name, "...\n")
+      
+      class(f) <- c("DLscheme", class(f))
+      flow$schemes[[function_name]] <- f
+      
+    }
+    
     flow$processes[[function_name]] <- f
     
   }

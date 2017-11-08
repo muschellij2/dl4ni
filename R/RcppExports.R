@@ -21,3 +21,7 @@ regularize <- function(image, kernel) {
     .Call('_dl4ni_regularize', PACKAGE = 'dl4ni', image, kernel)
 }
 
+which_max <- function(image) {
+    .Call('_dl4ni_which_max', PACKAGE = 'dl4ni', image)
+}
+

@@ -53,18 +53,27 @@ define_last_layer <- function(info,
                                 
                               }
                               
-                              if (!is.null(info$subsetted) && !info$subsetted) {
+                              if (is.null(info$subsetted)) {
                                 
                                 y_label <- info$values
-                                remap_classes <- list(source = info$values, 
-                                                      target = seq_along(info$values))
+                                remap_classes <- info$remap_classes
                                 
                               } else {
                                 
-                                y_label <- info$original_values
-                                remap_classes <- info$remap_classes
+                                if (!info$subsetted) {
+                                  
+                                  y_label <- info$values
+                                  remap_classes <- list(source = info$values, 
+                                                        target = seq_along(info$values))
+                                  
+                                } else {
+                                  
+                                  y_label <- info$original_values
+                                  remap_classes <- info$remap_classes
+                                  
+                                }
                                 
-                              }
+                              }             
                               
                               # If more than 2 classes, only option is a categorical layer as output.
                               if (num_classes > 1) {

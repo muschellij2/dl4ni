@@ -374,7 +374,8 @@ create_inference_function_from_config <- function(config) {
     
     if ((config$categorize_output) & (config$category_method == "by_class")) {
       
-      res <- apply(res, c(1:3), which.max) - 1
+      # res <- apply(res, c(1:3), which.max) - 1
+      res <- which_max(res)
       
     }
     

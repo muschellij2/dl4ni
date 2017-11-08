@@ -27,7 +27,7 @@ add_layers <- function(object,
   
   output <- object
   
-  max_width <- 7
+  max_width <- 50
   
   # print(str(layers_definition))
   
@@ -121,7 +121,14 @@ add_layers <- function(object,
              "conv3d" = {
                
                new_layer <- do.call(layer_conv_3d, args = layer_to_add$params)
+               cat("new_layer = \n")
+               str(new_layer)
+               cat("output$get_shape()$as_list() = \n")
+               assign("out_global", output, envir = .GlobalEnv)
+               str(output$get_shape()$as_list())
                n_units_last_layer <- prod(unlist(output$get_shape()$as_list()[-1]))
+               cat("n_units_last_layer = \n")
+               str(n_units_last_layer)
                
                can_convolutional <- FALSE
                for (w in seq(max_width)) {
@@ -138,6 +145,10 @@ add_layers <- function(object,
                  }
                  
                }
+               cat("partial_width = \n")
+               str(partial_width)
+               cat("n_filters = \n")
+               str(n_filters)
                
                if (can_convolutional) {
                  

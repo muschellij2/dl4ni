@@ -79,6 +79,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// which_max
+NumericVector which_max(NumericVector image);
+RcppExport SEXP _dl4ni_which_max(SEXP imageSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type image(imageSEXP);
+    rcpp_result_gen = Rcpp::wrap(which_max(image));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_dl4ni_get_windows_at", (DL_FUNC) &_dl4ni_get_windows_at, 5},
@@ -86,6 +97,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dl4ni_results_to_volume_label", (DL_FUNC) &_dl4ni_results_to_volume_label, 6},
     {"_dl4ni_results_to_volume_label_with_distance", (DL_FUNC) &_dl4ni_results_to_volume_label_with_distance, 7},
     {"_dl4ni_regularize", (DL_FUNC) &_dl4ni_regularize, 2},
+    {"_dl4ni_which_max", (DL_FUNC) &_dl4ni_which_max, 1},
     {NULL, NULL, 0}
 };
 

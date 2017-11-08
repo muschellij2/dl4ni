@@ -42,6 +42,7 @@ subset_flow <- function(flow, outputs) {
   
   # List of flow processes (both models and functions)
   new_flow$processes <- flow$processes[new_flow$outputs]
+  new_flow$schemes <- flow$schemes[new_flow$outputs]
   new_flow$trained <- list()
   
   # List of pipelines to execute for each process and of required inputs

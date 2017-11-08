@@ -105,6 +105,7 @@ execute_flow <- function(flow, inputs = list(),
                    if (mode[1] == "debug") {
                      
                      mode <- "faster"
+                     config$category_method <- "simple"
                      config$regularize <- NULL
                      
                    }
