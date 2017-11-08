@@ -96,9 +96,13 @@ regression <- function(units, ...) {
 #' 
 conv3d <- function(filters, kernel_size, ...) {
   
+  args <- list(...)
+  
+  args$filters <- filters
+  args$kernel_size <- kernel_size
+  
   list(type = "conv3d",
-       params = list(filters = filters,
-                     kernel_size = kernel_size, ...))
+       params = args)
   
 }
 

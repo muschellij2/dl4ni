@@ -57,11 +57,12 @@ save_flow <- function(flow, path = tempdir(), file_prefix = flow$name) {
   if (require(zip)) {
     
     setwd(dirname(output_dir))
-    zip::zip(zipfile = output_file, 
-             files = file.path(basename(output_dir), 
-                            list.files(output_dir, recursive = TRUE, all.files = TRUE, include.dirs = TRUE)),
-             recurse = FALSE)
-    
+    suppressWarnings(
+      zip::zip(zipfile = output_file, 
+               files = file.path(basename(output_dir), 
+                                 list.files(output_dir, recursive = TRUE, all.files = TRUE, include.dirs = TRUE)),
+               recurse = FALSE)
+    )
   }
   
   setwd(current_dir)
@@ -98,7 +99,7 @@ load_flow <- function(filename, verbose = TRUE) {
     cat("Loading main flow..\n")
   flow_file <- list.files(output_dir, pattern = "_flow.rds")
   flow <- readRDS(file.path(output_dir, flow_file))
-
+  
   # For each process, incorporate it to the flow
   processes_dir <- file.path(output_dir, "processes")
   # Functions and models
@@ -107,13 +108,13 @@ load_flow <- function(filename, verbose = TRUE) {
   models <- models[nzchar(models) > 0]
   
   for (file_f in functions) {
-
+    
     function_name <- gsub(x = file_f, pattern = ".rds", replacement = "")
     
     f <- readRDS(file.path(processes_dir, file_f))
     
     if (inherits(f, "function")) {
-
+      
       if (verbose)
         cat("Loading function:", function_name, "...\n")
       

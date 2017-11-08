@@ -27,10 +27,6 @@ add_layers <- function(object,
   
   output <- object
   
-  max_width <- 50
-  
-  # print(str(layers_definition))
-  
   if (!is.list(layers_definition) && is.vector(layers_definition) ) {
     
     tmp <- layers_definition
@@ -60,11 +56,25 @@ add_layers <- function(object,
         
       }
       
+      input_shape <- object_shape(output)
+      str(input_shape)
+      
+      
       switch(layer_to_add$type,
              
              "dense" = {
                
                new_layer <- do.call(layer_dense, args = layer_to_add$params)
+               
+               is_volumetric <- length(input_shape) == 4
+               
+               # in case it comes from a volumetric layer (convolutional),
+               # first we have to flatten it.
+               if (is_volumetric) {
+                 
+                 output <- output %>% layer_flatten()
+                 
+               }
                
                output <- output %>% 
                  new_layer 
@@ -82,7 +92,7 @@ add_layers <- function(object,
                params <- layer_to_add$params
                
                output <- output %>% block_categorical(params = params)
-
+               
              },
              
              "regression" = {
@@ -101,7 +111,7 @@ add_layers <- function(object,
                output <- output %>% block_multivalued(params = params)
                
              },
-
+             
              "resnet" = {
                
                params <- layer_to_add$params
@@ -120,43 +130,46 @@ add_layers <- function(object,
              
              "conv3d" = {
                
-               new_layer <- do.call(layer_conv_3d, args = layer_to_add$params)
-               cat("new_layer = \n")
-               str(new_layer)
-               cat("output$get_shape()$as_list() = \n")
-               assign("out_global", output, envir = .GlobalEnv)
-               str(output$get_shape()$as_list())
-               n_units_last_layer <- prod(unlist(output$get_shape()$as_list()[-1]))
-               cat("n_units_last_layer = \n")
-               str(n_units_last_layer)
-               
-               can_convolutional <- FALSE
-               for (w in seq(max_width)) {
+               can_convolutional <- length(input_shape) == 4
+               new_width <- 0
+               str(layer_to_add)
+               if (!is.null(layer_to_add$params$force)) {
                  
-                 filters <- round(n_units_last_layer / (w ^ 3))
+                 force <- layer_to_add$params$force
                  
-                 if (filters * w ^ 3 == n_units_last_layer) {
+                 if (is.numeric(force)) {
+
+                   force <- as.integer(force)
                    
-                   n_filters <- filters
-                   partial_width <- w
+                 } else {
                    
-                   can_convolutional <- TRUE
+                   force <- 0L
                    
                  }
                  
+                 new_width <- force
+                 
+                 layer_to_add$params$force <- NULL
+                 can_convolutional <- TRUE
+                 
                }
-               cat("partial_width = \n")
-               str(partial_width)
-               cat("n_filters = \n")
-               str(n_filters)
+               
+               new_layer <- do.call(layer_conv_3d, args = layer_to_add$params)
                
                if (can_convolutional) {
                  
+                 # Force output width: possibly we're coming from a dense layer
+                 if (new_width > 0) {
+                   
+                   output <- output %>% 
+                     layer_dense(units = new_width ^ 3) %>% 
+                     layer_reshape(target_shape = c(new_width, new_width, new_width, 1)) 
+                   
+                 }
+                 
                  output <- output %>% 
-                   layer_reshape(target_shape = c(partial_width, partial_width, partial_width, n_filters)) %>% 
                    new_layer %>% 
-                   layer_activation(activation = activation) %>% 
-                   layer_flatten()
+                   layer_activation(activation = activation)
                  
                } else {
                  
@@ -178,6 +191,5 @@ add_layers <- function(object,
   } 
   
   return(output)
-  
   
 }
