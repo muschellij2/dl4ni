@@ -8,6 +8,7 @@
 #' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
 #' @param num_steps          (integer) Number of steps to perform downsampling, Default: 1 if \code{kernel_size} is a vector or its length if it's a list.
 #' @param activation         (character) Activation function in the block layers, Default: 'relu'
+#' @param params             (list) List of parameters to apply, if not listed in the previous ones.
 #'
 #' @return The composed object.
 #'
@@ -22,13 +23,28 @@ block_downsample <- function(object,
                              initial_filters = 2, 
                              kernel_size = c(3, 3, 3),
                              num_steps = NULL,
-                             activation = "relu") {
+                             activation = "relu",
+                             params = NULL) {
   
   require(keras)
   
   # Initialize the output in order to compose
   output <- object
   
+  # Override arguments if needed
+  if (!is.null(params)) {
+    
+    initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
+    num_steps <- ifelse("num_steps" %in% names(params), params$num_steps, num_steps)
+    activation <- ifelse("activation" %in% names(params), params$activation, activation)
+    
+  }
+
   # Basic initialization of arguments
   if (!is.list(kernel_size)) {
     
@@ -74,6 +90,7 @@ block_downsample <- function(object,
 #' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
 #' @param num_steps          (integer) Number of steps to perform downsampling, Default: 1 if \code{kernel_size} is a vector or its length if it's a list.
 #' @param activation         (character) Activation function in the block layers, Default: 'relu'
+#' @param params             (list) List of parameters to apply, if not listed in the previous ones.
 #'
 #' @return The composed object.
 #'
@@ -89,13 +106,27 @@ block_upsample <- function(object,
                            initial_filters = NULL, 
                            kernel_size = c(3, 3, 3),
                            num_steps = NULL,
-                           activation = "relu") {
+                           activation = "relu", 
+                           params = NULL) {
   
   require(keras)
   
-  
   # Initialize the composed object
   output <- object
+  
+  # Override arguments if needed
+  if (!is.null(params)) {
+    
+    initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
+    num_steps <- ifelse("num_steps" %in% names(params), params$num_steps, num_steps)
+    activation <- ifelse("activation" %in% names(params), params$activation, activation)
+    
+  }
   
   # Initialization of arguments
   if (!is.list(kernel_size)) {
@@ -148,6 +179,7 @@ block_upsample <- function(object,
 #' @param num_up_steps       (integer) Steps for the upsampling path, Default: the same value as \code{num_down_steps}
 #' @param kernel_size        (list or vector) size of the kernels to use, Default: c(3, 3, 3)
 #' @param activation         (character) Activation function in the inner layers, Default: 'relu'
+#' @param params             (list) List of parameters to apply, if not listed in the previous ones.
 #'
 #' @return The composed object.
 #'
@@ -158,7 +190,23 @@ block_unet <- function(object,
                        num_down_steps = 3, 
                        num_up_steps = num_down_steps,
                        kernel_size = c(3, 3, 3),
-                       activation = "relu") {
+                       activation = "relu",
+                       params = NULL) {
+  
+  # Override arguments if needed
+  if (!is.null(params)) {
+    
+    initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
+    if (!is.null(params$kernel_size)) {
+      
+      kernel_size <- params$kernel_size
+      
+    }
+    num_down_steps <- ifelse("num_down_steps" %in% names(params), params$num_down_steps, num_down_steps)
+    num_up_steps <- ifelse("num_up_steps" %in% names(params), params$num_up_steps, num_up_steps)
+    activation <- ifelse("activation" %in% names(params), params$activation, activation)
+    
+  }
   
   # Just concatenate both blocks, a downsampling and an upsampling one.
   output <- object %>% 

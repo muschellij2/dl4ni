@@ -34,8 +34,10 @@ create_model_from_config <- function(config) {
   
   for (v_input in seq(num_vol_inputs)) {
     
-    vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3))
-    vol_outputs[[v_input]] <- vol_inputs[[v_input]]
+    vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
+    
+    vol_outputs[[v_input]] <- vol_inputs[[v_input]] %>% 
+      layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input]))
     
     if (config$initialize_with_lstm && all(is.numeric(config$lstm_units)) && (length(config$lstm_units) >= 2)) {
       
@@ -54,7 +56,8 @@ create_model_from_config <- function(config) {
                  batch_normalization = config$vol_batch_normalization,
                  activation = config$vol_activation,
                  dropout = config$vol_dropout,
-                 clf = FALSE)
+                 clf = FALSE) %>% 
+      layer_flatten()
     
     
     if (v_input == 1) {
@@ -84,6 +87,18 @@ create_model_from_config <- function(config) {
                clf = FALSE)
   
   # Finalize with convolutional?
+  if (config$finalize_with_convolutional) {
+    
+    layer_to_add <- list(conv3d(filters = 1, 
+                                kernel_size = rep(config$convolutional_kernel_size, 3),
+                                force = config$output_width,
+                                padding = "same"))
+    
+    main_output <- main_output %>% 
+      add_layers(layers_definition = layer_to_add, 
+                 activation = config$vol_activation)
+    
+  }
   
   # Add last layer
   if (config$add_last_layer) {

@@ -149,7 +149,9 @@ graph_from_model <- function(.model) {
   rownames(adj_matrix) <- new_names
   
   # Sizes of each layer
-  sizes <- model_structure$config$layers$config$units[-which_to_remove]
+  # sizes <- model_structure$config$layers$config$units[-which_to_remove]
+  sizes <- model %>% model_units()
+  sizes <- sizes[-which_to_remove]
   
   if (!.model$hyperparameters$multioutput) 
     sizes[length(sizes)] <- config$output_width ^ 3
