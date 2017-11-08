@@ -57,9 +57,7 @@ add_layers <- function(object,
       }
       
       input_shape <- object_shape(output)
-      str(input_shape)
-      
-      
+
       switch(layer_to_add$type,
              
              "dense" = {
@@ -125,6 +123,30 @@ add_layers <- function(object,
                params <- layer_to_add$params
                
                output <- output %>% block_clf(params = params)
+               
+             },
+             
+             "unet" = {
+               
+               params <- layer_to_add$params
+               
+               output <- output %>% block_unet(params = params)
+               
+             },
+
+             "downsample" = {
+               
+               params <- layer_to_add$params
+               
+               output <- output %>% block_downsample(params = params)
+               
+             },
+
+             "upsample" = {
+               
+               params <- layer_to_add$params
+               
+               output <- output %>% block_upsample(params = params)
                
              },
              
