@@ -86,6 +86,11 @@ add_process <- function(flow,
   flow$processes[[output]] <- proc
   flow$outputs <- c(flow$outputs, output)
   flow$trained[[output]] <- trained
+  if (inherits(proc, "DLscheme")) {
+    
+    flow$schemes[[output]] <- proc
+    
+  }
   
   # Add its pipeline (updating all previous pipelines)
   inputs <- which(V(flow$graph)$type == "Input")

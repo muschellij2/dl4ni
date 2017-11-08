@@ -47,6 +47,7 @@ add_trainable_model <- function(flow,
   # Store the model in the flow
   if (verbose)
     cat("Storing configuration\n")
+  
   flow %>% add_process(proc = params, inputs = inputs, output = output, trained = FALSE)
   
   return(invisible(flow))
