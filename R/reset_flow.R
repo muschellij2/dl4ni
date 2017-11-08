@@ -31,8 +31,9 @@ reset_flow <- function(flow, outputs = "all") {
     
     if (inherits(flow$processes[[output]], "DLmodel")) {
       
-      flow$processes[[output]] <- NULL
+      # flow$processes[[output]] <- NULL
       flow$processes[[output]] <- flow$schemes[[output]]
+      flow$trained[[output]] <- FALSE
       
     }
     

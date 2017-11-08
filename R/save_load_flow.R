@@ -110,9 +110,6 @@ load_flow <- function(filename, verbose = TRUE) {
 
     function_name <- gsub(x = file_f, pattern = ".rds", replacement = "")
     
-    if (verbose)
-      cat("Loading function:", function_name, "...\n")
-
     f <- readRDS(file.path(processes_dir, file_f))
     
     if (inherits(f, "function")) {
