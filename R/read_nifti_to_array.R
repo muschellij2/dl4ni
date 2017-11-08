@@ -26,7 +26,10 @@ read_nifti_to_array <- function(filename) {
   
   if (require(neurobase)) {
     
-    return(as.array(neurobase::readnii(filename)))
+    img <- fast_readnii(res[1])
+    class(img) <- setdiff(class(img), "array")
+
+    return(as.array(img))
     
   }
   

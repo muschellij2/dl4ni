@@ -164,7 +164,7 @@ train_output <- function(flow,
       num_volumes <- c()
       for (res in results) {
         
-        img <- neurobase::fast_readnii(res[1])
+        img <- read_nifti_to_array(res[1])
         this_dim <- dim(img)
         nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
         num_volumes <- c(num_volumes, nv)
