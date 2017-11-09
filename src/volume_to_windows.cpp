@@ -92,13 +92,7 @@ void results_to_volume(NumericVector V,
   
   IntegerVector dims = V.attr("dim");
   IntegerVector target_dims = res.attr("dim");
-  
-  // Rprintf("Vector dims = (%u,%u)\n", dims[0], dims[1]);
-  
-  // if (dims.size() == 2) {
-  
-  // For dense outputs
-  
+
   for (int i = 0; i < x.size(); i++) {
     
     int inner_count = 0;
@@ -127,18 +121,6 @@ void results_to_volume(NumericVector V,
     }
     
   }
-  
-  // }
-  
-  // if (dims.size() == 4) {
-  
-  // For convolutional outputs
-  
-  
-  
-  // }
-  
-  
   
 }
 
@@ -456,3 +438,89 @@ NumericVector which_max(NumericVector image) {
   
 }
 
+void to_categorical_volume_cpp(double* image, int ndims, int* dims, int* unique_labels, int n_classes, int* segmentation) {
+  
+  if (ndims == 3) {
+    
+    for (int x = 0; x < dims[0]; x++) {
+      
+      for (int y = 0; y < dims[1]; y++) {
+        
+        for (int z = 0; z < dims[2]; z++) {
+          
+          int voxel = x + dims[0] * y + dims[0] * dims[1] * z;
+          
+          int k = (int)image[voxel];
+          int target_voxel = x + dims[0] * y + dims[0] * dims[1] * z +  dims[0] * dims[1] * dims[2] * k;
+          segmentation[target_voxel] = 1;
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  if (ndims == 4) {
+    
+    // First dimension is batch_size
+    
+    for (int batch = 0; batch < dims[0]; batch++) {
+      
+      for (int x = 0; x < dims[1]; x++) {
+        
+        for (int y = 0; y < dims[2]; y++) {
+          
+          for (int z = 0; z < dims[3]; z++) {
+            
+            int voxel = batch + x * dims[0] + dims[0] * dims[1] * y + dims[0] * dims[1] * dims[2] * z;
+            
+            int k = (int)image[voxel];
+            int target_voxel = voxel +  dims[0] * dims[1] * dims[2] * dims[3] * k;
+            segmentation[target_voxel] = 1;
+            
+          }
+          
+        }
+        
+      }
+      
+      
+    }
+    
+  }
+  
+  
+}
+
+
+//[[Rcpp::export]]
+IntegerVector to_categorical_volume_cpp(NumericVector image, IntegerVector unique_labels) {
+  
+  IntegerVector dims = image.attr("dim");
+  int ndims = dims.size();
+  int image_size = image.size();
+  
+  int n_classes = unique_labels.size();
+  
+  IntegerVector new_dims(ndims + 1);
+  int new_size = (int)(image_size * n_classes);
+  
+  for (int d = 0; d < ndims; d++) {
+    
+    new_dims[d] = dims[d];
+    
+  }
+  new_dims[ndims] = n_classes;
+  
+  IntegerVector segmentation(new_size);
+  
+  to_categorical_volume_cpp(image.begin(), ndims, dims.begin(), unique_labels.begin(), n_classes, segmentation.begin());
+  
+  segmentation.attr("dim") = new_dims;
+  
+  return segmentation;
+  
+  
+}

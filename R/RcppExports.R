@@ -25,3 +25,7 @@ which_max <- function(image) {
     .Call('_dl4ni_which_max', PACKAGE = 'dl4ni', image)
 }
 
+to_categorical_volume_cpp <- function(image, unique_labels) {
+    .Call('_dl4ni_to_categorical_volume_cpp', PACKAGE = 'dl4ni', image, unique_labels)
+}
+

@@ -90,6 +90,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// to_categorical_volume_cpp
+IntegerVector to_categorical_volume_cpp(NumericVector image, IntegerVector unique_labels);
+RcppExport SEXP _dl4ni_to_categorical_volume_cpp(SEXP imageSEXP, SEXP unique_labelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type image(imageSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type unique_labels(unique_labelsSEXP);
+    rcpp_result_gen = Rcpp::wrap(to_categorical_volume_cpp(image, unique_labels));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_dl4ni_get_windows_at", (DL_FUNC) &_dl4ni_get_windows_at, 5},
@@ -98,6 +110,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dl4ni_results_to_volume_label_with_distance", (DL_FUNC) &_dl4ni_results_to_volume_label_with_distance, 7},
     {"_dl4ni_regularize", (DL_FUNC) &_dl4ni_regularize, 2},
     {"_dl4ni_which_max", (DL_FUNC) &_dl4ni_which_max, 1},
+    {"_dl4ni_to_categorical_volume_cpp", (DL_FUNC) &_dl4ni_to_categorical_volume_cpp, 2},
     {NULL, NULL, 0}
 };
 

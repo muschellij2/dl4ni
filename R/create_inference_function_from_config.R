@@ -38,7 +38,7 @@ create_inference_function_from_config <- function(config) {
     stdX <- list()
     maxX <- list()
     
-    for (input in seq(num_inputs)) {
+    for (input in seq(config$num_inputs)) {
       
       if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(as.vector(V[[input]]))
       if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(V[[input]]))
@@ -60,7 +60,16 @@ create_inference_function_from_config <- function(config) {
 
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
-      res <- array(0, dim = c(dim(V[[1]]), config$last_layer$params$num_classes))
+      if (config$only_convolutionals) {
+        
+        num_classes <- config$num_classes
+        
+      } else {
+        
+        num_classes <- config$last_layer$params$num_classes
+        
+      }
+      res <- array(0, dim = c(dim(V[[1]]), num_classes))
       
     } else {
       
@@ -78,7 +87,7 @@ create_inference_function_from_config <- function(config) {
                                                         config$num_features + 
                                                         config$output_width ^ 3))))
     
-    num_windows <- round(num_windows / (num_inputs + 2))
+    num_windows <- round(num_windows / (config$num_inputs + 2))
     
     sampling_indices <- all_idx
     num_batches <- ceiling(length(sampling_indices) / num_windows)
@@ -198,9 +207,21 @@ create_inference_function_from_config <- function(config) {
       
       inputs <- c(list(X_coords), X_vol)
       
-      output <- .model %>% keras::predict_on_batch(x = inputs)
-      
+      width <- round(length(X_vol[[1]]) ^ (1 / 3))
+      if (width < 15) {
+        
+        output <- .model %>% keras::predict_on_batch(x = inputs)
+
+      } else {
+        
+        batch_size <- 3L * floor(64 / width)
+        output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
+
+      }
+
       if (config$only_convolutionals) {
+        
+        output <- aperm(output, perm = c(1, 4, 3, 2, 5))
         
         if (config$categorize_output) {
           

@@ -376,17 +376,7 @@ create_generator_from_config <- function(config,
       
       if (config$categorize_output) {
         
-        Y_new <- array(0, dim = c(length(idx), 
-                                  config$output_width, 
-                                  config$output_width, 
-                                  config$output_width, 
-                                  config$num_classes))
-        
-        for (id in seq_along(idx)) {
-          
-          Y_new[id, , , , ] <- to_categorical_volume(Y[id, , , , 1], unique_labels = unique_labels)
-          
-        }
+        Y_new <- to_categorical_volume_cpp(Y[, , , , 1], unique_labels = unique_labels)
         
         x <- c(list(X_coords), X_vol)
         

@@ -45,6 +45,10 @@ ALREADY DONE:
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = Determinar número de batches cuando el modelo es convolucional.
+  = Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
+  = Visualizador de modelos
+  = Visualizador de pesos en capas convolucionales
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
   = Sistema de logs

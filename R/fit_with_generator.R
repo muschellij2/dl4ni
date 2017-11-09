@@ -300,6 +300,23 @@ fit_with_generator <- function(.model,
       # A possible third indicates sample weights.
       data <- generator()
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
+      new_batch_size <- 0
+      
+      if (new_batch_size == 0) {
+        
+        width <- round(length(data[[1]][[2]]) ^ (1 / 3))
+        if (width < 15) {
+          
+          new_batch_size <- batch_size
+          
+        } else {
+          
+          batch_size <- 3L 
+          new_batch_size <- batch_size
+          
+        }
+        
+      }
       
       if (length(data) > 2) {
         # With sample weight
