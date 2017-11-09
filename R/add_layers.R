@@ -57,7 +57,7 @@ add_layers <- function(object,
       }
       
       input_shape <- object_shape(output)
-
+      
       switch(layer_to_add$type,
              
              "dense" = {
@@ -91,6 +91,8 @@ add_layers <- function(object,
                
                output <- output %>% block_categorical(params = params)
                
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
              },
              
              "regression" = {
@@ -98,6 +100,8 @@ add_layers <- function(object,
                params <- layer_to_add$params
                
                output <- output %>% block_regression(params = params)
+               
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
                
              },
              
@@ -108,6 +112,8 @@ add_layers <- function(object,
                
                output <- output %>% block_multivalued(params = params)
                
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
              },
              
              "resnet" = {
@@ -115,6 +121,8 @@ add_layers <- function(object,
                params <- layer_to_add$params
                
                output <- output %>% block_resnet(params = params)
+               
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
                
              },
              
@@ -124,29 +132,37 @@ add_layers <- function(object,
                
                output <- output %>% block_clf(params = params)
                
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
              },
              
              "unet" = {
                
                params <- layer_to_add$params
-
+               
                output <- output %>% block_unet(params = params)
                
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
              },
-
+             
              "downsample" = {
                
                params <- layer_to_add$params
                
                output <- output %>% block_downsample(params = params)
                
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
              },
-
+             
              "upsample" = {
                
                params <- layer_to_add$params
                
                output <- output %>% block_upsample(params = params)
+               
+               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
                
              },
              
@@ -154,13 +170,13 @@ add_layers <- function(object,
                
                can_convolutional <- length(input_shape) == 4
                new_width <- 0
-
+               
                if (!is.null(layer_to_add$params$force)) {
                  
                  force <- layer_to_add$params$force
                  
                  if (is.numeric(force)) {
-
+                   
                    force <- as.integer(force)
                    
                  } else {
@@ -190,8 +206,13 @@ add_layers <- function(object,
                  }
                  
                  output <- output %>% 
-                   new_layer %>% 
-                   layer_activation(activation = activation)
+                   new_layer 
+                 
+                 if (batch_normalization) output <- output %>% layer_batch_normalization()
+                 
+                 output <- output %>% layer_activation(activation = activation)
+                 
+                 if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
                  
                } else {
                  

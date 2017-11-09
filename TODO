@@ -47,6 +47,7 @@ WIP:
   = README.md para github
   = Determinar número de batches cuando el modelo es convolucional.
   = Mejoras de velocidad en create_generator_from_config.
+  = Añadir batch_size en fit_with_generator como argumento.
   = Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
   = Visualizador de modelos
   = Visualizador de pesos en capas convolucionales
