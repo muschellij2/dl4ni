@@ -81,7 +81,7 @@ fit_with_generator <- function(.model,
     
     validation_data <- validation_config$generator
     validation_steps <- validation_config$max_sub_epochs * validation_config$num_files
-
+    
   }
   
   # Let's take into account where to store the best model
@@ -206,7 +206,7 @@ fit_with_generator <- function(.model,
         message("Loading previous best model, with loss:", best_validation_loss)
         
         weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
-
+        
         .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
         # file.path(model_pathmodel_filename %>% load_model_hdf5()
         
@@ -253,6 +253,9 @@ fit_with_generator <- function(.model,
   if (starting_epoch > 1) 
     training_epochs <- setdiff(training_epochs, seq(starting_epoch - 1))
   
+  new_batch_size <- 0
+  
+  
   # For each training epoch
   for (epoch in training_epochs) {
     
@@ -298,20 +301,22 @@ fit_with_generator <- function(.model,
       # The first is always the input samples
       # The second is always the desired outputs
       # A possible third indicates sample weights.
+      
       data <- generator()
+      
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
-      new_batch_size <- 0
       
       if (new_batch_size == 0) {
         
-        width <- round(length(data[[1]][[2]]) ^ (1 / 3))
+        width <- round(length(data[[1]][[2]][1, ]) ^ (1 / 3))
         if (width < 15) {
           
           new_batch_size <- batch_size
           
         } else {
           
-          batch_size <- 3L 
+          batch_size <- 3L
+          if (config$width <= 35) batch_size <- 70L
           new_batch_size <- batch_size
           
         }
@@ -329,7 +334,7 @@ fit_with_generator <- function(.model,
           sample_weight = to_numpy_array(data[[3]]),
           initial_epoch = epoch - 1, 
           callbacks = my_callback)#,
-          # ...)
+        # ...)
         
       } else {
         # No sample weight
@@ -341,7 +346,7 @@ fit_with_generator <- function(.model,
           batch_size = batch_size,
           initial_epoch = epoch - 1, 
           callbacks = my_callback) #,
-          # ...)
+        # ...)
         
       }
       
@@ -486,9 +491,9 @@ fit_with_generator <- function(.model,
     weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
     
     .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-
+    
     .model$best_loss <- best_validation_loss
-
+    
   }
   
 }

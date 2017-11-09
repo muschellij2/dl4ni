@@ -38,7 +38,7 @@ create_inference_function_from_config <- function(config) {
     stdX <- list()
     maxX <- list()
     
-    for (input in seq(config$num_inputs)) {
+    for (input in seq(num_inputs)) {
       
       if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(as.vector(V[[input]]))
       if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(V[[input]]))
@@ -57,7 +57,7 @@ create_inference_function_from_config <- function(config) {
        seq(from = 1, to = dim(V0)[2], by = stride), 
        seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
     all_idx <- which(V0 > 0) 
-
+    
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
       if (config$only_convolutionals) {
@@ -87,7 +87,7 @@ create_inference_function_from_config <- function(config) {
                                                         config$num_features + 
                                                         config$output_width ^ 3))))
     
-    num_windows <- round(num_windows / (config$num_inputs + 2))
+    num_windows <- round(num_windows / (num_inputs + 2))
     
     sampling_indices <- all_idx
     num_batches <- ceiling(length(sampling_indices) / num_windows)
@@ -207,18 +207,18 @@ create_inference_function_from_config <- function(config) {
       
       inputs <- c(list(X_coords), X_vol)
       
-      width <- round(length(X_vol[[1]]) ^ (1 / 3))
-      if (width < 15) {
+      if (config$width < 15) {
         
         output <- .model %>% keras::predict_on_batch(x = inputs)
-
+        
       } else {
         
-        batch_size <- 3L * floor(64 / width)
+        batch_size <- 3L
+        if (config$width <= 35) batch_size <- 70L
         output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
-
+        
       }
-
+      
       if (config$only_convolutionals) {
         
         output <- aperm(output, perm = c(1, 4, 3, 2, 5))
@@ -479,7 +479,7 @@ create_inference_function_from_config <- function(config) {
         res <- smooth_by_gaussian_kernel(image = res, 
                                          kernel_sigma = config$regularize$sigma, 
                                          kernel_width = config$regularize$width)
-
+        
       }
     
     if ((config$categorize_output) & (config$category_method == "by_class")) {
@@ -491,7 +491,7 @@ create_inference_function_from_config <- function(config) {
     if (config$categorize_output) {
       
       res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
-
+      
     }
     
     return(res)
