@@ -49,7 +49,7 @@ graph_from_model <- function(.model) {
   rownames(adj_matrix) <- layers_name
   
   # Exclude these layer types from the graph
-  hidden_types <- c("BatchNormalization", "Activation", "Dropout", "Concatenate")
+  hidden_types <- c("BatchNormalization", "Activation", "Dropout", "Concatenate", "Flatten", "Reshape")
   
   # "Size" of each layer
   sizes <- model_structure$config$layers$config$units
