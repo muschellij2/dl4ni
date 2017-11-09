@@ -370,34 +370,64 @@ create_generator_from_config <- function(config,
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
     
-    
-    if (config$categorize_output) {
+    if (config$only_convolutionals) {
+
+      Y <- array(Y, dim = c(length(idx), config$output_width, config$output_width, config$output_width, 1))
       
-      Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
-      
-      Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
-      
-      if (config$multioutput) {
+      if (config$categorize_output) {
         
-        # cat("Multioutput\n")
+        Y_new <- array(0, dim = c(length(idx), 
+                                  config$output_width, 
+                                  config$output_width, 
+                                  config$output_width, 
+                                  config$num_classes))
         
-        Y_list <- list()
-        for (i in seq(config$output_width ^ 3)) {
+        for (id in seq_along(idx)) {
           
-          Y_list[[i]] <- Y[ , 1:config$num_classes]
-          Y <- Y[, -c(1:config$num_classes)]
+          Y_new[id, , , , ] <- to_categorical_volume(Y[id, , , , 1], unique_labels = unique_labels)
           
         }
         
-        Y <- Y_list
+        x <- c(list(X_coords), X_vol)
         
+        # cat("Exiting...\n")
+        
+        return(list(x, Y_new))
+
       }
       
-      x <- c(list(X_coords), X_vol)
       
-      # cat("Exiting...\n")
+    } else {
       
-      return(list(x, Y))
+      if (config$categorize_output) {
+        
+        Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
+        
+        Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
+        
+        if (config$multioutput) {
+          
+          # cat("Multioutput\n")
+          
+          Y_list <- list()
+          for (i in seq(config$output_width ^ 3)) {
+            
+            Y_list[[i]] <- Y[ , 1:config$num_classes]
+            Y <- Y[, -c(1:config$num_classes)]
+            
+          }
+          
+          Y <- Y_list
+          
+        }
+        
+        x <- c(list(X_coords), X_vol)
+        
+        # cat("Exiting...\n")
+        
+        return(list(x, Y))
+        
+      }
       
     }
     
@@ -431,6 +461,7 @@ create_generator_from_config <- function(config,
     x <- c(list(X_coords), X_vol)
     
     return(list(x, Y))
+    
     
   }
   

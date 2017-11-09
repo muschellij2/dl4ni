@@ -54,6 +54,8 @@ define_config <- function(...) {
     
   }
   
+  if (config$only_convolutionals) config$path <- "volumes"
+  
   if (config$window_width %% 2 == 0) config$window_width <- config$window_width + 1
   config$width <- config$window_width
   
@@ -61,13 +63,13 @@ define_config <- function(...) {
 
   if (is.null(config$decoder_layers)) {
     
-    config$categorize_output <- (!is.null(config$last_layer)) && 
-      (!is.null(config$last_layer$type)) && 
-      (config$last_layer$type == "categorical")
+    # config$categorize_output <- (!is.null(config$last_layer)) && 
+    #   (!is.null(config$last_layer$type)) && 
+    #   (config$last_layer$type == "categorical")
     
     if (config$categorize_output) {
       
-      config$num_classes <- config$last_layer$params$num_classes
+      config$num_classes <- config$last_layer_info$num_classes + 1
       
       if (config$num_classes > 2) {
         

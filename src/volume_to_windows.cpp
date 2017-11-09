@@ -95,6 +95,10 @@ void results_to_volume(NumericVector V,
   
   // Rprintf("Vector dims = (%u,%u)\n", dims[0], dims[1]);
   
+  // if (dims.size() == 2) {
+  
+  // For dense outputs
+  
   for (int i = 0; i < x.size(); i++) {
     
     int inner_count = 0;
@@ -123,6 +127,18 @@ void results_to_volume(NumericVector V,
     }
     
   }
+  
+  // }
+  
+  // if (dims.size() == 4) {
+  
+  // For convolutional outputs
+  
+  
+  
+  // }
+  
+  
   
 }
 
@@ -343,7 +359,7 @@ void which_max(double* input, int ndims, int* dims, double* output) {
     for (int x = 0; x < dims[0]; x++) {
       
       for (int y = 0; y < dims[1]; y++) {
-
+        
         double max;
         int pos = 0;
         
@@ -363,7 +379,7 @@ void which_max(double* input, int ndims, int* dims, double* output) {
             pos = z;
             
           }
-
+          
         }
         
         output[x + dims[0] * y] = (double)pos;
@@ -374,7 +390,7 @@ void which_max(double* input, int ndims, int* dims, double* output) {
     
   } else {
     
-
+    
     for (int x = 0; x < dims[0]; x++) {
       
       for (int y = 0; y < dims[1]; y++) {
@@ -400,7 +416,7 @@ void which_max(double* input, int ndims, int* dims, double* output) {
               pos = k;
               
             }
-
+            
           }
           
           output[x + dims[0] * y + dims[0] * dims[1] * z ] = (double)pos;

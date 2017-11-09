@@ -56,9 +56,14 @@ create_model_from_config <- function(config) {
                  batch_normalization = config$vol_batch_normalization,
                  activation = config$vol_activation,
                  dropout = config$vol_dropout,
-                 clf = FALSE) %>% 
-      layer_flatten()
+                 clf = FALSE) 
     
+    if (!config$only_convolutionals) {
+      
+      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>%
+        layer_flatten()
+      
+    }
     
     if (v_input == 1) {
       
@@ -79,12 +84,17 @@ create_model_from_config <- function(config) {
                         "features" = output_features,
                         "volumes"  = output_vol)
   
-  main_output <- main_output %>% 
-    add_layers(layers_definition = config$common_layers,
-               batch_normalization = config$common_batch_normalization,
-               activation = config$common_activation,
-               dropout = config$common_dropout,
-               clf = FALSE)
+  
+  if (length(config$common_layers) > 0) {
+    
+    main_output <- main_output %>% 
+      add_layers(layers_definition = config$common_layers,
+                 batch_normalization = config$common_batch_normalization,
+                 activation = config$common_activation,
+                 dropout = config$common_dropout,
+                 clf = FALSE)
+    
+  }
   
   # Finalize with convolutional?
   if (config$finalize_with_convolutional) {
