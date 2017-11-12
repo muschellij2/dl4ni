@@ -46,6 +46,10 @@ WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = Determinar número de batches cuando el modelo es convolucional.
+  = Adaptar funciones para ancho "config$width" par.
+  = Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
+  = layer_permute para que el inicio sea correcto.
+  = config$memory_limit / object.size(vector(mode = "double", length = sum(model %>% model_units())))
   = Mejoras de velocidad en create_generator_from_config.
   = Añadir batch_size en fit_with_generator como argumento.
   = Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
