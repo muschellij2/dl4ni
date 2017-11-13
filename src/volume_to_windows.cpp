@@ -15,9 +15,17 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, IntegerVector y, IntegerVector z) {
   
-  if (width % 2 == 0) width++;
+  // if (width % 2 == 0) width++;
+  int real_width = width;
+  int disp = 0;
+  if (width % 2 == 0) {
+    
+    real_width++;
+    disp = 1;
+    
+  }
   
-  int radius = (width + 1) / 2;
+  int radius = (real_width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
   int n_volumes = 1;
@@ -46,11 +54,11 @@ NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, Intege
     
     for (int volume = 0; volume < n_volumes; volume++) {
       
-      for (int dz = -radius + 1; dz < radius; dz++) {
+      for (int dz = -radius + 1; dz < radius - disp; dz++) {
         
-        for (int dy = -radius + 1; dy < radius; dy++) {
+        for (int dy = -radius + 1; dy < radius - disp; dy++) {
           
-          for (int dx = -radius + 1; dx < radius; dx++) {
+          for (int dx = -radius + 1; dx < radius - disp; dx++) {
             
             if ((x[i] + dx >= 0) & (x[i] + dx < dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < dims[2])) {
               
@@ -87,8 +95,17 @@ void results_to_volume(NumericVector V,
                        NumericVector counts, 
                        IntegerVector x, IntegerVector y, IntegerVector z) {
   
-  if (width % 2 == 0) width ++;
-  int radius = (width + 1) / 2;
+  // if (width % 2 == 0) width++;
+  int real_width = width;
+  int disp = 0;
+  if (width % 2 == 0) {
+    
+    real_width++;
+    disp = 1;
+    
+  }
+  
+  int radius = (real_width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
   IntegerVector target_dims = res.attr("dim");
@@ -97,11 +114,11 @@ void results_to_volume(NumericVector V,
     
     int inner_count = 0;
     
-    for (int dz = -radius + 1; dz < radius; dz++) {
+    for (int dz = -radius + 1; dz < radius - disp; dz++) {
       
-      for (int dy = -radius + 1; dy < radius; dy++) {
+      for (int dy = -radius + 1; dy < radius - disp; dy++) {
         
-        for (int dx = -radius + 1; dx < radius; dx++) {
+        for (int dx = -radius + 1; dx < radius - disp; dx++) {
           
           if ((x[i] + dx >= 0) & (x[i] + dx < target_dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < target_dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < target_dims[2])) {
             
@@ -130,8 +147,17 @@ void results_to_volume_label(NumericVector V,
                              NumericVector res,  
                              IntegerVector x, IntegerVector y, IntegerVector z) {
   
-  if (width % 2 == 0) width ++;
-  int radius = (width + 1) / 2;
+  // if (width % 2 == 0) width++;
+  int real_width = width;
+  int disp = 0;
+  if (width % 2 == 0) {
+    
+    real_width++;
+    disp = 1;
+    
+  }
+  
+  int radius = (real_width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
   IntegerVector target_dims = res.attr("dim");
@@ -142,11 +168,11 @@ void results_to_volume_label(NumericVector V,
     
     int inner_count = 0;
     
-    for (int dz = -radius + 1; dz < radius; dz++) {
+    for (int dz = -radius + 1; dz < radius - disp; dz++) {
       
-      for (int dy = -radius + 1; dy < radius; dy++) {
+      for (int dy = -radius + 1; dy < radius - disp; dy++) {
         
-        for (int dx = -radius + 1; dx < radius; dx++) {
+        for (int dx = -radius + 1; dx < radius - disp; dx++) {
           
           int offset = (x[i] + dx) + target_dims[0] * (y[i] + dy) + target_dims[0] * target_dims[1] * (z[i] + dz);
           
@@ -171,8 +197,17 @@ void results_to_volume_label_with_distance(NumericVector V,
                                            NumericVector last_distance,
                                            IntegerVector x, IntegerVector y, IntegerVector z) {
   
-  if (width % 2 == 0) width ++;
-  int radius = (width + 1) / 2;
+  // if (width % 2 == 0) width++;
+  int real_width = width;
+  int disp = 0;
+  if (width % 2 == 0) {
+    
+    real_width++;
+    disp = 1;
+    
+  }
+  
+  int radius = (real_width + 1) / 2;
   
   IntegerVector dims = V.attr("dim");
   IntegerVector target_dims = res.attr("dim");
@@ -183,11 +218,11 @@ void results_to_volume_label_with_distance(NumericVector V,
     
     int inner_count = 0;
     
-    for (int dz = -radius + 1; dz < radius; dz++) {
+    for (int dz = -radius + 1; dz < radius - disp; dz++) {
       
-      for (int dy = -radius + 1; dy < radius; dy++) {
+      for (int dy = -radius + 1; dy < radius - disp; dy++) {
         
-        for (int dx = -radius + 1; dx < radius; dx++) {
+        for (int dx = -radius + 1; dx < radius - disp; dx++) {
           
           if ((x[i] + dx >= 0) & (x[i] + dx < target_dims[0]) & (y[i] + dy >= 0) & (y[i] + dy < target_dims[1]) & (z[i] + dz >= 0) & (z[i] + dz < target_dims[2])) {
             

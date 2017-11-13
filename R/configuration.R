@@ -62,10 +62,10 @@ define_config <- function(...) {
     
   }
   
-  if (config$window_width %% 2 == 0) config$window_width <- config$window_width + 1
+  # if (config$window_width %% 2 == 0) config$window_width <- config$window_width + 1
   config$width <- config$window_width
   
-  if (config$output_width %% 2 == 0) config$output_width <- config$output_width + 1
+  # if (config$output_width %% 2 == 0) config$output_width <- config$output_width + 1
 
   if (is.null(config$decoder_layers)) {
     

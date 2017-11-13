@@ -207,26 +207,16 @@ create_inference_function_from_config <- function(config) {
       
       inputs <- c(list(X_coords), X_vol)
       
-      # if (!config$only_convolutionals) {
-      #   
-      #   output <- .model %>% keras::predict_on_batch(x = inputs)
-      #   
-      # } else {
-        
-        # Available memory is the memory limit minus the memory reserved for the parameters in the model
-        available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$count_params()))
-        
-        # Get the maximum number of objects that fit into the memory limit.
-        batch_size <- as.integer(available_memory / 
-                                   object.size(vector(mode = "double", length = sum(.model %>% model_units()))))
-        
-        output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
-        
-      # }
+      # Available memory is the memory limit minus the memory reserved for the parameters in the model
+      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$count_params()))
+      
+      # Get the maximum number of objects that fit into the memory limit.
+      batch_size <- as.integer(available_memory / 
+                                 object.size(vector(mode = "double", length = sum(.model %>% model_units()))))
+      
+      output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
       
       if (config$only_convolutionals) {
-        
-        # output <- aperm(output, perm = c(1, 4, 3, 2, 5))
         
         if (config$categorize_output) {
           
