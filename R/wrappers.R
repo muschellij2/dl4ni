@@ -204,3 +204,16 @@ unet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_down_steps =
                      ...))
   
 }
+
+
+maxpooling <- function() {
+  
+  list(type = "maxpooling", params = NULL)
+  
+}
+
+upsampling <- function() {
+  
+  list(type = "upsampling", params = NULL)
+  
+}

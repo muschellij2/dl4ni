@@ -48,17 +48,15 @@ ALREADY DONE:
   + batch_size calculado en inference function
   + Congelar el modelo a la hora de hacer inferencia.
   + Adaptar funciones para ancho "config$width" par.
+  + Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
   
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
-  = Reshape a la salida de la red para que tenga dimensiones (output_width ^ 3, num_classes) sobre la que se aplica softmax.
   = Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
-  = keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE)
   = Mejoras de velocidad en create_generator_from_config.
-  = Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
-  = Visualizador de modelos: keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE)
+  = Visualizador de modelos: keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE). Necesita pydot y graphviz.
   = Visualizador de pesos en capas convolucionales
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
@@ -70,6 +68,7 @@ TODO:
   - Meter el info del problema en el config.
   - Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
+  - Reshape a la salida de la red para que tenga dimensiones (output_width ^ 3, num_classes) sobre la que se aplica softmax.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)
   - Tratar de inferir tanto el scale como el scale_y según el tipo de problema
   - GAN

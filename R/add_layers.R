@@ -171,6 +171,18 @@ add_layers <- function(object,
                
              },
              
+             "maxpooling" = {
+               
+               output <- output %>% layer_max_pooling_3d()
+               
+             },
+             
+             "upsampling" = {
+               
+               output <- output %>% layer_upsampling_3d()
+               
+             },
+             
              "conv3d" = {
                
                can_convolutional <- length(input_shape) == 4
