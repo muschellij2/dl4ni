@@ -58,7 +58,9 @@ create_model_from_config <- function(config) {
                  dropout = config$vol_dropout,
                  clf = FALSE) 
     
-    if (!config$only_convolutionals) {
+    shape <- vol_outputs[[v_input]] %>% object_shape()
+    
+    if (!config$only_convolutionals & length(shape) > 2) {
       
       vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>%
         layer_flatten()
