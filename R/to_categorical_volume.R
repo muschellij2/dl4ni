@@ -8,10 +8,7 @@
 #'
 #' @export 
 #' 
-to_categorical_volume <- function(V) {
-  
-  # Unique labels in the input volume
-  unique_labels <- sort(unique(as.vector(V)))
+to_categorical_volume <- function(V, unique_labels = sort(unique(as.vector(V)))) {
   
   # Create the output 4D volume, with the same 3 dimensions as the input, plus an additional
   # dimensions along the number of unique labels computed before.

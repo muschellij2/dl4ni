@@ -25,6 +25,9 @@ create_generator_from_config <- function(config,
   
   stopifnot(inherits(config, "DLconfig"))
   
+  require(tictoc)
+  # tic("Initialization")
+  
   num_inputs <- length(config$vol_layers)
   
   mode <- mode[1]
@@ -97,9 +100,14 @@ create_generator_from_config <- function(config,
     message("Number of actual windows: ", length(sampling_indices))
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    if (num_batches > 1)
-      batch_idx <- as.numeric(cut(seq_along(sampling_indices), num_batches))
-    else
+    max_epochs <- min(c(num_batches, max_sub_epochs))
+    
+    if (max_epochs > 1) {
+      
+      batch_idx <- rep(seq(max_epochs), each = num_windows) 
+      batch_idx <- batch_idx[seq_along(sampling_indices)]
+      
+    } else
       batch_idx <- rep(1, times = length(sampling_indices))
     
   } else {
@@ -140,24 +148,31 @@ create_generator_from_config <- function(config,
     }
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    if (num_batches > 1)
-      batch_idx <- as.numeric(cut(seq_along(sampling_indices), num_batches))
-    else
-      batch_idx <- rep(1, times = length(sampling_indices))
+    max_epochs <- min(c(num_batches, max_sub_epochs))
+    
+    batch_idx <- rep(seq(max_epochs), each = num_windows) 
     
   }
+  
+  # print(batch_idx)
   
   message("Number of batches per volume: ", num_batches)
   
   max_epochs <- min(c(num_batches, max_sub_epochs))
   
+  # toc()
+  
   f_generator <- function() {
+    
+    # tic("Total")
     
     sub_epoch <<- sub_epoch + 1
     
     # cat("Subepoch", sub_epoch, "\n")
     
     if (sub_epoch > max_epochs) {
+      
+      # tic("Reinitialization")
       
       sub_epoch <<- 1
       
@@ -167,6 +182,7 @@ create_generator_from_config <- function(config,
       if (next_file > length(x_files[[1]])) 
         next_file <<- 1
       
+      # tic("Reading X")
       Vx <<- list()
       meanX <<- list()
       stdX <<- list()
@@ -188,23 +204,31 @@ create_generator_from_config <- function(config,
         
       }
       
+      # toc()
       # cat("Reading ", y_files[next_file], "\n")
       
+      # tic("Reading Y")
       Vy <<- read_nifti_to_array(y_files[next_file])
       
       if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <<- mean(as.vector(Vy))
       if (config$scale_y %in% "z") stdY <<- sd(as.vector(Vy))
       if (config$scale_y %in% c("max", "meanmax")) maxY <<- max(as.vector(Vy))
       
+      # toc()
+      
+      # tic("Sampling")
       if (mode == "sampling") {
         
-        sampling_indices <<- sample(all_idx, length(all_idx))
         
         if (!is.null(config$class_balance) & !is.null(config$y_label)) {
           
+          # tic("Mapping")
           Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
+          # toc()
+          
           unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
           
+          # tic("Class balancing")
           balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
           sampling_indices <- rep(0, length(balanced_classes))
           
@@ -223,6 +247,9 @@ create_generator_from_config <- function(config,
             
           }
           
+          # toc()
+          
+          # tic("Resampling")
           sampling_indices <<- sampling_indices[sampling_indices > 0]
           
           if (length(sampling_indices) < length(all_idx))
@@ -230,15 +257,23 @@ create_generator_from_config <- function(config,
                                         size = length(all_idx),
                                         replace = TRUE)
           
+          # toc()
+          
+          
+        } else {
+          
+          # tic("First sample")
+          sampling_indices <<- sample(all_idx, length(all_idx))
+          # toc()
           
           
         }
         
+        # tic("Num batches")
         num_batches <- ceiling(length(sampling_indices) / num_windows)
-        if (num_batches > 1)
-          batch_idx <<- as.numeric(cut(seq_along(sampling_indices), num_batches))
-        else
-          batch_idx <<- rep(1, times = length(sampling_indices))
+        batch_idx <<- rep(seq(max_epochs), each = num_windows) 
+        
+        # toc()
         
       } else {
         
@@ -246,9 +281,16 @@ create_generator_from_config <- function(config,
         
       }
       
+      # toc()
+      # toc()
+      
     }
     
-    idx <- sampling_indices[batch_idx == sub_epoch]
+    # tic("Coordinates")
+    # print(batch_idx)
+    idx <- sampling_indices[which(batch_idx == sub_epoch)]
+    
+    # print(idx)
     
     coords <- idx %>% arrayInd(.dim = dim(Vy))
     
@@ -256,11 +298,12 @@ create_generator_from_config <- function(config,
     y <- coords[, 2] - 1
     z <- coords[, 3] - 1
     
+    # toc()
+    
+    # tic("Reading inputs")
     X_vol <- list()
     
     for (input in seq(num_inputs)) {
-      
-      # cat("MD5 of input number", input, "is:", digest::digest(Vx[[input]]), "\n")
       
       X <- get_windows_at(Vx[[input]], config$width, x, y, z)
       X_coords <- X[, 1:3]
@@ -338,6 +381,7 @@ create_generator_from_config <- function(config,
       
     }
     
+    # toc()
     # print("After Reading X")
     if (any(dim(Vy) != dim(Vx[[1]]))) {
       
@@ -355,49 +399,65 @@ create_generator_from_config <- function(config,
       
     }
     
-    # print("Reading Y")
-    # str(dim(Vy))
-    # str(range(x_))
-    # str(range(y_))
-    # str(range(z_))
-    # str(config$output_width)
-    
-    # stopifnot(all(x_ >= radius - 1), all(y_ >= radius - 1), all(z_ >= radius - 1))
-    
-    # cat("MD5 of output is:", digest::digest(Vy), "\n")
-    
+    # tic("Reading outputs")
     
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
     
+    # toc()
     
-    if (config$categorize_output) {
+    if (config$only_convolutionals) {
       
-      Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
+      # tic("Transforming for convolutional")
       
-      Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
+      Y <- array(Y, dim = c(length(idx), config$output_width, config$output_width, config$output_width, 1))
       
-      if (config$multioutput) {
+      if (config$categorize_output) {
         
-        # cat("Multioutput\n")
+        Y_new <- to_categorical_volume_cpp(Y[, , , , 1], unique_labels = unique_labels)
         
-        Y_list <- list()
-        for (i in seq(config$output_width ^ 3)) {
-          
-          Y_list[[i]] <- Y[ , 1:config$num_classes]
-          Y <- Y[, -c(1:config$num_classes)]
-          
-        }
+        x <- c(list(X_coords), X_vol)
         
-        Y <- Y_list
+        # toc()
+        
+        # toc()
+        
+        return(list(x, Y_new))
         
       }
       
-      x <- c(list(X_coords), X_vol)
       
-      # cat("Exiting...\n")
+    } else {
       
-      return(list(x, Y))
+      if (config$categorize_output) {
+        
+        Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
+        
+        Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
+        
+        if (config$multioutput) {
+          
+          # cat("Multioutput\n")
+          
+          Y_list <- list()
+          for (i in seq(config$output_width ^ 3)) {
+            
+            Y_list[[i]] <- Y[ , 1:config$num_classes]
+            Y <- Y[, -c(1:config$num_classes)]
+            
+          }
+          
+          Y <- Y_list
+          
+        }
+        
+        x <- c(list(X_coords), X_vol)
+        
+        # toc()
+        
+        return(list(x, Y))
+        
+      }
       
     }
     
@@ -430,7 +490,10 @@ create_generator_from_config <- function(config,
     
     x <- c(list(X_coords), X_vol)
     
+    # toc()
+    
     return(list(x, Y))
+    
     
   }
   

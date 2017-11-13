@@ -37,28 +37,36 @@ create_model_from_config <- function(config) {
     vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
     
     vol_outputs[[v_input]] <- vol_inputs[[v_input]] %>% 
-      layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input]))
+      layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
+      layer_permute(dims = c(1, 4, 3, 2, 5))
     
-    if (config$initialize_with_lstm && all(is.numeric(config$lstm_units)) && (length(config$lstm_units) >= 2)) {
-      
-      lstm_units <- as.integer(config$lstm_units)
-      
-      vol_outputs[[v_input]] <- vol_outputs[[v_input]] %>% 
-        layer_reshape(target_shape = c(config$width, config$width, config$width)) %>%
-        time_distributed(layer_lstm(units = lstm_units[1]), 
-                         batch_input_shape = list(NULL, config$width, config$width, config$width)) %>%
-        layer_lstm(units = config$lstm_units[2])
-      
-    }
+    # if (config$initialize_with_lstm && all(is.numeric(config$lstm_units)) && (length(config$lstm_units) >= 2)) {
+    #   
+    #   lstm_units <- as.integer(config$lstm_units)
+    #   
+    #   vol_outputs[[v_input]] <- vol_outputs[[v_input]] %>% 
+    #     layer_reshape(target_shape = c(config$width, config$width, config$width)) %>%
+    #     time_distributed(layer_lstm(units = lstm_units[1]), 
+    #                      batch_input_shape = list(NULL, config$width, config$width, config$width)) %>%
+    #     layer_lstm(units = config$lstm_units[2])
+    #   
+    # }
     
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
       add_layers(layers_definition = config$vol_layers[[v_input]],
                  batch_normalization = config$vol_batch_normalization,
                  activation = config$vol_activation,
                  dropout = config$vol_dropout,
-                 clf = FALSE) %>% 
-      layer_flatten()
+                 clf = FALSE) 
     
+    shape <- vol_outputs[[v_input]] %>% object_shape()
+    
+    if (!config$only_convolutionals & length(shape) > 2) {
+      
+      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>%
+        layer_flatten()
+      
+    }
     
     if (v_input == 1) {
       
@@ -79,12 +87,17 @@ create_model_from_config <- function(config) {
                         "features" = output_features,
                         "volumes"  = output_vol)
   
-  main_output <- main_output %>% 
-    add_layers(layers_definition = config$common_layers,
-               batch_normalization = config$common_batch_normalization,
-               activation = config$common_activation,
-               dropout = config$common_dropout,
-               clf = FALSE)
+  
+  if (length(config$common_layers) > 0) {
+    
+    main_output <- main_output %>% 
+      add_layers(layers_definition = config$common_layers,
+                 batch_normalization = config$common_batch_normalization,
+                 activation = config$common_activation,
+                 dropout = config$common_dropout,
+                 clf = FALSE)
+    
+  }
   
   # Finalize with convolutional?
   if (config$finalize_with_convolutional) {

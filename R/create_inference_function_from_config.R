@@ -57,10 +57,19 @@ create_inference_function_from_config <- function(config) {
        seq(from = 1, to = dim(V0)[2], by = stride), 
        seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
     all_idx <- which(V0 > 0) 
-
+    
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
-      res <- array(0, dim = c(dim(V[[1]]), config$last_layer$params$num_classes))
+      if (config$only_convolutionals) {
+        
+        num_classes <- config$num_classes
+        
+      } else {
+        
+        num_classes <- config$last_layer$params$num_classes
+        
+      }
+      res <- array(0, dim = c(dim(V[[1]]), num_classes))
       
     } else {
       
@@ -198,30 +207,46 @@ create_inference_function_from_config <- function(config) {
       
       inputs <- c(list(X_coords), X_vol)
       
-      output <- .model %>% keras::predict_on_batch(x = inputs)
-      
-      if (config$categorize_output) {
+      # if (!config$only_convolutionals) {
+      #   
+      #   output <- .model %>% keras::predict_on_batch(x = inputs)
+      #   
+      # } else {
         
-        # Should be a categorical layer
-        if (config$last_layer$type == "categorical") {
+        # Available memory is the memory limit minus the memory reserved for the parameters in the model
+        available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$count_params()))
+        
+        # Get the maximum number of objects that fit into the memory limit.
+        batch_size <- as.integer(available_memory / 
+                                   object.size(vector(mode = "double", length = sum(.model %>% model_units()))))
+        
+        output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
+        
+      # }
+      
+      if (config$only_convolutionals) {
+        
+        # output <- aperm(output, perm = c(1, 4, 3, 2, 5))
+        
+        if (config$categorize_output) {
           
-          num_classes <- config$last_layer$params$num_classes
-          units <- config$last_layer$params$units
-          
-          if (config$multioutput)
-            output <- Reduce(cbind, output)
-          
-          dims <- dim(output)
+          num_classes <- config$num_classes
           
           if (config$category_method == "simple") {
             
-            new_output <- array(t(output), dim = c(num_classes, units * dims[1]))
-            classes <- apply(new_output, 2, which.max) - 1
-            output <- t(array(classes, dim = c(units, dims[1])))
+            # Remove the class dimension
+            new_output <- array(0, dim = dim(output)[-5])
+            n_batch <- dim(output)[1]
+            
+            for (id in seq(n_batch)) {
+              
+              new_output[id, , , ] <- which_max(output[id, , , , ])
+              
+            }
             
             if (config$output_width > 1) {
               
-              results_to_volume_label_with_distance(V = output, 
+              results_to_volume_label_with_distance(V = new_output, 
                                                     width = config$output_width,
                                                     res = res, 
                                                     last_distance = last_distance,  
@@ -231,15 +256,15 @@ create_inference_function_from_config <- function(config) {
               
             } else {
               
-              res[idx] <- output
+              res[idx] <- new_output
               
             }
             
           } else {
-
+            
             for (k in seq(num_classes)) {
               
-              new_output <- output[, seq(from = k, to = num_classes * units, by = num_classes)]
+              new_output <- output[ , , , , k]
               
               res_ <- res[, , , k]
               
@@ -265,29 +290,6 @@ create_inference_function_from_config <- function(config) {
             
           }
           
-        }
-        
-      } else {
-        
-        # if its a multivalued layer, treat as a categorical layer
-        if (config$last_layer$type == "multivalued") {
-          
-          if (config$output_width > 1) {
-            
-            results_to_volume_label_with_distance(V = round(output), 
-                                                  width = config$output_width,
-                                                  res = res,  
-                                                  last_distance = last_distance,  
-                                                  x = x, 
-                                                  y = y, 
-                                                  z = z)
-            
-          } else {
-            
-            res[idx] <- round(output)
-            
-          }
-          
         } else {
           
           if (config$output_width > 1) {
@@ -308,8 +310,121 @@ create_inference_function_from_config <- function(config) {
           
         }
         
+      } else {
+        
+        if (config$categorize_output) {
+          
+          # Should be a categorical layer
+          if (config$last_layer$type == "categorical") {
+            
+            num_classes <- config$last_layer$params$num_classes
+            units <- config$last_layer$params$units
+            
+            if (config$multioutput)
+              output <- Reduce(cbind, output)
+            
+            dims <- dim(output)
+            
+            if (config$category_method == "simple") {
+              
+              new_output <- array(t(output), dim = c(num_classes, units * dims[1]))
+              classes <- apply(new_output, 2, which.max) - 1
+              output <- t(array(classes, dim = c(units, dims[1])))
+              
+              if (config$output_width > 1) {
+                
+                results_to_volume_label_with_distance(V = output, 
+                                                      width = config$output_width,
+                                                      res = res, 
+                                                      last_distance = last_distance,  
+                                                      x = x, 
+                                                      y = y, 
+                                                      z = z)
+                
+              } else {
+                
+                res[idx] <- output
+                
+              }
+              
+            } else {
+              
+              for (k in seq(num_classes)) {
+                
+                new_output <- output[, seq(from = k, to = num_classes * units, by = num_classes)]
+                
+                res_ <- res[, , , k]
+                
+                if (config$output_width > 1) {
+                  
+                  results_to_volume(V = new_output, 
+                                    width = config$output_width,
+                                    res = res_,  
+                                    counts = counts,
+                                    x = x, 
+                                    y = y, 
+                                    z = z)
+                  
+                } else {
+                  
+                  res_[idx] <- new_output
+                  
+                }
+                
+                res[, , , k] <- res_
+                
+              } 
+              
+            }
+            
+          }
+          
+        } else {
+          
+          # if its a multivalued layer, treat as a categorical layer
+          if (config$last_layer$type == "multivalued") {
+            
+            if (config$output_width > 1) {
+              
+              results_to_volume_label_with_distance(V = round(output), 
+                                                    width = config$output_width,
+                                                    res = res,  
+                                                    last_distance = last_distance,  
+                                                    x = x, 
+                                                    y = y, 
+                                                    z = z)
+              
+            } else {
+              
+              res[idx] <- round(output)
+              
+            }
+            
+          } else {
+            
+            if (config$output_width > 1) {
+              
+              results_to_volume(V = output, 
+                                width = config$output_width,
+                                res = res,  
+                                counts = counts,
+                                x = x, 
+                                y = y, 
+                                z = z)
+              
+            } else {
+              
+              res[idx] <- output
+              
+            }
+            
+          }
+          
+          
+        }
         
       }
+      
       
       if (progress) {
         
@@ -369,12 +484,11 @@ create_inference_function_from_config <- function(config) {
         res <- smooth_by_gaussian_kernel(image = res, 
                                          kernel_sigma = config$regularize$sigma, 
                                          kernel_width = config$regularize$width)
-
+        
       }
     
     if ((config$categorize_output) & (config$category_method == "by_class")) {
       
-      # res <- apply(res, c(1:3), which.max) - 1
       res <- which_max(res)
       
     }
@@ -382,7 +496,7 @@ create_inference_function_from_config <- function(config) {
     if (config$categorize_output) {
       
       res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
-
+      
     }
     
     return(res)
