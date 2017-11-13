@@ -255,7 +255,6 @@ fit_with_generator <- function(.model,
   
   new_batch_size <- 0
   
-  
   # For each training epoch
   for (epoch in training_epochs) {
     
@@ -307,34 +306,12 @@ fit_with_generator <- function(.model,
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
       
       if (new_batch_size == 0) {
+        
+        batch_size <- .model %>% compute_batch_size()
 
-        config <- .model$hyperparameters
-        
-        # Available memory is the memory limit minus the memory reserved for the parameters in the model
-        available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$count_params()))
-        
-        # Get the maximum number of objects that fit into the memory limit.
-        batch_size <- as.integer(available_memory / 
-                                   object.size(vector(mode = "double", length = sum(model %>% model_units()))))
-        
         new_batch_size <- batch_size
         cat("Batch size is stablished at:", batch_size, "\n")
-        
-        # 
-        # width <- round(length(data[[1]][[2]][1, ]) ^ (1 / 3))
-        # if (width < 15) {
-        #   
-        #   new_batch_size <- batch_size
-        #   
-        # } else {
-        #   
-        #   config <- .model$hyperparameters
-        #   
-        #   new_batch_size <- batch_size
-        #   
-        #   
-        # }
-        
+
       }
       
       if (length(data) > 2) {

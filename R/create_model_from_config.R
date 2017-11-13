@@ -38,19 +38,7 @@ create_model_from_config <- function(config) {
     
     vol_outputs[[v_input]] <- vol_inputs[[v_input]] %>% 
       layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
-      layer_permute(dims = c(1, 4, 3, 2, 5))
-    
-    # if (config$initialize_with_lstm && all(is.numeric(config$lstm_units)) && (length(config$lstm_units) >= 2)) {
-    #   
-    #   lstm_units <- as.integer(config$lstm_units)
-    #   
-    #   vol_outputs[[v_input]] <- vol_outputs[[v_input]] %>% 
-    #     layer_reshape(target_shape = c(config$width, config$width, config$width)) %>%
-    #     time_distributed(layer_lstm(units = lstm_units[1]), 
-    #                      batch_input_shape = list(NULL, config$width, config$width, config$width)) %>%
-    #     layer_lstm(units = config$lstm_units[2])
-    #   
-    # }
+      layer_permute(dims = c(3, 2, 1, 4))
     
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
       add_layers(layers_definition = config$vol_layers[[v_input]],

@@ -29,6 +29,9 @@ create_inference_function_from_config <- function(config) {
     
     .model <- model$model
     
+    # Freeze learning phase (unfreeze at the end)
+    model %>% set_trainability(trainability = FALSE)
+
     stride <- switch(speed, 
                      "slower" = 1,
                      "medium" = (config$output_width + 1) / 2,
@@ -488,6 +491,9 @@ create_inference_function_from_config <- function(config) {
       res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
       
     }
+    
+    # Unfreeze learning phase (frozen at the beginning)
+    model %>% set_trainability(trainability = TRUE)
     
     return(res)
     

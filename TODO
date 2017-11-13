@@ -46,13 +46,14 @@ ALREADY DONE:
   + layer_permute para que el inicio sea correcto.
   = Añadir batch_size en fit_with_generator como argumento.
   + batch_size calculado en inference function
+  + Congelar el modelo a la hora de hacer inferencia.
+  + Adaptar funciones para ancho "config$width" par.
   
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Reshape a la salida de la red para que tenga dimensiones (output_width ^ 3, num_classes) sobre la que se aplica softmax.
-  = Adaptar funciones para ancho "config$width" par.
   = Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
   = keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE)
   = Mejoras de velocidad en create_generator_from_config.
@@ -85,7 +86,7 @@ TODO:
   - Poner capas convolucionales a la salida
   - Más tipos de bloques: block_clf, block_resnet, block_unet, block_smooth (como last layer y extended), block_crop, block_downsample, block_upsample...con sus wrappers.
   - Extended Model cuando last_layer tiene type multivalued o similar, se le añade una más (que habrá que gestionar en la inference function), por ejemplo haciendo argmax o un layer_dot con un tensor constante...
-  - App shiny (playground) para hacer el entranmiento, definir la configuración, crear modelos o aplicarlos, con la posibilidad de usar un widget para visualizar imágenes 3d.
+  - App shiny (playground) para hacer el entrenamiento, definir la configuración, crear modelos o aplicarlos, con la posibilidad de usar un widget para visualizar imágenes 3d.
   - Manipulación de redes. 
   - pad_sequence con lstm para hacer modelos sobre la imagen al completo.
   - Generación de textos a partir de las imágenes completas: empezar con output \in\{"axial", "coronal", "sagital"\} e ir complicando el modelo.

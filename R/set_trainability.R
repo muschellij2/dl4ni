@@ -9,26 +9,36 @@
 #' @return changes the \code{trainable} attribute in the selected layers in the model, in place.
 #' @export
 #'
-set_trainability <- function(.model, layer_names, trainability) {
+set_trainability <- function(.model, layer_names = NULL, trainability = FALSE) {
   
   # Check input class
-  if (inherits(.model, "DLmodel")) {
+  stopifnot(inherits(.model, "DLmodel")) 
+  
+  # Get layer names
+  all_layer_names <- sapply(.model$model$layers, function(s) s$name)
+  
+  if (is.null(layer_names)) {
     
-    # Get layer names
-    all_layer_names <- sapply(.model$model$layers, function(s) s$name)
+    layer_names <- all_layer_names
     
-    # Get the index of selected layers
-    idx <- match(layer_names, all_layer_names)
-    idx <- idx[!is.na(idx)]
+  }
+  
+  # Get the index of selected layers
+  idx <- match(layer_names, all_layer_names)
+  idx <- idx[!is.na(idx)]
+  
+  if (length(trainability) == 1) {
     
-    # Set the trainable attribute of the layers to the desired value
-    if (length(idx) > 0) {
+    trainability <- rep(trainability, length(idx))
+    
+  }
+  
+  # Set the trainable attribute of the layers to the desired value
+  if (length(idx) > 0) {
+    
+    for (i in seq_along(idx)) {
       
-      for (i in seq_along(idx)) {
-        
-        .model$model$layers[[idx[i]]]$trainable <- trainability[i]
-        
-      }
+      .model$model$layers[[idx[i]]]$trainable <- trainability[i]
       
     }
     
