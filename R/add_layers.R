@@ -62,15 +62,20 @@ add_layers <- function(object,
              
              "dense" = {
                
-               new_layer <- do.call(layer_dense, args = layer_to_add$params)
-               
                is_volumetric <- length(input_shape) == 4
                
                # in case it comes from a volumetric layer (convolutional),
                # first we have to flatten it.
                if (is_volumetric) {
                  
-                 output <- output %>% layer_flatten()
+                 # output <- output %>% layer_flatten()
+                 new_layer <- layer_conv3d(filters = layer_to_add$params$units,
+                                           kernel_size = input_shape[1:3])
+                 
+                 
+               } else {
+                 
+                 new_layer <- do.call(layer_dense, args = layer_to_add$params)
                  
                }
                
