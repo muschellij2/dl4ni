@@ -41,17 +41,17 @@ ALREADY DONE:
   + Pasar de una capa no convolucional a otra que sí sea convolucional requiere de un paso intermedio.
   + Faltan wrappers para block_downsample, block_upsample y block_unet, en "wrappers" y en "add_layers".
   + Revisar map_ids y el remap_classes que no se almacena correctamente algunas veces.
+  + batch_size <- config$memory_limit / object.size(vector(mode = "double", length = sum(model %>% model_units())))  
+  + Determinar número de batches cuando el modelo es convolucional.
+  + layer_permute para que el inicio sea correcto.
   
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
-  = Determinar número de batches cuando el modelo es convolucional.
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Adaptar funciones para ancho "config$width" par.
   = Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
-  = layer_permute para que el inicio sea correcto.
   = keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE)
-  = batch_size <- config$memory_limit / object.size(vector(mode = "double", length = sum(model %>% model_units())))
   = Mejoras de velocidad en create_generator_from_config.
   = Añadir batch_size en fit_with_generator como argumento.
   = Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
