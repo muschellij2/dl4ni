@@ -185,40 +185,40 @@ block_upsample <- function(object,
 #'
 #' @export 
 #' 
-block_unet <- function(object, 
-                       initial_filters = 2, 
-                       num_down_steps = 3, 
-                       num_up_steps = num_down_steps,
-                       kernel_size = c(3, 3, 3),
-                       activation = "relu",
-                       params = NULL) {
-  
-  # Override arguments if needed
-  if (!is.null(params)) {
-    
-    initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
-    if (!is.null(params$kernel_size)) {
-      
-      kernel_size <- params$kernel_size
-      
-    }
-    num_down_steps <- ifelse("num_down_steps" %in% names(params), params$num_down_steps, num_down_steps)
-    num_up_steps <- ifelse("num_up_steps" %in% names(params), params$num_up_steps, num_up_steps)
-    activation <- ifelse("activation" %in% names(params), params$activation, activation)
-    
-  }
-  
-  # Just concatenate both blocks, a downsampling and an upsampling one.
-  output <- object %>% 
-    block_downsample(initial_filters = initial_filters,
-                     kernel_size = kernel_size,
-                     num_steps = num_down_steps,
-                     activation = activation) %>% 
-    block_upsample(kernel_size = kernel_size,
-                   num_steps = num_up_steps,
-                   activation = activation)
-  
-  # Return the composed object
-  return(output)
-  
-}
+# block_unet <- function(object, 
+#                        initial_filters = 2, 
+#                        num_down_steps = 3, 
+#                        num_up_steps = num_down_steps,
+#                        kernel_size = c(3, 3, 3),
+#                        activation = "relu",
+#                        params = NULL) {
+#   
+#   # Override arguments if needed
+#   if (!is.null(params)) {
+#     
+#     initial_filters <- ifelse("initial_filters" %in% names(params), params$initial_filters, initial_filters)
+#     if (!is.null(params$kernel_size)) {
+#       
+#       kernel_size <- params$kernel_size
+#       
+#     }
+#     num_down_steps <- ifelse("num_down_steps" %in% names(params), params$num_down_steps, num_down_steps)
+#     num_up_steps <- ifelse("num_up_steps" %in% names(params), params$num_up_steps, num_up_steps)
+#     activation <- ifelse("activation" %in% names(params), params$activation, activation)
+#     
+#   }
+#   
+#   # Just concatenate both blocks, a downsampling and an upsampling one.
+#   output <- object %>% 
+#     block_downsample(initial_filters = initial_filters,
+#                      kernel_size = kernel_size,
+#                      num_steps = num_down_steps,
+#                      activation = activation) %>% 
+#     block_upsample(kernel_size = kernel_size,
+#                    num_steps = num_up_steps,
+#                    activation = activation)
+#   
+#   # Return the composed object
+#   return(output)
+#   
+# }

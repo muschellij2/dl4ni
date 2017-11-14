@@ -188,19 +188,18 @@ upsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
 #'
 #' @param initial_filters    (integer) Number of initial filters used in the first layer, Default: 2
 #' @param kernel_size        (list or vector) size of the kernels to use, Default: c(3, 3, 3)
-#' @param num_down_steps     (integer) Steps for the downsampling path, Default: 3
+#' @param depth              (integer) Steps for the downsampling path, Default: 3
 #' @param ...                arguments for the \code{\link{block_downsample}} function.
 #'
 #' @return A list with \code{type} = "unet" and \code{params} with the rest of parameters that define the block.
 #'
 #' @export 
 #' 
-unet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_down_steps = 3, ...) {
+unet <- function(initial_filters = 2, depth = 3, ...) {
   
   list(type = "unet",
        params = list(initial_filters = initial_filters, 
-                     kernel_size = kernel_size, 
-                     num_down_steps = num_down_steps,
+                     depth = depth,
                      ...))
   
 }

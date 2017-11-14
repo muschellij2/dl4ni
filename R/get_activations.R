@@ -1,3 +1,14 @@
+#' @title Get Activations in Intermediate Layer
+#'
+#' @description This function computes the activation of an intermediate layer of a model.
+#'
+#' @param object     (\code{DLmodel} object) Base model.
+#' @param layer      (integer or character) Name or index of the intermediate layer to compute its output.
+#'
+#' @return A function that computes the output of the layer given an input.
+#' @export
+#' @import keras
+#' 
 get_activations <- function(object, layer) {
   
   suppressPackageStartupMessages(require(keras))

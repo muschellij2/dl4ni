@@ -144,9 +144,9 @@ add_layers <- function(object,
              "unet" = {
                
                params <- layer_to_add$params
-               
-               output <- output %>% block_unet(params = params)
-               
+               params$object <- output
+               output <- do.call(block_unet, args = params)
+
                if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
                
              },
