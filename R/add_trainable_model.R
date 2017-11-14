@@ -18,8 +18,6 @@
 #' @import igraph
 add_trainable_model <- function(flow, 
                                 scheme = NULL, 
-                                inputs = list(),
-                                output, 
                                 subset = NULL,
                                 verbose = TRUE) {
   
@@ -28,7 +26,7 @@ add_trainable_model <- function(flow,
   # Basic checks
   stopifnot(inherits(flow, "DLflow"))
 
-  stopifnot(is.list(scheme))
+  stopifnot(inherits(scheme, "DLscheme"))
   stopifnot(!is.null(scheme$vol_layers_pattern))
   stopifnot(!is.null(scheme$last_hidden_layers))
   stopifnot(!is.null(scheme$units) | !is.null(scheme$output_width))
@@ -37,10 +35,8 @@ add_trainable_model <- function(flow,
     scheme$units <- scheme$output_width ^ 3
   
   # Remaining parameters to be computed
-  vol_layers <- rep(list(scheme$vol_layers_pattern), times = length(inputs))
   params <- scheme
-  params$vol_layers <- vol_layers
-  params$subset <- subset
+  params$labels_subset <- subset
   
   class(params) <- c("DLscheme", class(params))
   

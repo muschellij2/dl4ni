@@ -109,6 +109,9 @@ fit_with_generator <- function(.model,
   # Initialize variables for training
   model <- .model$model
   
+  # Unfreeze learning phase (freeze at the end)
+  model %>% set_trainability(trainability = TRUE)
+  
   if ("best_loss" %in% names(.model)) {
     
     best_validation_loss <- .model$best_loss
@@ -208,7 +211,9 @@ fit_with_generator <- function(.model,
         weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
         
         .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-        # file.path(model_pathmodel_filename %>% load_model_hdf5()
+
+        # Unfreeze learning phase (freeze at the end)
+        .model$model %>% set_trainability(trainability = TRUE)
         
         .model$best_loss <- best_validation_loss
         
@@ -474,17 +479,20 @@ fit_with_generator <- function(.model,
     
   }
   
-  # To end, return the best model in the training.
-  if (keep_best) {
-    
-    message("Loading previous best model, with loss:", best_validation_loss)
-    
-    weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
-    
-    .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-    
-    .model$best_loss <- best_validation_loss
-    
-  }
+  # # To end, return the best model in the training.
+  # if (keep_best) {
+  #   
+  #   message("Loading previous best model, with loss:", best_validation_loss)
+  #   
+  #   weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
+  #   
+  #   .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
+  #   
+  #   # Freeze learning phase
+  #   .model$model %>% set_trainability(trainability = FALSE)
+  #   
+  #   .model$best_loss <- best_validation_loss
+  #   
+  # }
   
 }

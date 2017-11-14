@@ -134,7 +134,7 @@ train_output <- function(flow,
           filenames[f] <- paste0(filenames[f], ".nii.gz")
           
           RNifti::writeNifti(image = previous_results[[given_output]],
-                              file = file.path(tmp_folder, filenames[f]))
+                             file = file.path(tmp_folder, filenames[f]))
           
         } else {
           
@@ -152,48 +152,15 @@ train_output <- function(flow,
     if (inherits(model, "DLscheme")) {
       
       if (verbose)
-        cat("Actually building model...\n")
-      
-      params <- model
-      num_volumes <- c()
-      for (res in results) {
-        
-        img <- read_nifti_to_array(res[1])
-        this_dim <- dim(img)
-        nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
-        num_volumes <- c(num_volumes, nv)
-        
-      }
-      params$num_volumes <- num_volumes
-      
-      # Parameters from the output template
-      if (verbose)
-        cat("Preparing output...\n")
-      output_template <- output_filenames[1]
-      output_info <- analyze_output(output_template)
-      
-      if (!is.null(params$subset) & is.list(params$subset)) {
-        
-        output_info <- do.call(subset_problem, args = list(problem_info = output_info, 
-                                                           subset_classes = params$subset$subset_classes,
-                                                           unify_classes = params$subset$unify_classes))
-        
-      }
-      
-      # Definition of the last layer
-      last_layer_info <- output_info %>% define_last_layer(units = params$units, 
-                                                           force_categorical = TRUE, 
-                                                           multioutput = TRUE, 
-                                                           hidden_layers = params$last_hidden_layers)
-      
-      last_layer_info$num_volumes <- num_volumes
-      params$last_layer_info <- last_layer_info
+        cat("Scheme detected. Model must be built....\n")
       
       # Configuration of the model
       if (verbose)
         cat("Preparing model configuration...\n")
-      config <- do.call(define_config, args = params)
-      config$num_volumes <- num_volumes
+      
+      params <- model
+      
+      config <- params %>% instantiate_model_config(inputs = results, outputs = output_filenames, labels_subset = params$labels_subset)
       
       # Model creation
       if (verbose)
@@ -209,20 +176,18 @@ train_output <- function(flow,
     
     # Model configuration
     config <- model$hyperparameters
-
+    
     # Training configuration
     train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))
     test_indices <- setdiff(seq(num_subjects), train_indices)
     
-    train_config <- config %>% create_generator_from_config(x_files = lapply(results, function(x) x[train_indices]),
-                                                             y_files = output_filenames[train_indices],
-                                                             mode = "sampling",
-                                                             max_sub_epochs = max_sub_epochs)
+    train_config <- model %>% create_generator(x_files = lapply(results, function(x) x[train_indices]),
+                                               y_files = output_filenames[train_indices],
+                                               batches_per_file = max_sub_epochs)
     
-    test_config <- config %>% create_generator_from_config(x_files = lapply(results, function(x) x[test_indices]),
-                                                           y_files = output_filenames[test_indices],
-                                                           mode = "sampling",
-                                                           max_sub_epochs = max_sub_epochs)
+    test_config <- model %>% create_generator(x_files = lapply(results, function(x) x[test_indices]),
+                                              y_files = output_filenames[test_indices],
+                                              batches_per_file = max_sub_epochs)
     
     keep_best <- TRUE
     saving_path <- file.path(system.file(package = "dl4ni"), "models")

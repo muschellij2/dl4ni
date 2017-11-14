@@ -51,12 +51,16 @@ ALREADY DONE:
   + Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
   = Visualizador de modelos: keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE). Necesita pydot y graphviz.
   + Visualizador de activaciones en capas convolucionales
+  + Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
+  + Actualizar flows para usar "DLscheme"
   
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = Visualizar input que maximiza las activaciones de una capa
+  = Actualizar ejemplos con "DLscheme"
+  = Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
-  = Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
   = Mejoras de velocidad en create_generator_from_config.
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
@@ -66,7 +70,6 @@ WIP:
   
 TODO:
   - Meter el info del problema en el config.
-  - Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   - "save_model" y "load_model" con la posibilidad de guardar comprimido.
   - Reshape a la salida de la red para que tenga dimensiones (output_width ^ 3, num_classes) sobre la que se aplica softmax.
   - Error checking en todas las funciones con respecto a los argumentos de entrada (del tipo correcto, de la existencia de archivos...)

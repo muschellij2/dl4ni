@@ -99,9 +99,6 @@ execute_flow <- function(flow, inputs = list(),
                  
                  "DLmodel" = {
                    
-                   # Inference function for the given model
-                   config <- process$hyperparameters
-                   
                    if (mode[1] == "debug") {
                      
                      mode <- "faster"
@@ -109,7 +106,6 @@ execute_flow <- function(flow, inputs = list(),
                      config$regularize <- NULL
                      
                    }
-                   infer <- config %>% create_inference_function_from_config()
                    
                    # Infer on input volumes
                    input_imgs <- flow$computed_outputs[my_inputs]
