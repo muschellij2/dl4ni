@@ -91,7 +91,7 @@ create_generator <- function(model,
     message("Number of actual windows: ", length(sampling_indices))
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, max_sub_epochs))
+    max_epochs <- min(c(num_batches, batches_per_file))
     
     if (max_epochs > 1) {
       
@@ -139,7 +139,7 @@ create_generator <- function(model,
     }
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, max_sub_epochs))
+    max_epochs <- min(c(num_batches, batches_per_file))
     
     batch_idx <- rep(seq(max_epochs), each = num_windows) 
     
@@ -149,7 +149,7 @@ create_generator <- function(model,
   
   message("Number of batches per volume: ", num_batches)
   
-  max_epochs <- min(c(num_batches, max_sub_epochs))
+  max_epochs <- min(c(num_batches, batches_per_file))
   
   # toc()
   
@@ -490,7 +490,7 @@ create_generator <- function(model,
   
   return(list(generator = f_generator, 
               num_windows = num_windows,
-              max_sub_epochs = max_epochs,
+              max_sub_epochs = batches_per_file,
               num_files = length(y_files)))
   
   
