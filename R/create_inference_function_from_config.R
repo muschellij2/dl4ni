@@ -12,15 +12,23 @@
 #' @export 
 #' @importFrom keras to_categorical
 #' @import progress
-create_inference_function_from_config <- function(config) {
+create_inference_function_from_config <- function(object) {
   
-  stopifnot(inherits(config, "DLconfig"))
+  stopifnot(inherits(object, "DLconfig") | inherits(object, "DLmodel"))
   
-  radius <- 0.5 * (config$width + 1)
+  if (inherits(object, "DLmodel")) {
+    
+    config <- object$hyperparameters
+    
+  } else {
+    
+    config <- object
+    
+  }
   
   f_inference <- function(model, 
                           V, 
-                          speed = c("slower", "medium", "faster"), 
+                          speed = c("faster", "medium", "slower"), 
                           ...) {
     
     num_inputs <- length(V)
