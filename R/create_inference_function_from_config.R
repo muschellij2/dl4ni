@@ -211,7 +211,7 @@ create_inference_function_from_config <- function(config) {
       inputs <- c(list(X_coords), X_vol)
       
       # Available memory is the memory limit minus the memory reserved for the parameters in the model
-      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$count_params()))
+      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$model$count_params()))
       
       # Get the maximum number of objects that fit into the memory limit.
       batch_size <- as.integer(available_memory / 
