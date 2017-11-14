@@ -22,9 +22,6 @@ create_model_from_config <- function(config) {
   
   output_features <- input_features %>% 
     add_layers(layers_definition = config$feature_layers,
-               batch_normalization = config$feature_batch_normalization,
-               activation = config$feature_activation,
-               dropout = config$feature_dropout,
                clf = FALSE)
   
   num_vol_inputs <- length(config$vol_layers)
@@ -42,9 +39,6 @@ create_model_from_config <- function(config) {
     
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
       add_layers(layers_definition = config$vol_layers[[v_input]],
-                 batch_normalization = config$vol_batch_normalization,
-                 activation = config$vol_activation,
-                 dropout = config$vol_dropout,
                  clf = FALSE) 
     
     shape <- vol_outputs[[v_input]] %>% object_shape()
@@ -80,9 +74,6 @@ create_model_from_config <- function(config) {
     
     main_output <- main_output %>% 
       add_layers(layers_definition = config$common_layers,
-                 batch_normalization = config$common_batch_normalization,
-                 activation = config$common_activation,
-                 dropout = config$common_dropout,
                  clf = FALSE)
     
   }
@@ -93,11 +84,11 @@ create_model_from_config <- function(config) {
     layer_to_add <- list(conv3d(filters = 1, 
                                 kernel_size = rep(config$convolutional_kernel_size, 3),
                                 force = config$output_width,
-                                padding = "same"))
+                                padding = "same",
+                                activation = config$vol_activation))
     
     main_output <- main_output %>% 
-      add_layers(layers_definition = layer_to_add, 
-                 activation = config$vol_activation)
+      add_layers(layers_definition = layer_to_add)
     
   }
   

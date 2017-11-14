@@ -2,6 +2,7 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
+#' @param info      (name) PARAM_DESCRIPTION
 #' @param output    (name) PARAM_DESCRIPTION
 #'
 #' @return OUTPUT_DESCRIPTION
@@ -13,9 +14,10 @@
 #' @export 
 #' @importFrom neurobase readnii
 #' @importFrom dplyr near
-analyze_output <- function(output) {
-  
-  info <- new.env()
+analyze_output <- function(info = NULL, output) {
+    
+  if (is.null(info))
+    info <- new.env()
   
   # read one of the output files to detect problem type
   y_file <- output[1]
@@ -50,6 +52,6 @@ analyze_output <- function(output) {
   }
   
   class(info) <- c("DLproblem", class(info))
-  return(info)
+  return(invisible(info))
 
 }

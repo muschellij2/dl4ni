@@ -18,18 +18,12 @@
 #' @details DETAILS
 #' @seealso 
 #'  \code{\link[neurobase]{fast_readnii}}
-
 #'  \code{\link[oro.nifti]{as.nifti}}
-
 #'  \code{\link[RNifti]{writeNifti}}
-
 #'  \code{\link[oro.nifti]{as.nifti}}
-
 #'  \code{\link[RNifti]{writeNifti}}
 #' @export 
 #' @importFrom neurobase fast_readnii
-#' @importFrom oro.nifti as.nifti
-#' @importFrom RNifti writeNifti
 #' @importFrom oro.nifti as.nifti
 #' @importFrom RNifti writeNifti
 #' @import 

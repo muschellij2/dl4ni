@@ -4,9 +4,6 @@
 #'
 #' @param object                 (name) PARAM_DESCRIPTION
 #' @param layers_definition      (call) PARAM_DESCRIPTION, Default: c()
-#' @param batch_normalization    (logical) PARAM_DESCRIPTION, Default: TRUE
-#' @param activation             (character) PARAM_DESCRIPTION, Default: 'relu'
-#' @param dropout                (numeric) PARAM_DESCRIPTION, Default: 0
 #' @param clf                    (logical) PARAM_DESCRIPTION, Default: FALSE
 #'
 #' @return OUTPUT_DESCRIPTION
@@ -18,9 +15,6 @@
 #' @import keras
 add_layers <- function(object, 
                        layers_definition = c(),
-                       batch_normalization = TRUE,
-                       activation = "relu",
-                       dropout = 0,
                        clf = FALSE) {
   
   require(keras)
@@ -56,9 +50,30 @@ add_layers <- function(object,
         
       }
       
+      # This should be moved to config.properties
+      defaults <- list(batch_normalization = FALSE,
+                       activation = "relu",
+                       dropout = 0)
+      
+      type <- layer_to_add$type
+      params <- layer_to_add$params
+      
+      # Overwrite default specification
+      this_config <- defaults
+      for (nm in names(defaults)) {
+        
+        if (!is.null(params[[nm]])) {
+          
+          this_config[[nm]] <- params[[nm]]
+          params[[nm]] <- NULL
+          
+        }
+        
+      }
+      
       input_shape <- object_shape(output)
       
-      switch(layer_to_add$type,
+      switch(type,
              
              "dense" = {
                
@@ -82,11 +97,11 @@ add_layers <- function(object,
                output <- output %>% 
                  new_layer 
                
-               if (batch_normalization) output <- output %>% layer_batch_normalization()
+               if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                
-               output <- output %>% layer_activation(activation = activation)
+               output <- output %>% layer_activation(activation = this_config$activation)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -96,7 +111,7 @@ add_layers <- function(object,
                
                output <- output %>% block_categorical(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -106,7 +121,7 @@ add_layers <- function(object,
                
                output <- output %>% block_regression(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -117,7 +132,7 @@ add_layers <- function(object,
                
                output <- output %>% block_multivalued(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -127,7 +142,7 @@ add_layers <- function(object,
                
                output <- output %>% block_resnet(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -137,7 +152,7 @@ add_layers <- function(object,
                
                output <- output %>% block_clf(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -146,8 +161,8 @@ add_layers <- function(object,
                params <- layer_to_add$params
                params$object <- output
                output <- do.call(block_unet, args = params)
-
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -157,7 +172,7 @@ add_layers <- function(object,
                
                output <- output %>% block_downsample(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -167,7 +182,7 @@ add_layers <- function(object,
                
                output <- output %>% block_upsample(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -225,11 +240,11 @@ add_layers <- function(object,
                  output <- output %>% 
                    new_layer 
                  
-                 if (batch_normalization) output <- output %>% layer_batch_normalization()
+                 if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                  
-                 output <- output %>% layer_activation(activation = activation)
+                 output <- output %>% layer_activation(activation = this_config$activation)
                  
-                 if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+                 if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                  
                } else {
                  
