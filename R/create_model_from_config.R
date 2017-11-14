@@ -92,14 +92,25 @@ create_model_from_config <- function(config) {
     
   }
   
+  # Check that last-but-one layer in case of "only_convolutionals" has the appropriate shape
+  if (config$only_convolutionals) {
+    
+    shape <- main_output %>% object_shape()
+    expected_shape <- c(config$output_width, config$output_width, config$output_width)
+    if (!all(shape[-4] == expected_shape))
+      stop(paste0("Output shapes are not correct. Expected: (", 
+                  paste0(expected_shape, collapse = ", "),
+                  ") . Obtained: (", 
+                  paste0(shape[-4], collapse = ", "),
+                  ")"))
+    
+  }
+  
   # Add last layer
   if (config$add_last_layer) {
     
     main_output <- main_output %>% 
       add_layers(layers_definition = list(config$last_layer),
-                 batch_normalization = FALSE,
-                 activation = config$output_activation,
-                 dropout = 0,
                  clf = FALSE)
     
   }
@@ -113,9 +124,6 @@ create_model_from_config <- function(config) {
     
     decoder_output <- decoder_input %>%
       add_layers(layers_definition = config$decoder_layers,
-                 batch_normalization = FALSE,
-                 activation = config$decoder_activation,
-                 dropout = 0,
                  clf = FALSE)
     
     decoder <- keras_model(inputs = decoder_input,
@@ -123,9 +131,6 @@ create_model_from_config <- function(config) {
     
     main_output <- main_output %>% 
       add_layers(layers_definition = config$decoder_layers,
-                 batch_normalization = FALSE,
-                 activation = config$decoder_activation,
-                 dropout = 0,
                  clf = FALSE)
     
     model <- keras_model(inputs = c(input_features, vol_inputs),

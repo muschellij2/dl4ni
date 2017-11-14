@@ -74,6 +74,7 @@ instantiate_model_config <- function(scheme, info = NULL, inputs = NULL, outputs
                                                   hidden_layers = scheme$last_hidden_layers)
     
     to_add$last_layer_info <- last_layer_info
+    to_add$vol_layers <- info %>% create_vol_layers(default_config$vol_layers_pattern)
     
      
     config <- do.call(define_config, args = c(scheme_list, to_add))

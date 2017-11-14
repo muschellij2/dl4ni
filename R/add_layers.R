@@ -83,10 +83,9 @@ add_layers <- function(object,
                # first we have to flatten it.
                if (is_volumetric) {
                  
-                 # output <- output %>% layer_flatten()
-                 new_layer <- layer_conv3d(filters = layer_to_add$params$units,
-                                           kernel_size = input_shape[1:3])
-                 
+                 new_params <- list(filters = layer_to_add$params$units,
+                                    kernel_size = input_shape[1:3])
+                 new_layer <- do.call(layer_conv_3d, args = new_params)
                  
                } else {
                  
@@ -107,8 +106,6 @@ add_layers <- function(object,
              
              "categorical" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_categorical(params = params)
                
                if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
@@ -116,8 +113,6 @@ add_layers <- function(object,
              },
              
              "regression" = {
-               
-               params <- layer_to_add$params
                
                output <- output %>% block_regression(params = params)
                
@@ -128,8 +123,6 @@ add_layers <- function(object,
              
              "multivalued" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_multivalued(params = params)
                
                if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
@@ -137,8 +130,6 @@ add_layers <- function(object,
              },
              
              "resnet" = {
-               
-               params <- layer_to_add$params
                
                output <- output %>% block_resnet(params = params)
                
@@ -148,8 +139,6 @@ add_layers <- function(object,
              
              "clf" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_clf(params = params)
                
                if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
@@ -158,7 +147,6 @@ add_layers <- function(object,
              
              "unet" = {
                
-               params <- layer_to_add$params
                params$object <- output
                output <- do.call(block_unet, args = params)
                
@@ -168,8 +156,6 @@ add_layers <- function(object,
              
              "downsample" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_downsample(params = params)
                
                if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
@@ -177,8 +163,6 @@ add_layers <- function(object,
              },
              
              "upsample" = {
-               
-               params <- layer_to_add$params
                
                output <- output %>% block_upsample(params = params)
                
@@ -203,9 +187,9 @@ add_layers <- function(object,
                can_convolutional <- length(input_shape) == 4
                new_width <- 0
                
-               if (!is.null(layer_to_add$params$force)) {
+               if (!is.null(params$force)) {
                  
-                 force <- layer_to_add$params$force
+                 force <- params$force
                  
                  if (is.numeric(force)) {
                    
@@ -219,12 +203,18 @@ add_layers <- function(object,
                  
                  new_width <- force
                  
-                 layer_to_add$params$force <- NULL
+                 params$force <- NULL
                  can_convolutional <- TRUE
                  
                }
                
-               new_layer <- do.call(layer_conv_3d, args = layer_to_add$params)
+               if (is.null(params$padding)) {
+                 
+                 params$padding <- "same"
+                 
+               }
+               
+               new_layer <- do.call(layer_conv_3d, args = params)
                
                if (can_convolutional) {
                  
