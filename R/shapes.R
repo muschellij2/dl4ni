@@ -9,7 +9,7 @@
 #'
 object_shape <- function(object) {
   
-  unlist(object$get_shape()$as_list()[-1])
+  parse_shape(object$get_shape())
   
 }
 
@@ -53,5 +53,18 @@ model_shapes <- function(model) {
 model_units <- function(model) {
   
   sapply(model$layers, layer_units)
+  
+}
+
+
+parse_shape <- function(shape) {
+  
+  suppressWarnings({
+    shape %>% 
+      as.character() %>% 
+      gsub(x = ., pattern = "(\\(|\\))", replacement = "") %>% 
+      strsplit(x = ., split = ",") %>% .[[1]] %>% 
+      as.numeric() %>% .[-1]
+  })
   
 }

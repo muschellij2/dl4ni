@@ -205,14 +205,14 @@ unet <- function(initial_filters = 2, depth = 3, ...) {
 }
 
 
-maxpooling <- function() {
+maxpooling <- function(mode = c("downsampling", "convolutional"), ...) {
   
-  list(type = "maxpooling", params = NULL)
+  list(type = "maxpooling", params = list(mode = mode[1], ...))
   
 }
 
-upsampling <- function() {
+upsampling <- function(mode = c("upsampling", "convolutional"), ...) {
   
-  list(type = "upsampling", params = NULL)
+  list(type = "upsampling", params = list(mode = mode[1], ...))
   
 }

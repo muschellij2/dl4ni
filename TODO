@@ -57,6 +57,7 @@ ALREADY DONE:
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = Después de load_model, no se mantiene el input de las coordenadas en redes convolucionales.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Añadir callback_tensorboard.

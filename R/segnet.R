@@ -1,5 +1,8 @@
 #' imlab-uiip/keras-segnet
-segnet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_steps = 5) {
+segnet <- function(initial_filters = 2, 
+                   kernel_size = c(3, 3, 3), 
+                   depth = 5, 
+                   mode = c("sampling", "convolutional")) {
   
   layers <- list()
   
@@ -7,7 +10,7 @@ segnet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_steps = 5)
     kernel_size <- rep(kernel_size[1], 3)
   
   # Maxpooling Path
-  for (step in seq(num_steps)) {
+  for (step in seq(depth)) {
     
     num_filters <- 2 ^ (step - 1) * initial_filters
     
@@ -18,16 +21,33 @@ segnet <- function(initial_filters = 2, kernel_size = c(3, 3, 3), num_steps = 5)
                                  activation = "relu",
                                  dropout = 0))
     
-    layers <- c(layers, list(maxpooling()))
+    if (mode == "sampling") {
+      
+      layers <- c(layers, list(maxpooling()))
+      
+    } else {
+      
+      # Convolutional
+      layers <- c(layers, list(maxpooling(mode = "convolutional", num_filters = num_filters)))
+    }
     
   }
   
   # Upsampling Path
-  for (step in seq(num_steps, 1, by = -1)) {
+  for (step in seq(depth, 1, by = -1)) {
     
     num_filters <- 2 ^ (step - 1) * initial_filters
     
-    layers <- c(layers, list(upsampling()))
+    
+    if (mode == "sampling") {
+      
+      layers <- c(layers, list(upsampling()))
+      
+    } else {
+      
+      layers <- c(layers, list(upsampling(mode = "convolutional", num_filters = num_filters)))
+      
+    }
     
     layers <- c(layers, identity(filters = num_filters,
                                  kernel_size = as.integer(kernel_size),

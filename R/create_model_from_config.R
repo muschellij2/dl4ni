@@ -97,12 +97,17 @@ create_model_from_config <- function(config) {
     
     shape <- main_output %>% object_shape()
     expected_shape <- c(config$output_width, config$output_width, config$output_width)
-    if (!all(shape[-4] == expected_shape))
-      stop(paste0("Output shapes are not correct. Expected: (", 
-                  paste0(expected_shape, collapse = ", "),
-                  ") . Obtained: (", 
-                  paste0(shape[-4], collapse = ", "),
-                  ")"))
+    
+    if (!all(is.na(shape[-4]))) {
+      
+      if (!all(shape[-4] == expected_shape))
+        stop(paste0("Output shapes are not correct. Expected: (", 
+                    paste0(expected_shape, collapse = ", "),
+                    ") . Obtained: (", 
+                    paste0(shape[-4], collapse = ", "),
+                    ")"))
+      
+    }
     
   }
   

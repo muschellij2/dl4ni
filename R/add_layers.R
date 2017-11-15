@@ -172,13 +172,41 @@ add_layers <- function(object,
              
              "maxpooling" = {
                
-               output <- output %>% layer_max_pooling_3d()
+               if (params$mode == "downsampling") {
+                 
+                 output <- output %>% layer_max_pooling_3d()
+                 
+               } else {
+                 
+                 # Convolutional
+                 
+                 output <- output %>% layer_conv_3d(filters = params$num_filters, 
+                                                    kernel_size = c(3, 3, 3), 
+                                                    strides = c(2, 2, 2), 
+                                                    activation = this_config$activation, 
+                                                    padding = "same")
+                 
+               }
                
              },
              
              "upsampling" = {
                
-               output <- output %>% layer_upsampling_3d()
+               if (params$mode == "upsampling") {
+                 
+                 output <- output %>% layer_upsampling_3d()
+                 
+               } else {
+                 
+                 # Convolutional
+                 
+                 output <- output %>% layer_conv_3d_transpose(filters = params$num_filters, 
+                                                              kernel_size = c(3, 3, 3), 
+                                                              strides = c(2, 2, 2), 
+                                                              activation = this_config$activation, 
+                                                              padding = "same")
+                 
+               }
                
              },
              
