@@ -46,16 +46,12 @@ block_clf <- function(object,
 
     output <- object %>% 
       add_layers(layers_definition = hidden_layers, 
-                 activation = hidden_activation, 
-                 dropout = hidden_dropout,
                  clf = TRUE)
     
   } else {
     
     output <- object %>% 
-      add_layers(layers_definition = hidden_layers, 
-                 activation = hidden_activation, 
-                 dropout = hidden_dropout)
+      add_layers(layers_definition = hidden_layers)
     
     output <- layer_concatenate(c(object, output))
     

@@ -372,13 +372,13 @@ create_generator <- function(model,
       
     }
     
-    x <- switch(config$path[1],
-                
-                "volumes" = X_vol,
-                
-                "both" = c(list(X_coords), X_vol),
-                
-                "features" = X_coords)
+    x_input <- switch(config$path[1],
+                      
+                      "volumes" = X_vol,
+                      
+                      "both" = c(list(X_coords), X_vol),
+                      
+                      "features" = X_coords)
     
     
     # toc()
@@ -416,7 +416,7 @@ create_generator <- function(model,
         
         Y_new <- to_categorical_volume_cpp(Y[, , , , 1], unique_labels = unique_labels)
         
-        return(list(x, Y_new))
+        return(list(x_input, Y_new))
         
       }
       
@@ -447,7 +447,7 @@ create_generator <- function(model,
         
         # toc()
         
-        return(list(x, Y))
+        return(list(x_input, Y))
         
       }
       
@@ -480,8 +480,8 @@ create_generator <- function(model,
       
     }
     
-
-    return(list(x, Y))
+    
+    return(list(x_input, Y))
     
     
   }

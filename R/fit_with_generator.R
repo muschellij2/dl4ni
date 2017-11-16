@@ -41,6 +41,7 @@ fit_with_generator <- function(.model,
                                validation_config = NULL,
                                keep_best = TRUE,
                                verbose = TRUE,
+                               tensorboard_dir = NULL,
                                ...) {
   
   require(keras)
@@ -130,7 +131,7 @@ fit_with_generator <- function(.model,
   
   
   # Unfreeze learning phase (freeze at the end)
-  model %>% set_trainability(trainability = TRUE)
+  .model %>% set_trainability(trainability = TRUE)
   
   if ("best_loss" %in% names(.model)) {
     
@@ -272,6 +273,16 @@ fit_with_generator <- function(.model,
       last_loss <<- logs$loss
     }
   )
+  
+  if (!is.null(tensorboard_dir)) {
+    
+    tensorboard_callback <- callback_tensorboard(log_dir = tensorboard_dir)
+    my_callback <- c(my_callback, tensorboard_callback)
+    
+    message("Initializing Tensorboard.")
+    tensorboard(log_dir = tensorboard_dir)
+    
+  }
   
   # Select epochs to train, useful to resume previous trainings.
   training_epochs <- seq(epochs)

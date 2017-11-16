@@ -22,7 +22,7 @@ add_attribute <- function(scheme, ...) {
   
   if ("optimizer" %in% var_names) {
     
-    optimizer <- parse_optimizer(var_names$optimizer)
+    optimizer <- parse_optimizer(args[["optimizer"]])
     args[["optimizer"]] <- optimizer
 
   } 
