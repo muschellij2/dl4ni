@@ -33,9 +33,15 @@ create_model_from_config <- function(config) {
     
     vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
     
-    vol_outputs[[v_input]] <- vol_inputs[[v_input]] %>% 
-      layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
-      layer_permute(dims = c(3, 2, 1, 4))
+    vol_outputs[[v_input]] <- vol_inputs[[v_input]]
+    
+    if (config$only_convolutionals) {
+      
+      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
+        layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
+        layer_permute(dims = c(3, 2, 1, 4))
+      
+    }
     
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
       add_layers(layers_definition = config$vol_layers[[v_input]],

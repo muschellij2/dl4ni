@@ -41,7 +41,7 @@ fit_with_generator <- function(.model,
                                validation_config = NULL,
                                keep_best = TRUE,
                                verbose = TRUE,
-                               tensorboard_dir = NULL,
+                               metrics_viewer = FALSE,
                                ...) {
   
   require(keras)
@@ -234,7 +234,7 @@ fit_with_generator <- function(.model,
         .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
         
         # Unfreeze learning phase (freeze at the end)
-        .model$model %>% set_trainability(trainability = TRUE)
+        .model %>% set_trainability(trainability = TRUE)
         
         .model$best_loss <- best_validation_loss
         
@@ -274,13 +274,19 @@ fit_with_generator <- function(.model,
     }
   )
   
-  if (!is.null(tensorboard_dir)) {
+  if (metrics_viewer) {
     
-    tensorboard_callback <- callback_tensorboard(log_dir = tensorboard_dir)
-    my_callback <- c(my_callback, tensorboard_callback)
+    message("Initializing Viewer")
+
+    view_metrics <- keras:::KerasMetricsCallback$new()
+    view_metrics$view_metrics <- TRUE
+    view_metrics$metrics <- list("loss" = numeric())
     
-    message("Initializing Tensorboard.")
-    tensorboard(log_dir = tensorboard_dir)
+    callback_view <- callback_lambda(
+      on_epoch_end = view_metrics$on_epoch_end
+    )
+    
+    my_callback <- c(my_callback, callback_view)
     
   }
   
