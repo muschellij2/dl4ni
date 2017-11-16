@@ -138,19 +138,24 @@ create_model_from_config <- function(config) {
       add_layers(layers_definition = config$decoder_layers,
                  clf = FALSE)
     
-    model <- keras_model(inputs = c(input_features, vol_inputs),
-                         outputs = main_output)
-    
   } else {
-    
-    model <- keras_model(inputs = c(input_features, vol_inputs),
-                         outputs = main_output)
     
     encoder <- NULL
     decoder <- NULL
     
     
   }
+  
+  model <- switch(config$path[1],
+                  
+                  "volumes" = keras_model(inputs = vol_inputs,
+                                          outputs = main_output),
+                  
+                  "both" = keras_model(inputs = c(input_features, vol_inputs),
+                                       outputs = main_output),
+                  
+                  "features" = keras_model(inputs = input_features,
+                                           outputs = main_output) )
   
   
   if (!is.null(config$optimizer) && !is.null(config$loss))

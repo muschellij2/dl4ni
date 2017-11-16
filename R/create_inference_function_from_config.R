@@ -213,7 +213,16 @@ create_inference_function_from_config <- function(object) {
         
       }
       
-      inputs <- c(list(X_coords), X_vol)
+      inputs <- switch(config$path[1],
+                       
+                       "volumes" = X_vol,
+                       
+                       "both" = c(list(X_coords), X_vol),
+                       
+                       "features" = X_coords
+                       )
+      
+      # inputs <- c(list(X_coords), X_vol)
       
       # Available memory is the memory limit minus the memory reserved for the parameters in the model
       available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$model$count_params()))

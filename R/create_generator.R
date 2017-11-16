@@ -38,7 +38,7 @@ create_generator <- function(model,
   
   num_windows <- model %>% compute_batch_size()
   message("Number of windows per batch is set to ", num_windows)
-
+  
   next_file <- 1
   sub_epoch <- 0
   
@@ -372,6 +372,15 @@ create_generator <- function(model,
       
     }
     
+    x <- switch(config$path[1],
+                
+                "volumes" = X_vol,
+                
+                "both" = c(list(X_coords), X_vol),
+                
+                "features" = X_coords)
+    
+    
     # toc()
     # print("After Reading X")
     if (any(dim(Vy) != dim(Vx[[1]]))) {
@@ -407,12 +416,6 @@ create_generator <- function(model,
         
         Y_new <- to_categorical_volume_cpp(Y[, , , , 1], unique_labels = unique_labels)
         
-        x <- c(list(X_coords), X_vol)
-        
-        # toc()
-        
-        # toc()
-        
         return(list(x, Y_new))
         
       }
@@ -441,8 +444,6 @@ create_generator <- function(model,
           Y <- Y_list
           
         }
-        
-        x <- c(list(X_coords), X_vol)
         
         # toc()
         
@@ -479,10 +480,7 @@ create_generator <- function(model,
       
     }
     
-    x <- c(list(X_coords), X_vol)
-    
-    # toc()
-    
+
     return(list(x, Y))
     
     
