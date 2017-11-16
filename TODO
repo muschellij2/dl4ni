@@ -58,6 +58,8 @@ ALREADY DONE:
   + Gestión de memoria.
   + Actualizar ejemplos con "DLscheme"
   + Visualizar input que maximiza las activaciones de una capa.
+  + Poner capas convolucionales a la salida
+  + Entrenar con capas convolucionales.
 
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -94,7 +96,6 @@ TODO:
   - Layers operations, como select_layers (by_name, by_index)...
   - Al hacer grafo, renombrar capas, y usar esta función al generar el modelo. En la configuración (y en la info del problema) almacenar el nombre de la carpeta de los inputs ("T1", "FLAIR") que después se usará para renombrar las capas.
   - verbose para la función de "fit_with_generator"
-  - Poner capas convolucionales a la salida
   - Más tipos de bloques: block_clf, block_resnet, block_unet, block_smooth (como last layer y extended), block_crop, block_downsample, block_upsample...con sus wrappers.
   - Extended Model cuando last_layer tiene type multivalued o similar, se le añade una más (que habrá que gestionar en la inference function), por ejemplo haciendo argmax o un layer_dot con un tensor constante...
   - App shiny (playground) para hacer el entrenamiento, definir la configuración, crear modelos o aplicarlos, con la posibilidad de usar un widget para visualizar imágenes 3d.
@@ -112,4 +113,3 @@ TODO:
   - Prepararlo todo para problemas más generales (clasificación de imágenes de sujetos en varios grupos, super resolución, multimodalidad...)
   - Viñetas y demos por cada problema.
   - Lstm para procesar la imagen entera??
-  - Entrenar con capas convolucionales.

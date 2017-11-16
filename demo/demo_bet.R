@@ -9,10 +9,12 @@ devtools::load_all("../dl4ni.data/")
 #                                                          #
 ##%######################################################%##
 
-
 require(neurobase)
 require(dl4ni.data)
 load_keras()
+K <- keras::backend()
+tensorflow::tf$set_random_seed(1234)
+set.seed(1234)
 
 ##%######################################################%##
 #                                                          #
@@ -108,7 +110,7 @@ test_config <- bet_model %>% create_generator(x_files = info$test$x,
 #                                                          #
 ##%######################################################%##
 
-epochs <- 3
+epochs <- 20
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -120,7 +122,8 @@ bet_model %>% fit_with_generator(train_config = train_config,
                                  keep_best = keep_best,
                                  path = saving_path,
                                  prefix = saving_prefix,
-                                 metrics_viewer = TRUE)
+                                 metrics_viewer = TRUE,
+                                 reset_optimizer = FALSE)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 

@@ -42,6 +42,7 @@ fit_with_generator <- function(.model,
                                keep_best = TRUE,
                                verbose = TRUE,
                                metrics_viewer = FALSE,
+                               reset_optimizer = TRUE,
                                ...) {
   
   require(keras)
@@ -298,6 +299,9 @@ fit_with_generator <- function(.model,
   # For each training epoch
   for (epoch in training_epochs) {
     
+    opt_states <- .model$model$optimizer$updates
+    iterations <- .model$model$optimizer$iterations
+    
     # Information (progress bar) for epochs.
     if (verbose) {
       
@@ -368,6 +372,13 @@ fit_with_generator <- function(.model,
           initial_epoch = epoch - 1, 
           callbacks = my_callback) #,
         # ...)
+        
+      }
+      
+      if (reset_optimizer) {
+        
+        .model$model$optimizer$updates <- opt_states
+        .model$model$optimizer$iterations <- iterations
         
       }
       
