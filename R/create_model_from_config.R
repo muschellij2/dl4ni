@@ -158,8 +158,15 @@ create_model_from_config <- function(config) {
                                            outputs = main_output) )
   
   
-  if (!is.null(config$optimizer) && !is.null(config$loss))
-    model %>% compile(optimizer = config$optimizer, loss = config$loss)
+  if (!is.null(config$optimizer) && !is.null(config$loss)) {
+    
+    # Get the actual optimizer to use, according to the stored configuration
+    optimizer <- eval_optimizer(config$optimizer)
+    
+    # And compile
+    model %>% compile(optimizer = optimizer, loss = config$loss)
+    
+  }
   
   result <- new.env()
   result$model <- model

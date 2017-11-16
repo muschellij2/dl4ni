@@ -22,15 +22,9 @@ add_attribute <- function(scheme, ...) {
   
   if ("optimizer" %in% var_names) {
     
-    optimizer <- var_names$optimizer
-    var_names <- setdiff(var_names, "optimizer")
-    
-    if (!is.character(optimizer)) {
-      
-      stop("'optimizer' is provided but it must be a string, such as: 'adam', 'sgd', etc.")
-      
-    }
-    
+    optimizer <- parse_optimizer(var_names$optimizer)
+    args[["optimizer"]] <- optimizer
+
   } 
   
   lapply(var_names, function(vn) {
