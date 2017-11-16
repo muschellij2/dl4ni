@@ -22,7 +22,7 @@ save_model <- function(.model,
     model <- .model$model
     width <- .model$width
     hyperparameters <- .model$hyperparameters
-
+    
   } else {
     
     stop("Model not a DLmodel object.")
@@ -98,17 +98,20 @@ load_model <- function(path, prefix) {
   comment_definition_file <- file.path(path, paste0(prefix, "_comments.txt"))
   hyper_parameters_file <- file.path(path, paste0(prefix, "_hyper.rds"))
   
-  # Load model architecture
-  model <- model_definition_file %>% readLines() %>% paste0(collapse = "\n") %>% 
-    keras::model_from_json()
-  
-  # Load model weights
-  model %>% keras::load_model_weights_hdf5(filepath = weights_definition_file)
-  
   # Load hyperparameters 
   hyperparameters <- readRDS(file = hyper_parameters_file)
   
-  output_model <- list(model = model,
+  # Initialize the model, as created with the former configuration
+  output_model <- hyperparameters %>% create_model_from_config()
+  
+  # # Load model architecture
+  # model <- model_definition_file %>% readLines() %>% paste0(collapse = "\n") %>% 
+  #   keras::model_from_json()
+  
+  # Load model weights
+  output_model$model %>% keras::load_model_weights_hdf5(filepath = weights_definition_file)
+  
+  output_model <- list(model = output_model$model,
                        width = hyperparameters$width,
                        hyperparameters = hyperparameters)
   

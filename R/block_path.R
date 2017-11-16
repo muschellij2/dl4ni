@@ -52,9 +52,7 @@ block_paths <- function(object,
     if (length(hidden_layers) > 0) {
       
       outputs[[i]] <- (outputs[[i]]) %>% 
-        add_layers(layers_definition = hidden_layers,
-                   activation = hidden_activation, 
-                   dropout = hidden_dropout)
+        add_layers(layers_definition = hidden_layers)
       
     }
 

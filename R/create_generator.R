@@ -2,12 +2,12 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param config            (name) PARAM_DESCRIPTION
+#' @param model             (name) PARAM_DESCRIPTION
 #' @param x_files           (name) PARAM_DESCRIPTION
 #' @param y_files           (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param mode              (call) PARAM_DESCRIPTION, Default: c("sampling", "all")
 #' @param num_windows       (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param max_sub_epochs    (numeric) PARAM_DESCRIPTION, Default: 5
+#' @param batches_per_file  (numeric) PARAM_DESCRIPTION, Default: 5
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -16,14 +16,15 @@
 #'  \code{\link[keras]{to_categorical}}
 #' @export 
 #' @importFrom keras to_categorical
-create_generator_from_config <- function(config, 
-                                         x_files, 
-                                         y_files = NULL,
-                                         mode = c("sampling", "all"),
-                                         num_windows = NULL,
-                                         max_sub_epochs = 5) {
+create_generator <- function(model, 
+                             x_files, 
+                             y_files = NULL,
+                             mode = "sampling",
+                             batches_per_file = 5) {
   
-  stopifnot(inherits(config, "DLconfig"))
+  stopifnot(inherits(model, "DLmodel"))
+  
+  config <- model$hyperparameters
   
   require(tictoc)
   # tic("Initialization")
@@ -35,18 +36,8 @@ create_generator_from_config <- function(config,
   
   stride <- ifelse(mode == "all", radius, 1)
   
-  if (is.null(num_windows)) {
-    
-    num_windows <- round(unclass(config$memory_limit / 
-                                   object.size(vector(mode = "double",
-                                                      length = sum(config$num_volumes) * config$width ^ 3 + 
-                                                        config$num_features + config$output_width ^ 3))))
-    
-    num_windows <- round(num_windows / (num_inputs + 2))
-    
-    message("Set number of windows to ", num_windows)
-    
-  }
+  num_windows <- model %>% compute_batch_size()
+  message("Number of windows per batch is set to ", num_windows)
   
   next_file <- 1
   sub_epoch <- 0
@@ -100,7 +91,7 @@ create_generator_from_config <- function(config,
     message("Number of actual windows: ", length(sampling_indices))
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, max_sub_epochs))
+    max_epochs <- min(c(num_batches, batches_per_file))
     
     if (max_epochs > 1) {
       
@@ -148,7 +139,7 @@ create_generator_from_config <- function(config,
     }
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, max_sub_epochs))
+    max_epochs <- min(c(num_batches, batches_per_file))
     
     batch_idx <- rep(seq(max_epochs), each = num_windows) 
     
@@ -158,7 +149,7 @@ create_generator_from_config <- function(config,
   
   message("Number of batches per volume: ", num_batches)
   
-  max_epochs <- min(c(num_batches, max_sub_epochs))
+  max_epochs <- min(c(num_batches, batches_per_file))
   
   # toc()
   
@@ -381,14 +372,14 @@ create_generator_from_config <- function(config,
       
     }
     
-    
     x <- switch(config$path[1],
-                     
-                     "volumes" = X_vol,
-                     
-                     "both" = c(list(X_coords), X_vol),
-                     
-                     "features" = X_coords)
+                
+                "volumes" = X_vol,
+                
+                "both" = c(list(X_coords), X_vol),
+                
+                "features" = X_coords)
+    
     
     # toc()
     # print("After Reading X")
@@ -454,6 +445,8 @@ create_generator_from_config <- function(config,
           
         }
         
+        # toc()
+        
         return(list(x, Y))
         
       }
@@ -487,6 +480,7 @@ create_generator_from_config <- function(config,
       
     }
     
+
     return(list(x, Y))
     
     
@@ -494,7 +488,7 @@ create_generator_from_config <- function(config,
   
   return(list(generator = f_generator, 
               num_windows = num_windows,
-              max_sub_epochs = max_epochs,
+              max_sub_epochs = batches_per_file,
               num_files = length(y_files)))
   
   

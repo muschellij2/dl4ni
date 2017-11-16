@@ -25,27 +25,22 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-scheme <- create_scheme(width = 7,
-                        only_convolutionals = FALSE,
-                        output_width = 3,
+width <- 32
+
+scheme <- create_scheme(width = width,
+                        only_convolutionals = TRUE,
+                        output_width = width,
                         num_features = 3,
-                        vol_layers_pattern = list(clf(all = TRUE,
-                                                      hidden_layers = list(dense(300),
-                                                                           dense(200),
-                                                                           dense(100),
-                                                                           dense(250),
-                                                                           dense(100)))),
-                        vol_dropout = 0.15,
-                        feature_layers = list(dense(10), 
-                                              dense(5)),
-                        feature_dropout = 0.15,
-                        common_layers = list(clf(all = TRUE, 
-                                                 hidden_layers = list(dense(300), 
-                                                                      dense(200), 
-                                                                      dense(100)))),
-                        common_dropout = 0.25,
-                        last_hidden_layers = list(dense(10)),
-                        optimizer = "adadelta",
+                        vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                                    mode = "convolutional", 
+                                                    initial_filters = 4),
+                        vol_dropout = 0,
+                        feature_layers = list(),
+                        feature_dropout = 0,
+                        common_layers = list(),
+                        common_dropout = 0,
+                        last_hidden_layers = list(),
+                        optimizer = "nadam",
                         scale = "z",
                         scale_y = "none")
 
@@ -88,12 +83,12 @@ if (batch_size == 0) {
 batches_per_file <- as.integer(target_windows_per_file / batch_size)
 
 train_config <- flair_model %>% create_generator(x_files = info$train$x,
-                                               y_files = info$train$y,
-                                               batches_per_file = batches_per_file)
+                                                 y_files = info$train$y,
+                                                 batches_per_file = batches_per_file)
 
 test_config <- flair_model %>% create_generator(x_files = info$test$x,
-                                              y_files = info$test$y,
-                                              batches_per_file = batches_per_file)
+                                                y_files = info$test$y,
+                                                batches_per_file = batches_per_file)
 
 
 ##%######################################################%##
@@ -108,18 +103,18 @@ saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
 flair_model %>% fit_with_generator(train_config = train_config, 
-                                 validation_config = test_config,
-                                 epochs = epochs,
-                                 starting_epoch = 1,
-                                 keep_best = keep_best,
-                                 path = saving_path,
-                                 prefix = saving_prefix)
+                                   validation_config = test_config,
+                                   epochs = epochs,
+                                   starting_epoch = 1,
+                                   keep_best = keep_best,
+                                   path = saving_path,
+                                   prefix = saving_prefix)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
 flair_model %>% save_model(path = saving_path, 
-                         prefix = saving_prefix, 
-                         comment = "Final model after training")
+                           prefix = saving_prefix, 
+                           comment = "Final model after training")
 
 # flair_model <- load_model(path = saving_path, prefix = saving_prefix)
 

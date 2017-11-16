@@ -12,15 +12,23 @@
 #' @export 
 #' @importFrom keras to_categorical
 #' @import progress
-create_inference_function_from_config <- function(config) {
+create_inference_function_from_config <- function(object) {
   
-  stopifnot(inherits(config, "DLconfig"))
+  stopifnot(inherits(object, "DLconfig") | inherits(object, "DLmodel"))
   
-  radius <- 0.5 * (config$width + 1)
+  if (inherits(object, "DLmodel")) {
+    
+    config <- object$hyperparameters
+    
+  } else {
+    
+    config <- object
+    
+  }
   
   f_inference <- function(model, 
                           V, 
-                          speed = c("slower", "medium", "faster"), 
+                          speed = c("faster", "medium", "slower"), 
                           ...) {
     
     num_inputs <- length(V)
@@ -28,9 +36,6 @@ create_inference_function_from_config <- function(config) {
     stopifnot(inherits(model, "DLmodel"))
     
     .model <- model$model
-    
-    # Freeze learning phase (unfreeze at the end)
-    model %>% set_trainability(trainability = FALSE)
 
     stride <- switch(speed, 
                      "slower" = 1,
@@ -208,7 +213,16 @@ create_inference_function_from_config <- function(config) {
         
       }
       
-      inputs <- c(list(X_coords), X_vol)
+      inputs <- switch(config$path[1],
+                       
+                       "volumes" = X_vol,
+                       
+                       "both" = c(list(X_coords), X_vol),
+                       
+                       "features" = X_coords
+                       )
+      
+      # inputs <- c(list(X_coords), X_vol)
       
       # Available memory is the memory limit minus the memory reserved for the parameters in the model
       available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$model$count_params()))
@@ -491,9 +505,6 @@ create_inference_function_from_config <- function(config) {
       res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
       
     }
-    
-    # Unfreeze learning phase (frozen at the beginning)
-    model %>% set_trainability(trainability = TRUE)
     
     return(res)
     

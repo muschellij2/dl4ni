@@ -79,10 +79,11 @@ define_last_layer <- function(info,
                               
                               if (only_convolutionals) {
                                 
+                                output_activation <- "softmax"
                                 last_layer <- conv3d(filters = num_classes + 1,
                                                      kernel_size = c(3, 3, 3),
-                                                     padding = "same")
-                                output_activation <- "softmax"
+                                                     padding = "same",
+                                                     activation = output_activation)
                                 multioutput <- FALSE
                                 loss <- loss_function
                                 

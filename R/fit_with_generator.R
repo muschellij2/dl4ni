@@ -109,6 +109,29 @@ fit_with_generator <- function(.model,
   # Initialize variables for training
   model <- .model$model
   
+  # Compute optimal batch size
+  batch_size <- .model %>% compute_batch_size()
+  
+  # If batch_size == 0, there is no possibility of training with the specified memory limit.
+  if (batch_size < 1) {
+    
+    required_memory <- prettyunits::pretty_bytes(unclass(.model %>% model_size() * 4))
+    
+    # Not enough memory to train even 1 batch at a time
+    error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
+                            prettyunits::pretty_bytes(.model$hyperparameters$memory_limit), "\n",
+                            "This model requires at least ", required_memory, " to be trained.\n",
+                            "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
+    stop(error_message)
+    
+  }
+  
+  cat("Batch size is stablished at:", batch_size, "\n")
+  
+  
+  # Unfreeze learning phase (freeze at the end)
+  model %>% set_trainability(trainability = TRUE)
+  
   if ("best_loss" %in% names(.model)) {
     
     best_validation_loss <- .model$best_loss
@@ -208,7 +231,9 @@ fit_with_generator <- function(.model,
         weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
         
         .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-        # file.path(model_pathmodel_filename %>% load_model_hdf5()
+        
+        # Unfreeze learning phase (freeze at the end)
+        .model$model %>% set_trainability(trainability = TRUE)
         
         .model$best_loss <- best_validation_loss
         
@@ -252,8 +277,6 @@ fit_with_generator <- function(.model,
   training_epochs <- seq(epochs)
   if (starting_epoch > 1) 
     training_epochs <- setdiff(training_epochs, seq(starting_epoch - 1))
-  
-  new_batch_size <- 0
   
   # For each training epoch
   for (epoch in training_epochs) {
@@ -300,19 +323,9 @@ fit_with_generator <- function(.model,
       # The first is always the input samples
       # The second is always the desired outputs
       # A possible third indicates sample weights.
-      
       data <- generator()
       
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
-      
-      if (new_batch_size == 0) {
-        
-        batch_size <- .model %>% compute_batch_size()
-
-        new_batch_size <- batch_size
-        cat("Batch size is stablished at:", batch_size, "\n")
-
-      }
       
       if (length(data) > 2) {
         # With sample weight
@@ -340,7 +353,6 @@ fit_with_generator <- function(.model,
         # ...)
         
       }
-      
       
       last_loss <- last_loss / num_outputs
       
@@ -471,19 +483,6 @@ fit_with_generator <- function(.model,
         pb_epochs$tick(tokens = list(epoch = epoch))
       
     }
-    
-  }
-  
-  # To end, return the best model in the training.
-  if (keep_best) {
-    
-    message("Loading previous best model, with loss:", best_validation_loss)
-    
-    weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
-    
-    .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
-    
-    .model$best_loss <- best_validation_loss
     
   }
   

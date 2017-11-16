@@ -4,9 +4,6 @@
 #'
 #' @param object                 (name) PARAM_DESCRIPTION
 #' @param layers_definition      (call) PARAM_DESCRIPTION, Default: c()
-#' @param batch_normalization    (logical) PARAM_DESCRIPTION, Default: TRUE
-#' @param activation             (character) PARAM_DESCRIPTION, Default: 'relu'
-#' @param dropout                (numeric) PARAM_DESCRIPTION, Default: 0
 #' @param clf                    (logical) PARAM_DESCRIPTION, Default: FALSE
 #'
 #' @return OUTPUT_DESCRIPTION
@@ -18,9 +15,6 @@
 #' @import keras
 add_layers <- function(object, 
                        layers_definition = c(),
-                       batch_normalization = TRUE,
-                       activation = "relu",
-                       dropout = 0,
                        clf = FALSE) {
   
   require(keras)
@@ -56,9 +50,30 @@ add_layers <- function(object,
         
       }
       
+      # This should be moved to config.properties
+      defaults <- list(batch_normalization = FALSE,
+                       activation = "relu",
+                       dropout = 0)
+      
+      type <- layer_to_add$type
+      params <- layer_to_add$params
+      
+      # Overwrite default specification
+      this_config <- defaults
+      for (nm in names(defaults)) {
+        
+        if (!is.null(params[[nm]])) {
+          
+          this_config[[nm]] <- params[[nm]]
+          params[[nm]] <- NULL
+          
+        }
+        
+      }
+      
       input_shape <- object_shape(output)
       
-      switch(layer_to_add$type,
+      switch(type,
              
              "dense" = {
                
@@ -68,10 +83,9 @@ add_layers <- function(object,
                # first we have to flatten it.
                if (is_volumetric) {
                  
-                 # output <- output %>% layer_flatten()
-                 new_layer <- layer_conv3d(filters = layer_to_add$params$units,
-                                           kernel_size = input_shape[1:3])
-                 
+                 new_params <- list(filters = layer_to_add$params$units,
+                                    kernel_size = input_shape[1:3])
+                 new_layer <- do.call(layer_conv_3d, args = new_params)
                  
                } else {
                  
@@ -82,104 +96,117 @@ add_layers <- function(object,
                output <- output %>% 
                  new_layer 
                
-               if (batch_normalization) output <- output %>% layer_batch_normalization()
+               if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                
-               output <- output %>% layer_activation(activation = activation)
+               output <- output %>% layer_activation(activation = this_config$activation)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "categorical" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_categorical(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "regression" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_regression(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              
              "multivalued" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_multivalued(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "resnet" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_resnet(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "clf" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_clf(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "unet" = {
                
-               params <- layer_to_add$params
                params$object <- output
                output <- do.call(block_unet, args = params)
-
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "downsample" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_downsample(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "upsample" = {
                
-               params <- layer_to_add$params
-               
                output <- output %>% block_upsample(params = params)
                
-               if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              "maxpooling" = {
                
-               output <- output %>% layer_max_pooling_3d()
+               if (params$mode == "downsampling") {
+                 
+                 output <- output %>% layer_max_pooling_3d()
+                 
+               } else {
+                 
+                 # Convolutional
+                 
+                 output <- output %>% layer_conv_3d(filters = params$num_filters, 
+                                                    kernel_size = c(3, 3, 3), 
+                                                    strides = c(2, 2, 2), 
+                                                    activation = this_config$activation, 
+                                                    padding = "same")
+                 
+               }
                
              },
              
              "upsampling" = {
                
-               output <- output %>% layer_upsampling_3d()
+               if (params$mode == "upsampling") {
+                 
+                 output <- output %>% layer_upsampling_3d()
+                 
+               } else {
+                 
+                 # Convolutional
+                 
+                 output <- output %>% layer_conv_3d_transpose(filters = params$num_filters, 
+                                                              kernel_size = c(3, 3, 3), 
+                                                              strides = c(2, 2, 2), 
+                                                              activation = this_config$activation, 
+                                                              padding = "same")
+                 
+               }
                
              },
              
@@ -188,9 +215,9 @@ add_layers <- function(object,
                can_convolutional <- length(input_shape) == 4
                new_width <- 0
                
-               if (!is.null(layer_to_add$params$force)) {
+               if (!is.null(params$force)) {
                  
-                 force <- layer_to_add$params$force
+                 force <- params$force
                  
                  if (is.numeric(force)) {
                    
@@ -204,12 +231,18 @@ add_layers <- function(object,
                  
                  new_width <- force
                  
-                 layer_to_add$params$force <- NULL
+                 params$force <- NULL
                  can_convolutional <- TRUE
                  
                }
                
-               new_layer <- do.call(layer_conv_3d, args = layer_to_add$params)
+               if (is.null(params$padding)) {
+                 
+                 params$padding <- "same"
+                 
+               }
+               
+               new_layer <- do.call(layer_conv_3d, args = params)
                
                if (can_convolutional) {
                  
@@ -225,11 +258,11 @@ add_layers <- function(object,
                  output <- output %>% 
                    new_layer 
                  
-                 if (batch_normalization) output <- output %>% layer_batch_normalization()
+                 if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                  
-                 output <- output %>% layer_activation(activation = activation)
+                 output <- output %>% layer_activation(activation = this_config$activation)
                  
-                 if (dropout > 0) output <- output %>% layer_dropout(rate = dropout)
+                 if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                  
                } else {
                  
