@@ -20,6 +20,19 @@ add_attribute <- function(scheme, ...) {
   
   var_names <- names(args)
   
+  if ("optimizer" %in% var_names) {
+    
+    optimizer <- var_names$optimizer
+    var_names <- setdiff(var_names, "optimizer")
+    
+    if (!is.character(optimizer)) {
+      
+      stop("'optimizer' is provided but it must be a string, such as: 'adam', 'sgd', etc.")
+      
+    }
+    
+  } 
+  
   lapply(var_names, function(vn) {
     
     assign(x = vn, value = args[[vn]], envir = scheme)

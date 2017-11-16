@@ -64,6 +64,7 @@ WIP:
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Añadir callback_tensorboard.
   = Visualizar input que maximiza las activaciones de una capa.
+  = Instantiate_autoencoder.
   = Cambiar el input de un modelo convolucional para que acepte una imagen entera?
   = Actualizar ejemplos con "DLscheme"
   = Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
