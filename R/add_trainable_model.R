@@ -18,6 +18,8 @@
 #' @import igraph
 add_trainable_model <- function(flow, 
                                 scheme = NULL, 
+                                inputs,
+                                output,
                                 subset = NULL,
                                 verbose = TRUE) {
   

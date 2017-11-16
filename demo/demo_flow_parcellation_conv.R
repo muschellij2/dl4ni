@@ -1,6 +1,7 @@
 ##%######################################################%##
 #                                                          #
 ####       Example of Flow for Brain Parcellation       ####
+####                   Convolutional                    ####
 #                                                          #
 ##%######################################################%##
 
@@ -15,19 +16,24 @@ load_keras()
 ##%######################################################%##
 
 # Basic scheme for all networks in the flow
-scheme_bigger <- list(width = 7,
-                      output_width = 3,
-                      num_features = 3,
-                      vol_layers_pattern = list(clf(hidden_layers = list(dense(300), dense(200), dense(200), dense(100)))),
-                      vol_dropout = 0.1,
-                      feature_layers = list(clf(hidden_layers = list(dense(10), dense(10)))),
-                      feature_dropout = 0.15,
-                      common_layers = list(clf(hidden_layers = list(dense(300), dense(250), dense(100)))),
-                      common_dropout = 0.1,
-                      last_hidden_layers = list(dense(30), dense(20)),
-                      optimizer = "adadelta",
-                      scale = "none",
-                      scale_y = "none")
+width <- 32
+
+scheme_bigger <- create_scheme(width = width,
+                               only_convolutionals = TRUE,
+                               output_width = width,
+                               num_features = 3,
+                               vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                                           mode = "convolutional", 
+                                                           initial_filters = 4),
+                               vol_dropout = 0,
+                               feature_layers = list(),
+                               feature_dropout = 0,
+                               common_layers = list(),
+                               common_dropout = 0,
+                               last_hidden_layers = list(),
+                               optimizer = "adadelta",
+                               scale = "none",
+                               scale_y = "none")
 
 ##%######################################################%##
 #                                                          #

@@ -1,6 +1,6 @@
 ##%######################################################%##
 #                                                          #
-####           Example For Brain Transformation         ####
+####        Example For Brain Tumor Segmentation        ####
 #                                                          #
 ##%######################################################%##
 
@@ -14,8 +14,8 @@ load_keras()
 #                                                          #
 ##%######################################################%##
 
-problem <- "t1_flair"
-info <- problem %>% get_problem_info()
+problem <- "brats_lgg"
+info <- problem %>% get_problem_info(num_subjects = 10)
 
 info %>% split_train_test_sets()
 
@@ -25,27 +25,22 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-scheme <- create_scheme(width = 7,
-                        only_convolutionals = FALSE,
-                        output_width = 3,
+width <- 32
+
+scheme <- create_scheme(width = width,
+                        only_convolutionals = TRUE,
+                        output_width = width,
                         num_features = 3,
-                        vol_layers_pattern = list(clf(all = TRUE,
-                                                      hidden_layers = list(dense(300),
-                                                                           dense(200),
-                                                                           dense(100),
-                                                                           dense(250),
-                                                                           dense(100)))),
-                        vol_dropout = 0.15,
-                        feature_layers = list(dense(10), 
-                                              dense(5)),
-                        feature_dropout = 0.15,
-                        common_layers = list(clf(all = TRUE, 
-                                                 hidden_layers = list(dense(300), 
-                                                                      dense(200), 
-                                                                      dense(100)))),
-                        common_dropout = 0.25,
-                        last_hidden_layers = list(dense(10)),
-                        optimizer = "adadelta",
+                        vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                                    mode = "convolutional", 
+                                                    initial_filters = 4),
+                        vol_dropout = 0,
+                        feature_layers = list(),
+                        feature_dropout = 0,
+                        common_layers = list(),
+                        common_dropout = 0,
+                        last_hidden_layers = list(),
+                        optimizer = "nadam",
                         scale = "z",
                         scale_y = "none")
 
@@ -55,9 +50,9 @@ scheme <- create_scheme(width = 7,
 #                                                          #
 ##%######################################################%##
 
-flair_model <- scheme %>% instantiate_model(problem_info = info)
+tumor_model <- scheme %>% instantiate_model(problem_info = info)
 
-summary(flair_model$model)
+summary(tumor_model$model)
 
 ##%######################################################%##
 #                                                          #
@@ -65,9 +60,9 @@ summary(flair_model$model)
 #                                                          #
 ##%######################################################%##
 
-g <- flair_model %>% graph_from_model()
+g <- tumor_model %>% graph_from_model()
 g %>% plot_graph()
-flair_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
+tumor_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
 
 ##%######################################################%##
 #                                                          #
@@ -77,7 +72,7 @@ flair_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
 
 target_windows_per_file <- 1000
 
-batch_size <- bet_model %>% compute_batch_size()
+batch_size <- tumor_model %>% compute_batch_size()
 
 if (batch_size == 0) {
   
@@ -87,13 +82,13 @@ if (batch_size == 0) {
 
 batches_per_file <- as.integer(target_windows_per_file / batch_size)
 
-train_config <- flair_model %>% create_generator(x_files = info$train$x,
-                                               y_files = info$train$y,
-                                               batches_per_file = batches_per_file)
+train_config <- tumor_model %>% create_generator(x_files = info$train$x,
+                                                 y_files = info$train$y,
+                                                 batches_per_file = batches_per_file)
 
-test_config <- flair_model %>% create_generator(x_files = info$test$x,
-                                              y_files = info$test$y,
-                                              batches_per_file = batches_per_file)
+test_config <- tumor_model %>% create_generator(x_files = info$test$x,
+                                                y_files = info$test$y,
+                                                batches_per_file = batches_per_file)
 
 
 ##%######################################################%##
@@ -107,22 +102,21 @@ keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-flair_model %>% fit_with_generator(train_config = train_config, 
-                                 validation_config = test_config,
-                                 epochs = epochs,
-                                 starting_epoch = 1,
-                                 keep_best = keep_best,
-                                 path = saving_path,
-                                 prefix = saving_prefix)
+tumor_model %>% fit_with_generator(train_config = train_config, 
+                                   validation_config = test_config,
+                                   epochs = epochs,
+                                   starting_epoch = 1,
+                                   keep_best = keep_best,
+                                   path = saving_path,
+                                   prefix = saving_prefix)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-flair_model %>% save_model(path = saving_path, 
-                         prefix = saving_prefix, 
-                         comment = "Final model after training")
+tumor_model %>% save_model(path = saving_path, 
+                           prefix = saving_prefix, 
+                           comment = "Final model after training")
 
-# flair_model <- load_model(path = saving_path, prefix = saving_prefix)
-
+# tumor_model <- load_model(path = saving_path, prefix = saving_prefix)
 
 ##%######################################################%##
 #                                                          #
@@ -130,18 +124,31 @@ flair_model %>% save_model(path = saving_path,
 #                                                          #
 ##%######################################################%##
 
-# Select random test subject
+# Select random test image
 test_index <- sample(info$test$subject_indices, size = 1)
 input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
-# Read images and ground truth
+# Load images and ground truth
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
-# Predict on the inputs
-flair <- flair_model %>% infer(V = input_imgs, speed = "faster")
+# Infer in the input volume
+tumor <- tumor_model %>% infer_on_volume(V = input_imgs, speed = "faster")
 
-# Plot
-ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)
-ortho_plot(x = ground_truth, text = "Ground Truth", interactiveness = FALSE)
-ortho_plot(x = flair, text = "Predicted", interactiveness = FALSE)
+# Some values for plotting
+num_classes <- length(info$values)
+col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
+
+# Plot Ground Truth results
+ortho_plot(x = input_imgs[[1]], 
+           y = ground_truth, 
+           col.y = col.y, 
+           text = "Ground Truth", 
+           interactiveness = FALSE)
+
+# Plot Model results
+ortho_plot(x = input_imgs[[1]], 
+           y = tumor, 
+           col.y = col.y, 
+           text = "Predicted", 
+           interactiveness = FALSE)

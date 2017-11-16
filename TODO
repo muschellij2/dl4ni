@@ -61,12 +61,13 @@ WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
+  = Actualizar ejemplos con "DLscheme"
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
+  = Generar nombres de forma automática en create_model_from_config.
   = Añadir callback_tensorboard.
   = Visualizar input que maximiza las activaciones de una capa.
   = Instantiate_autoencoder.
   = Cambiar el input de un modelo convolucional para que acepte una imagen entera?
-  = Actualizar ejemplos con "DLscheme"
   = Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Mejoras de velocidad en create_generator_from_config.
