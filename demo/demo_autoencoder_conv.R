@@ -1,0 +1,160 @@
+rm(list = ls())
+rstudioapi::restartSession()
+devtools::load_all()
+devtools::load_all("../dl4ni.data/")
+
+##%######################################################%##
+#                                                          #
+####               Example For Autoencoder              ####
+####                   Convolutional                    ####
+#                                                          #
+##%######################################################%##
+
+require(neurobase)
+require(dl4ni.data)
+load_keras()
+
+##%######################################################%##
+#                                                          #
+####                   Data Loading                     ####
+#                                                          #
+##%######################################################%##
+
+problem <- "brain_extraction"
+info <- problem %>% get_problem_info()
+
+info %>% split_train_test_sets()
+
+##%######################################################%##
+#                                                          #
+####                   Network Scheme                   ####
+#                                                          #
+##%######################################################%##
+
+width <- 16
+
+scheme <- create_scheme(width = width,
+                        is_autoencoder = TRUE,
+                        loss = loss_mean_squared_error,
+                        only_convolutionals = TRUE,
+                        output_width = width,
+                        num_features = 3,
+                        vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                                    mode = "convolutional", 
+                                                    initial_filters = 2),
+                        vol_dropout = 0,
+                        feature_layers = list(),
+                        feature_dropout = 0,
+                        common_layers = list(conv3d(filters = 1, kernel_size = c(1, 1, 1))),
+                        common_dropout = 0,
+                        decoder_layers = c(segnet(depth = as.integer(log2(width) - 1), 
+                                                  mode = "convolutional", 
+                                                  initial_filters = 2), 
+                                           list(conv3d(filters = 1, 
+                                                       kernel_size = c(1, 1, 1)))),
+                        add_last_layer = FALSE,
+                        last_hidden_layers = list(),
+                        optimizer = "adadelta",
+                        scale = "z",
+                        scale_y = "none")
+
+##%######################################################%##
+#                                                          #
+####               Network Instantiation                ####
+#                                                          #
+##%######################################################%##
+
+ae_model <- scheme %>% instantiate_model(problem_info = info)
+
+summary(ae_model$model)
+
+##%######################################################%##
+#                                                          #
+####                   Model Plotting                   ####
+#                                                          #
+##%######################################################%##
+
+g <- ae_model %>% graph_from_model()
+g %>% plot_graph()
+ae_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
+
+##%######################################################%##
+#                                                          #
+####                  Data Generators                   ####
+#                                                          #
+##%######################################################%##
+
+target_windows_per_file <- 1000
+
+batch_size <- ae_model %>% compute_batch_size()
+
+if (batch_size == 0) {
+  
+  message("Do not continue!! Not enough memory!!")
+  
+}
+
+batches_per_file <- as.integer(target_windows_per_file / batch_size)
+
+train_config <- ae_model %>% create_generator(x_files = info$train$x,
+                                              y_files = info$train$y,
+                                              batches_per_file = batches_per_file)
+
+test_config <- ae_model %>% create_generator(x_files = info$test$x,
+                                             y_files = info$test$y,
+                                             batches_per_file = batches_per_file)
+
+
+##%######################################################%##
+#                                                          #
+####                        Fit                         ####
+#                                                          #
+##%######################################################%##
+
+epochs <- 1
+keep_best <- TRUE
+saving_path <- file.path(system.file(package = "dl4ni"), "models")
+saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
+
+ae_model %>% fit_with_generator(train_config = train_config, 
+                                validation_config = test_config,
+                                epochs = epochs,
+                                starting_epoch = 1,
+                                keep_best = keep_best,
+                                path = saving_path,
+                                prefix = saving_prefix)
+
+saving_prefix <- paste0(saving_prefix, "_final")
+
+ae_model %>% save_model(path = saving_path, 
+                         prefix = saving_prefix, 
+                         comment = "Final model after training")
+
+
+##%######################################################%##
+#                                                          #
+####                     Test Image                     ####
+#                                                          #
+##%######################################################%##
+
+# Select random test image
+test_index <- sample(info$test$subject_indices, size = 1)
+input_file_list <- lapply(info$inputs, function(x) x[test_index])
+
+# Load images and ground truth
+input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
+ground_truth <- input_imgs[[1]]
+
+# Infer in the input volume
+reconstruction <- ae_model %>% infer_on_volume(V = input_imgs, speed = "faster")
+
+# Plot Ground Truth results
+ortho_plot(x = ground_truth,
+           text = "Ground Truth", 
+           interactiveness = FALSE)
+
+# Plot Model results
+ortho_plot(x = reconstruction, 
+           text = "Predicted", 
+           interactiveness = FALSE)
+
