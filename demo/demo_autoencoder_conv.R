@@ -35,7 +35,7 @@ width <- 16
 
 scheme <- create_scheme(width = width,
                         is_autoencoder = TRUE,
-                        loss = loss_mean_squared_error,
+                        loss = keras::loss_mean_squared_error,
                         only_convolutionals = TRUE,
                         output_width = width,
                         num_features = 3,
@@ -55,7 +55,7 @@ scheme <- create_scheme(width = width,
                         add_last_layer = FALSE,
                         last_hidden_layers = list(),
                         optimizer = "adadelta",
-                        scale = "z",
+                        scale = "meanmax",
                         scale_y = "none")
 
 ##%######################################################%##
