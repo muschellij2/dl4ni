@@ -38,11 +38,17 @@ instantiate_model_config <- function(scheme,
                    num_volumes = info$num_volumes,
                    remap_classes = info$remap_classes)
     
-    
-    last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
-                                                  only_convolutionals = only_convolutionals, 
-                                                  force_categorical = TRUE,
-                                                  hidden_layers = scheme$last_hidden_layers)
+    if (scheme_list$add_last_layer) {
+      
+      last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
+                                                    only_convolutionals = only_convolutionals, 
+                                                    force_categorical = TRUE,
+                                                    hidden_layers = scheme$last_hidden_layers)
+      
+    } else {
+      
+      last_layer_info <- NULL
+    }
     
     to_add$last_layer_info <- last_layer_info
     to_add$vol_layers <- info %>% create_vol_layers(default_config$vol_layers_pattern)
