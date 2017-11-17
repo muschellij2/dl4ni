@@ -13,6 +13,8 @@
 #' @param validation_steps     (integer) Number of steps of validation per epoch, Default: NULL
 #' @param validation_config    (list) The testing configuration, the output of \code{\link{create_generator_from_config}} when inputs are validation files, Default: NULL
 #' @param keep_best            (logical) Should the training always store the best model up-to-date?, Default: TRUE
+#' @param metrics_viewer       (logical) Visualize training loss interactively while fitting?, Default: FALSE
+#' @param reset_optimizer      (logical) Reset optimizer state after each subepoch?, Default: FALSE
 #' @param verbose              (logical) Provide additional information on training, Default: TRUE
 #' @param ...                  extra arguments passed to other functions.
 #'
@@ -42,7 +44,7 @@ fit_with_generator <- function(.model,
                                keep_best = TRUE,
                                verbose = TRUE,
                                metrics_viewer = FALSE,
-                               reset_optimizer = TRUE,
+                               reset_optimizer = FALSE,
                                ...) {
   
   require(keras)

@@ -60,22 +60,24 @@ ALREADY DONE:
   + Visualizar input que maximiza las activaciones de una capa.
   + Poner capas convolucionales a la salida
   + Entrenar con capas convolucionales.
+  + Añadir callback_tensorboard.
+  + Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = Pasar todo a clases R6.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.
-  = Añadir callback_tensorboard.
+  = Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   = instantiate_autoencoder.
   = Cambiar el input de un modelo convolucional para que acepte una imagen entera?
-  = Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Mejoras de velocidad en create_generator_from_config.
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
-  = Sistema de logs
+  = Sistema de logs y history dentro del DLmodel
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
   
@@ -103,7 +105,6 @@ TODO:
   - pad_sequence con lstm para hacer modelos sobre la imagen al completo.
   - Generación de textos a partir de las imágenes completas: empezar con output \in\{"axial", "coronal", "sagital"\} e ir complicando el modelo.
   - Autoencoder para la parcelación. Si podemos representar una parcelación por número entre -1 y 1 por ejemplo, podemos hacer que eso sea la salida de la red para que Mapee una ventana de la imagen original a la codificación de la parcelación
-  - Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   - Mapeo de T1 a Flair...
   - Cálculo de la matriz de transformación homogénea del registro afín, usando la parte central de una imagen, y varias LSTM o similar para hacer regresión sobre las componentes de la matriz.
   - Reinforcement learning para clasificación, primero de una red que intenta aprender la clasificación al estilo Flappy Bird y después redes enfrentadas que luchen por ver cuál lo hace mejor y aprendan una de la otra.
