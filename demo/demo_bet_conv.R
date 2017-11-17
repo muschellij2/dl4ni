@@ -31,7 +31,7 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-width <- 32
+width <- 16
 
 scheme <- create_scheme(width = width,
                         only_convolutionals = TRUE,
@@ -46,9 +46,11 @@ scheme <- create_scheme(width = width,
                         common_layers = list(),
                         common_dropout = 0,
                         last_hidden_layers = list(),
-                        optimizer = "nadam",
+                        optimizer = "adadelta",
                         scale = "z",
                         scale_y = "none")
+
+scheme %>% add_attribute(memory_limit = "2G")
 
 ##%######################################################%##
 #                                                          #
@@ -56,7 +58,7 @@ scheme <- create_scheme(width = width,
 #                                                          #
 ##%######################################################%##
 
-bet_model <- scheme %>% instantiate_model(info = info)
+bet_model <- scheme %>% instantiate_model(problem_info = info)
 
 summary(bet_model$model)
 

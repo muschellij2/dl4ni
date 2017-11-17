@@ -37,7 +37,8 @@ scheme <- create_scheme(width = 7,
                         only_convolutionals = FALSE,
                         output_width = 3,
                         num_features = 3,
-                        vol_layers_pattern = list(dense(300),
+                        vol_layers_pattern = list(dense(500),
+                                                  dense(300),
                                                   dense(200),
                                                   dense(250),
                                                   dense(100)),
@@ -46,7 +47,8 @@ scheme <- create_scheme(width = 7,
                                               dense(5)),
                         feature_dropout = 0.15,
                         common_layers = list(clf(all = TRUE, 
-                                                 hidden_layers = list(dense(300), 
+                                                 hidden_layers = list(dense(500),
+                                                                      dense(300), 
                                                                       dense(200),
                                                                       dense(100)))),
                         common_dropout = 0.25,
@@ -55,7 +57,7 @@ scheme <- create_scheme(width = 7,
                         scale = "z",
                         scale_y = "none")
 
-scheme %>% add_attribute(memory_limit = "2G")
+scheme %>% add_attribute(memory_limit = "3G")
 
 ##%######################################################%##
 #                                                          #
@@ -123,7 +125,7 @@ bet_model %>% fit_with_generator(train_config = train_config,
                                  path = saving_path,
                                  prefix = saving_prefix,
                                  metrics_viewer = TRUE,
-                                 reset_optimizer = FALSE)
+                                 reset_optimizer = TRUE)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
