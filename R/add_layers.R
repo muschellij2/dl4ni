@@ -83,13 +83,13 @@ add_layers <- function(object,
                # first we have to flatten it.
                if (is_volumetric) {
                  
-                 new_params <- list(filters = layer_to_add$params$units,
+                 new_params <- list(filters = params$units,
                                     kernel_size = input_shape[1:3])
                  new_layer <- do.call(layer_conv_3d, args = new_params)
                  
                } else {
                  
-                 new_layer <- do.call(layer_dense, args = layer_to_add$params)
+                 new_layer <- do.call(layer_dense, args = params)
                  
                }
                
