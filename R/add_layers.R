@@ -1,26 +1,27 @@
-#' @title FUNCTION_TITLE
+#' @title Add Layers to a Previous Tensor
 #'
-#' @description FUNCTION_DESCRIPTION
+#' @description This function is used to add succesive layers to a previous output tensor.
 #'
-#' @param object                 (name) PARAM_DESCRIPTION
-#' @param layers_definition      (call) PARAM_DESCRIPTION, Default: c()
-#' @param clf                    (logical) PARAM_DESCRIPTION, Default: FALSE
+#' @param object                 (\code{keras} object) A tensor (layer) to which add layers.
+#' @param layers_definition      (list) List of layers to add, using wrappers such as \code{\link{dense}}, \code{\link{conv3d}}, ... Default: c()
+#' @param clf                    (logical) Perform concatenation of input and output layers? (shortcut), Default: FALSE
 #'
-#' @return OUTPUT_DESCRIPTION
+#' @return The composed object.
 #'
-#' @details DETAILS
-#' @seealso 
-#'  
 #' @export 
 #' @import keras
+#' 
 add_layers <- function(object, 
                        layers_definition = c(),
                        clf = FALSE) {
   
   require(keras)
   
+  # Initialize output
   output <- object
   
+  # If layers_definition consists only in numbers, take them as dense layers with as
+  # many units as each number indicates
   if (!is.list(layers_definition) && is.vector(layers_definition) ) {
     
     tmp <- layers_definition
@@ -30,7 +31,7 @@ add_layers <- function(object,
       
       for (i in seq_along(tmp)) {
         
-        layers_definition[[i]] <- list(type = "dense", params = list(units = tmp[i]))
+        layers_definition[[i]] <- dense(units = tmp[i])
         
       }
       
@@ -38,15 +39,18 @@ add_layers <- function(object,
     
   }
   
+  # If we have layers
   if (length(layers_definition) > 0) {
     
+    # Loop over all layers to add
     for (i in seq_along(layers_definition)) {
       
+      # If one of them is numeric, as before, take it as a dense layer.
       layer_to_add <- layers_definition[[i]]
       
       if (is.numeric(layer_to_add)) {
         
-        layer_to_add <- list(type = "dense", params = list(units = layer_to_add))
+        layer_to_add <- dense(units = layer_to_add)
         
       }
       
@@ -71,15 +75,18 @@ add_layers <- function(object,
         
       }
       
+      # Shape of the current output
       input_shape <- object_shape(output)
       
+      # Add layers depending on the actual type of the layer_to_add
       switch(type,
              
+             # Dense layer
              "dense" = {
                
                is_volumetric <- length(input_shape) == 4
                
-               # in case it comes from a volumetric layer (convolutional),
+               # In case it comes from a volumetric layer (convolutional),
                # first we have to flatten it.
                if (is_volumetric) {
                  
@@ -93,9 +100,11 @@ add_layers <- function(object,
                  
                }
                
+               # Add new layer
                output <- output %>% 
                  new_layer 
                
+               # Add additional secondary layers as specified
                if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                
                output <- output %>% layer_activation(activation = this_config$activation)
@@ -104,6 +113,7 @@ add_layers <- function(object,
                
              },
              
+             # A categorical block
              "categorical" = {
                
                output <- output %>% block_categorical(params = params)
@@ -112,6 +122,7 @@ add_layers <- function(object,
                
              },
              
+             # A regression block
              "regression" = {
                
                output <- output %>% block_regression(params = params)
@@ -120,7 +131,7 @@ add_layers <- function(object,
                
              },
              
-             
+             # A multivalued block
              "multivalued" = {
                
                output <- output %>% block_multivalued(params = params)
@@ -129,6 +140,7 @@ add_layers <- function(object,
                
              },
              
+             # A resnet block
              "resnet" = {
                
                output <- output %>% block_resnet(params = params)
@@ -137,6 +149,7 @@ add_layers <- function(object,
                
              },
              
+             # A CLF block
              "clf" = {
                
                output <- output %>% block_clf(params = params)
@@ -145,6 +158,7 @@ add_layers <- function(object,
                
              },
              
+             # U-Net
              "unet" = {
                
                params$object <- output
@@ -154,6 +168,7 @@ add_layers <- function(object,
                
              },
              
+             # Downsample block
              "downsample" = {
                
                output <- output %>% block_downsample(params = params)
@@ -162,6 +177,7 @@ add_layers <- function(object,
                
              },
              
+             # Upsample block
              "upsample" = {
                
                output <- output %>% block_upsample(params = params)
@@ -170,8 +186,10 @@ add_layers <- function(object,
                
              },
              
+             # Maxpooling layer
              "maxpooling" = {
                
+               # We can use a maxpooling layer or a convolutional layer with stride 2.
                if (params$mode == "downsampling") {
                  
                  output <- output %>% layer_max_pooling_3d()
@@ -190,8 +208,10 @@ add_layers <- function(object,
                
              },
              
+             # Upsampling layer
              "upsampling" = {
                
+               # We can use an upsampling layer or a deconvolutional layer with stride 2
                if (params$mode == "upsampling") {
                  
                  output <- output %>% layer_upsampling_3d()
@@ -210,11 +230,15 @@ add_layers <- function(object,
                
              },
              
+             # Convolutional layer
              "conv3d" = {
                
+               # We can only add a convolutional layer after another convolutional
                can_convolutional <- length(input_shape) == 4
                new_width <- 0
                
+               # Or we can force an intermediate layer with a pre-specified number of units
+               # which can be used as a bridge between a dense layer and a convolutional one.
                if (!is.null(params$force)) {
                  
                  force <- params$force
@@ -236,12 +260,14 @@ add_layers <- function(object,
                  
                }
                
+               # Default padding is "same", useful in models such as SegNet and U-Net
                if (is.null(params$padding)) {
                  
                  params$padding <- "same"
                  
                }
                
+               # The convolutinal layer to add
                new_layer <- do.call(layer_conv_3d, args = params)
                
                if (can_convolutional) {
@@ -255,9 +281,11 @@ add_layers <- function(object,
                    
                  }
                  
+                 # Add the layer
                  output <- output %>% 
                    new_layer 
                  
+                 # Add secondary layers as needed
                  if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                  
                  output <- output %>% layer_activation(activation = this_config$activation)
@@ -275,6 +303,7 @@ add_layers <- function(object,
       
       if (clf) {
         
+        # Concatenate input and output of this block of layers.
         output <- layer_concatenate(c(object, output))
         
       }
