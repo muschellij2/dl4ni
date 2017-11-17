@@ -171,7 +171,7 @@ create_model_from_config <- function(config) {
     n_layers_full <- length(model$layers)
     
     # Decoder begins with a layer of the same shape as the output of the encoder.
-    decoder_input <- layer_input(shape = main_output %>% object_shape())
+    decoder_input <- layer_input(shape = ((encoder %>% model_shapes())[[n_layers_encoder]]))
     
     # Add the SAME decoder layers
     decoder_output <- decoder_input
