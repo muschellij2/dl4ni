@@ -49,7 +49,7 @@ ALREADY DONE:
   + Congelar el modelo a la hora de hacer inferencia.
   + Adaptar funciones para ancho "config$width" par.
   + Re-escribir redes densas cuando es convolucional como filters = numero de unidades, kernel_size = tamaño de la salida anterior.
-  = Visualizador de modelos: keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE). Necesita pydot y graphviz.
+  + Visualizador de modelos: keras:::keras$utils$plot_model(bet_model$model, to_file = "model.png", show_shapes = TRUE). Necesita pydot y graphviz.
   + Visualizador de activaciones en capas convolucionales
   + Adaptar para que la unidad básica sea el "DLscheme". A partir de ahí se instancia tanto el modelo como el "DLconfig". Las funciones create_generator o create_inference_function pueden aceptar DLscheme o DLconfig.
   + Actualizar flows para usar "DLscheme"
@@ -63,12 +63,12 @@ ALREADY DONE:
   + Añadir callback_tensorboard.
   + Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   + Reescribir block_downsample y block_upsample.
+  + Poner defaults para batch_normalization, dropout y activation en config.properties.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = Pasar todo a clases R6.
-  = Poner defaults para batch_normalization, dropout y activation en config.properties.
   = Cambiar RESNET.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.

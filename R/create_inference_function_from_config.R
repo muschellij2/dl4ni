@@ -1,4 +1,4 @@
-#' @title FUNCTION_TITLE
+#' @title Generic Inference Function for a Model Configuration
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
