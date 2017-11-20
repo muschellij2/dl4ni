@@ -62,11 +62,14 @@ ALREADY DONE:
   + Entrenar con capas convolucionales.
   + Añadir callback_tensorboard.
   + Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
+  + Reescribir block_downsample y block_upsample.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = Pasar todo a clases R6.
+  = Poner defaults para batch_normalization, dropout y activation en config.properties.
+  = Cambiar RESNET.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.

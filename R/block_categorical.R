@@ -3,11 +3,8 @@
 #'
 #' @param object             (keras object) The object where to append the block.
 #' @param hidden_layers      (list) List of layers, with types and corresponding parameters.
-#' @param hidden_activation  (character) Activation function to use in the hidden layers of the block. 
-#' @param hidden_dropout     (numeric in [0, 1]) The dropout to use in the hidden layers.
 #' @param num_classes        (integer) The number of classes in the output of the block.
 #' @param units              (integer) Number of output units of the block.
-#' @param params             (list) List of parameters to apply, if not listed in the previous ones.
 #'
 #' @details 
 #' A categorical block consists on \code{units} different paths, with the common input \code{object}, 
@@ -22,48 +19,21 @@
 #'
 block_categorical <- function(object, 
                               hidden_layers = NULL,
-                              hidden_activation = "relu",
-                              hidden_dropout = 0,
                               num_classes = 2,
                               units = 1,
-                              concatenate = FALSE,
-                              params = NULL) {
+                              concatenate = FALSE) {
   
-  if (is.null(params)) {
-    
-    params <- list(num_paths = units)
-    
-  } else {
-    
-    params$num_paths <- ifelse("units" %in% names(params), params$units, units)
-    
-  }
-
-  if ("num_classes" %in% names(params)) num_classes <- params$num_classes
-  if ("concatenate" %in% names(params)) {
-    
-    concatenate <- params$concatenate
-    params$concatenate <- FALSE
-    
-  }
-
+  # Final layer in each path
+  finalize_layers <- list(dense(units = num_classes, 
+                                activation = "softmax"))
+  
   # Build the independent paths.
   outputs <- object %>% block_paths(hidden_layers = hidden_layers, 
-                                    hidden_activation = hidden_activation, 
-                                    hidden_dropout = hidden_dropout, 
-                                    num_paths = params$num_paths, 
-                                    params = params)
+                                    num_paths = units,
+                                    finalize_layers = finalize_layers,
+                                    concatenate = FALSE)
   
-
-  # For each independent path, add the output representation
-  for (i in seq_along(outputs)) {
-    
-    # We add a dense layer with num_classes units and softmax activation
-    outputs[[i]] <- (outputs[[i]]) %>% 
-      keras::layer_dense(units = num_classes, activation = "softmax") 
-    
-  }
-  
+  # Concatenate output?
   if (concatenate) {
     
     output <- concatenate_layers(outputs)

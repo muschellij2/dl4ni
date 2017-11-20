@@ -21,44 +21,19 @@
 #' @export
 #'
 block_multivalued <- function(object, 
-                              hidden_layers = NULL,
-                              hidden_activation = "relu",
-                              hidden_dropout = 0,
+                              hidden_layers = list(),
                               num_values = 2,
-                              units = 1,
-                              params = NULL) {
-  
-  if (is.null(params)) {
-    
-    params <- list(num_paths = units)
-    
-  } else {
-    
-    params$num_paths <- ifelse("units" %in% names(params), params$units, units)
-    
-  }
-  
-  if ("num_values" %in% names(params)) num_values <- params$num_values
-  
+                              units = 1) {
+
+  # Layers to add at the end of each independent path
+  finalize_layers <- list(dense(units = num_values, activation = "sigmoid"),
+                          dense(units = 1, activation = "linear"))  
+
   # Build the independent paths.
-  outputs <- object %>% block_paths(hidden_layers = hidden_layers, 
-                                    hidden_activation = hidden_activation, 
-                                    hidden_dropout = hidden_dropout, 
-                                    num_paths = params$num_paths, 
-                                    params = params)
-  
-  
-  # For each independent path, add the output representation
-  for (i in seq_along(outputs)) {
-    
-    # End the path with two dense layers (one with sigmoid and the other with linear activations)
-    outputs[[i]] <- (outputs[[i]]) %>% 
-      keras::layer_dense(units = num_values, activation = "sigmoid") %>% 
-      keras::layer_dense(units = 1, activation = "linear") 
-    
-  }
-  
-  output <- concatenate_layers(outputs)
+  output <- object %>% block_paths(hidden_layers = hidden_layers, 
+                                    num_paths = units,
+                                    finalize_layers = finalize_layers,
+                                    concatenate = TRUE)
   
   return(output)
   

@@ -140,42 +140,42 @@ clf <- function(...) {
   
 }
 
-#' @title Downsampling Convolutional Block
+#' @title Halving Convolutional Block
 #'
-#' @description This function is a wrapper to define a downsampling convolutional block.
+#' @description This function is a wrapper to define a halving convolutional block.
 #'
 #' @param initial_filters    (numeric) Number of filters in the first convolutional layer, Default: 2
 #' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
-#' @param ...                arguments for the \code{\link{block_downsample}} function.
+#' @param ...                arguments for the \code{\link{block_half}} function.
 #'
-#' @return A list with \code{type} = "downsample" and \code{params} with the rest of parameters that define the block.
+#' @return A list with \code{type} = "half" and \code{params} with the rest of parameters that define the block.
 #'
 #' @export 
 #' 
-downsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
+half <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
   
-  list(type = "downsample",
+  list(type = "half",
        params = list(initial_filters = initial_filters, 
                      kernel_size = kernel_size, 
                      ...))
   
 }
 
-#' @title Upsampling Convolutional Block
+#' @title Doubling Convolutional Block
 #'
-#' @description This function is a wrapper to define a upsampling convolutional block.
+#' @description This function is a wrapper to define a doubling convolutional block.
 #'
 #' @param initial_filters    (numeric) Number of filters in the first convolutional layer, Default: 2
 #' @param kernel_size        (list or vector) size of the convolution kernels, Default: c(3, 3, 3)
-#' @param ...                arguments for the \code{\link{block_downsample}} function.
+#' @param ...                arguments for the \code{\link{block_double}} function.
 #'
-#' @return A list with \code{type} = "upsample" and \code{params} with the rest of parameters that define the block.
+#' @return A list with \code{type} = "double" and \code{params} with the rest of parameters that define the block.
 #'
 #' @export 
 #' 
-upsample <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
+double <- function(initial_filters = 2, kernel_size = c(3, 3, 3), ...) {
   
-  list(type = "upsample",
+  list(type = "double",
        params = list(initial_filters = initial_filters, 
                      kernel_size = kernel_size, 
                      ...))

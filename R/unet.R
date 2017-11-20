@@ -1,5 +1,6 @@
 conv_block <- function(object, 
                        num_filters, 
+                       kernel_size = c(3, 3, 3),
                        activation = "relu", 
                        batch_normalization = FALSE, 
                        residual = FALSE, 

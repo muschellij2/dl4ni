@@ -3,10 +3,7 @@
 #' 
 #' @param object             (keras object) The object where to append the block.
 #' @param hidden_layers      (list) List of layers, with types and corresponding parameters.
-#' @param hidden_activation  (character) Activation function to use in the hidden layers of the block. 
-#' @param hidden_dropout     (numeric in [0, 1]) The dropout to use in the hidden layers.
 #' @param all                (logical) Use CLF technique in all hidden layers?, Default: FALSE
-#' @param params             (list) List of parameters to apply, if not listed in the previous ones.
 #' 
 #' @return The object composed with the Continuous Learning of Features block.
 #' 
@@ -18,26 +15,7 @@
 #' 
 block_clf <- function(object, 
                       hidden_layers = NULL,
-                      hidden_activation = "relu",
-                      hidden_dropout = 0,
-                      all = FALSE,
-                      params = NULL) {
-  
-  # Override arguments if needed
-  if (!is.null(params)) {
-    
-    if (length(hidden_layers) == 0) {
-      
-      if (("hidden_layers" %in% names(params)) && (length(params$hidden_layers) > 0)) 
-        hidden_layers <- params$hidden_layers
-      
-    }
-    
-    all <- ifelse("all" %in% names(params), params$all, all)
-    hidden_activation <- ifelse("hidden_activation" %in% names(params), params$hidden_activation, hidden_activation)
-    hidden_dropout <- ifelse("hidden_dropout" %in% names(params), params$hidden_dropout, hidden_dropout)
-    
-  }
+                      all = FALSE) {
   
   require(keras)
   

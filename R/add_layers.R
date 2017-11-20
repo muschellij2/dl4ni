@@ -116,27 +116,27 @@ add_layers <- function(object,
              # A categorical block
              "categorical" = {
                
-               output <- output %>% block_categorical(params = params)
+               params$object <- output
                
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               output <- do.call(block_categorical, args = params)
                
              },
              
              # A regression block
              "regression" = {
                
-               output <- output %>% block_regression(params = params)
+               params$object <- output
                
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               output <- do.call(block_regression, args = params)
                
              },
              
              # A multivalued block
              "multivalued" = {
                
-               output <- output %>% block_multivalued(params = params)
+               params$object <- output
                
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               output <- do.call(block_multivalued, args = params)
                
              },
              
@@ -152,9 +152,9 @@ add_layers <- function(object,
              # A CLF block
              "clf" = {
                
-               output <- output %>% block_clf(params = params)
+               params$object <- output
                
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               output <- do.call(block_clf, args = params)
                
              },
              
@@ -162,27 +162,34 @@ add_layers <- function(object,
              "unet" = {
                
                params$object <- output
+               params$batch_normalization <- this_config$batch_normalization
+               params$activation <- this_config$activation
+               params$dropout <- this_config$dropout
                output <- do.call(block_unet, args = params)
                
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               # if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
              },
              
              # Downsample block
-             "downsample" = {
+             "half" = {
                
-               output <- output %>% block_downsample(params = params)
-               
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               params$object <- output
+               params$batch_normalization <- this_config$batch_normalization
+               params$activation <- this_config$activation
+               params$dropout <- this_config$dropout
+               output <- do.call(block_half, args = params)
                
              },
              
              # Upsample block
-             "upsample" = {
+             "double" = {
                
-               output <- output %>% block_upsample(params = params)
-               
-               if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
+               params$object <- output
+               params$batch_normalization <- this_config$batch_normalization
+               params$activation <- this_config$activation
+               params$dropout <- this_config$dropout
+               output <- do.call(block_double, args = params)
                
              },
              
