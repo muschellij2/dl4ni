@@ -54,10 +54,8 @@ add_layers <- function(object,
         
       }
       
-      # This should be moved to config.properties
-      defaults <- list(batch_normalization = FALSE,
-                       activation = "relu",
-                       dropout = 0)
+      # Default specifications for inner layers
+      defaults <- get_default_specs()
       
       type <- layer_to_add$type
       params <- layer_to_add$params
