@@ -175,7 +175,7 @@ train_output <- function(flow,
       cat("Training configuration...\n")
     
     # Model configuration
-    config <- model$hyperparameters
+    config <- model$get_config()
     
     # Training configuration
     train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))

@@ -24,7 +24,7 @@ create_generator <- function(model,
   
   stopifnot(inherits(model, "DLmodel"))
   
-  config <- model$hyperparameters
+  config <- model$get_config()
   
   require(tictoc)
   # tic("Initialization")

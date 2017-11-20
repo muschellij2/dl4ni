@@ -37,9 +37,7 @@ scheme <- create_scheme(width = 7,
                         only_convolutionals = FALSE,
                         output_width = 3,
                         num_features = 3,
-                        vol_layers_pattern = list(dense(500),
-                                                  dense(300),
-                                                  dense(200),
+                        vol_layers_pattern = list(
                                                   dense(250),
                                                   dense(100)),
                         vol_dropout = 0.15,
@@ -47,8 +45,7 @@ scheme <- create_scheme(width = 7,
                                               dense(5)),
                         feature_dropout = 0.15,
                         common_layers = list(clf(all = TRUE, 
-                                                 hidden_layers = list(dense(500),
-                                                                      dense(300), 
+                                                 hidden_layers = list( 
                                                                       dense(200),
                                                                       dense(100)))),
                         common_dropout = 0.25,
@@ -67,7 +64,7 @@ scheme %>% add_attribute(memory_limit = "3G")
 
 bet_model <- scheme %>% instantiate_model(problem_info = info)
 
-summary(bet_model$model)
+bet_model$summary()
 
 ##%######################################################%##
 #                                                          #
@@ -124,8 +121,8 @@ bet_model %>% fit_with_generator(train_config = train_config,
                                  keep_best = keep_best,
                                  path = saving_path,
                                  prefix = saving_prefix,
-                                 metrics_viewer = TRUE,
-                                 reset_optimizer = TRUE)
+                                 metrics_viewer = FALSE,
+                                 reset_optimizer = FALSE)
 
 saving_prefix <- paste0(saving_prefix, "_final")
 

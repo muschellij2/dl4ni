@@ -8,7 +8,7 @@ infer_on_volume <- function(object,
   
   if (inherits(object, "DLmodel")) {
     
-    config <- object$hyperparameters
+    config <- object$get_config()
     model <- object
     
     infer <- config %>% create_inference_function_from_config()

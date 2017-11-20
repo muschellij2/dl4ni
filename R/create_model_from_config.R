@@ -16,12 +16,23 @@ create_model_from_config <- function(config) {
   # Basic check
   stopifnot(inherits(config, "DLconfig"))
   
-  # Add layers corresponding to the features input.
-  input_features <- layer_input(shape = c(config$num_features))
+  result <- DLmodel$new()
+  result$log("INFO", message = "Model initialiazed.")
   
-  output_features <- input_features %>% 
-    add_layers(layers_definition = config$feature_layers,
-               clf = FALSE)
+  if (config$path[1] %in% c("both", "features")) {
+    
+    result$log("INFO", message = "Adding feature layers.")
+    
+    # Add layers corresponding to the features input.
+    input_features <- layer_input(shape = c(config$num_features))
+    
+    output_features <- input_features %>% 
+      add_layers(layers_definition = config$feature_layers,
+                 clf = FALSE)
+    
+  }
+  
+  result$log("INFO", message = "Adding volume layers.")
   
   # Check number of input images
   num_vol_inputs <- length(config$vol_layers)
@@ -90,6 +101,8 @@ create_model_from_config <- function(config) {
   # Add layers in the common part of the model
   if (length(config$common_layers) > 0) {
     
+    result$log("INFO", message = "Adding common layers.")
+    
     main_output <- main_output %>% 
       add_layers(layers_definition = config$common_layers,
                  clf = FALSE)
@@ -122,12 +135,18 @@ create_model_from_config <- function(config) {
     if (!all(is.na(shape[-4]))) {
       
       # Otherwise, if output shape and expected shapes are not consistent, raise an error.
-      if (!all(shape[-4] == expected_shape))
-        stop(paste0("Output shapes are not correct. Expected: (", 
+      if (!all(shape[-4] == expected_shape)) {
+        
+        message <- paste0("Output shapes are not correct. Expected: (", 
                     paste0(expected_shape, collapse = ", "),
                     ") . Obtained: (", 
                     paste0(shape[-4], collapse = ", "),
-                    ")"))
+                    ")")
+        result$log("ERROR", message = message)
+        
+        stop(message)
+        
+      }
       
     }
     
@@ -144,15 +163,17 @@ create_model_from_config <- function(config) {
   
   # Define the inputs, according to the config$path.
   inputs <- switch(config$path[1],
-         
-         "volumes" = vol_inputs,
-         
-         "both" = c(input_features, vol_inputs),
-         
-         "features" = input_features)
+                   
+                   "volumes" = vol_inputs,
+                   
+                   "both" = c(input_features, vol_inputs),
+                   
+                   "features" = input_features)
   
   # If we have decoder layers, define the encoder, decoder and complete model.
   if (!is.null(config$decoder_layers)) {
+    
+    result$log("INFO", message = "Creating autoencoder.")
     
     # Encoder from the inputs to the current output.
     encoder <- keras_model(inputs = inputs,
@@ -199,6 +220,8 @@ create_model_from_config <- function(config) {
   # Compile if we are given the optimizer and loss function
   if (!is.null(config$optimizer) && !is.null(config$loss)) {
     
+    result$log("INFO", message = "Compiling model.")
+    
     # Get the actual optimizer to use, according to the stored configuration
     optimizer <- eval_optimizer(config$optimizer)
     
@@ -208,16 +231,15 @@ create_model_from_config <- function(config) {
   }
   
   # Store the model and metadata in an object of class DLmodel
-  result <- new.env()
-  result$model <- model
-  result$width <- config$width
-  result$best_loss <- Inf
-  result$encoder <- encoder
-  result$decoder <- decoder
-  result$hyperparameters <- config
+  result$update(model = model, 
+                width = config$width, 
+                best_loss = Inf, 
+                encoder = encoder, 
+                decoder = decoder,
+                hyperparameters = config)
   
-  class(result) <- c("DLmodel", class(result))
-  
+  result$log(level = "INFO", message = "Model created.")
+
   return(result)
   
 }

@@ -10,8 +10,8 @@
 model_size <- function(model) {
   
   # Number of parameters to train and size of input data
-  data_size <- sum(model$model %>% model_units())
-  params_size <- model$model$count_params()
+  data_size <- sum(model$get_model() %>% model_units())
+  params_size <- model$get_model()$count_params()
   
   # Total size
   total_size <- object.size(vector(mode = "double", length = data_size + params_size))
@@ -31,7 +31,7 @@ model_size <- function(model) {
 compute_batch_size <- function(model) {
   
   # Max batch_size (https://stackoverflow.com/questions/46654424/how-to-calculate-optimal-batch-size)
-  config <- model$hyperparameters
+  config <- model$get_config()
   batch_size <- config$memory_limit / (4 * model_size(model))
   
   # Better if it is a power of two
