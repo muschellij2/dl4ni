@@ -126,25 +126,25 @@ fit_with_generator <- function(.model,
   model <- .model$get_model()
   
   # Compute optimal batch size
-  batch_size <- .model %>% compute_batch_size()
-  
-  
-  # If batch_size == 0, there is no possibility of training with the specified memory limit.
-  if (batch_size < 1) {
-    
-    required_memory <- prettyunits::pretty_bytes(unclass(.model %>% model_size() * 4))
-    
-    # Not enough memory to train even 1 batch at a time
-    error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
-                            prettyunits::pretty_bytes(.model$hyperparameters$memory_limit), "\n",
-                            "This model requires at least ", required_memory, " to be trained.\n",
-                            "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
-    
-    .model$log("ERROR", message = error_message)
-    
-    stop(error_message)
-    
-  }
+  batch_size <- .model$check_memory()
+  # %>% compute_batch_size()
+  # 
+  # # If batch_size == 0, there is no possibility of training with the specified memory limit.
+  # if (batch_size < 1) {
+  #   
+  #   required_memory <- prettyunits::pretty_bytes(unclass(.model %>% model_size() * 4))
+  #   
+  #   # Not enough memory to train even 1 batch at a time
+  #   error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
+  #                           prettyunits::pretty_bytes(.model$hyperparameters$memory_limit), "\n",
+  #                           "This model requires at least ", required_memory, " to be trained.\n",
+  #                           "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
+  #   
+  #   .model$log("ERROR", message = error_message)
+  #   
+  #   stop(error_message)
+  #   
+  # }
 
   .model$log("DEBUG", message = paste0("Optimal batch size set to: ", batch_size, "."))
   
@@ -252,7 +252,7 @@ fit_with_generator <- function(.model,
       
       if (epoch > 1) {
         
-        my_message <- paste0("Loading previous best model, with loss:", best_validation_loss)
+        my_message <- paste0("Loading previous best model, with loss: ", best_validation_loss)
         
         message(my_message)
         
@@ -497,7 +497,7 @@ fit_with_generator <- function(.model,
         loss_acc <- rep(0, length(validation_steps))
         for (val_steps in seq(validation_steps)) {
           
-          .model$log("INFO", message = paste0("Validation step ", val_steps, "."))
+          .model$log("DEBUG", message = paste0("Validation step ", val_steps, "."))
           
           # Use the generator to get data
           test_data <- validation_data()

@@ -2,12 +2,12 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param model             (name) PARAM_DESCRIPTION
-#' @param x_files           (name) PARAM_DESCRIPTION
-#' @param y_files           (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param mode              (call) PARAM_DESCRIPTION, Default: c("sampling", "all")
-#' @param num_windows       (NULL) PARAM_DESCRIPTION, Default: NULL
-#' @param batches_per_file  (numeric) PARAM_DESCRIPTION, Default: 5
+#' @param model                    (name) PARAM_DESCRIPTION
+#' @param x_files                  (name) PARAM_DESCRIPTION
+#' @param y_files                  (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param mode                     (call) PARAM_DESCRIPTION, Default: c("sampling", "all")
+#' @param num_windows              (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param target_windows_per_file  (numeric) PARAM_DESCRIPTION, Default: 1024
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -20,7 +20,7 @@ create_generator <- function(model,
                              x_files, 
                              y_files = NULL,
                              mode = "sampling",
-                             batches_per_file = 5) {
+                             target_windows_per_file = 1024) {
   
   stopifnot(inherits(model, "DLmodel"))
   
@@ -36,8 +36,10 @@ create_generator <- function(model,
   
   stride <- ifelse(mode == "all", radius, 1)
   
-  num_windows <- model %>% compute_batch_size()
+  num_windows <- model$check_memory() # %>% compute_batch_size()
+  batches_per_file <- ceiling(target_windows_per_file / num_windows)
   message("Number of windows per batch is set to ", num_windows)
+  message("Will use", batches_per_file, "batches to achieve", batches_per_file * num_windows, "windows extracted per each image.")
   
   next_file <- 1
   sub_epoch <- 0

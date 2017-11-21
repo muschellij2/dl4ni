@@ -82,25 +82,18 @@ bet_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
 #                                                          #
 ##%######################################################%##
 
-target_windows_per_file <- 1000
 
-batch_size <- bet_model %>% compute_batch_size()
+target_windows_per_file <- 1024
 
-if (batch_size == 0) {
-  
-  message("Do not continue!! Not enough memory!!")
-  
-}
-
-batches_per_file <- as.integer(target_windows_per_file / batch_size)
+bet_model$check_memory()
 
 train_config <- bet_model %>% create_generator(x_files = info$train$x,
                                                y_files = info$train$y,
-                                               batches_per_file = batches_per_file)
+                                               target_windows_per_file = target_windows_per_file)
 
 test_config <- bet_model %>% create_generator(x_files = info$test$x,
                                               y_files = info$test$y,
-                                              batches_per_file = batches_per_file)
+                                              target_windows_per_file = target_windows_per_file)
 
 
 ##%######################################################%##
@@ -109,7 +102,7 @@ test_config <- bet_model %>% create_generator(x_files = info$test$x,
 #                                                          #
 ##%######################################################%##
 
-epochs <- 20
+epochs <- 2
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
