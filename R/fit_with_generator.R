@@ -127,24 +127,6 @@ fit_with_generator <- function(.model,
   
   # Compute optimal batch size
   batch_size <- .model$check_memory()
-  # %>% compute_batch_size()
-  # 
-  # # If batch_size == 0, there is no possibility of training with the specified memory limit.
-  # if (batch_size < 1) {
-  #   
-  #   required_memory <- prettyunits::pretty_bytes(unclass(.model %>% model_size() * 4))
-  #   
-  #   # Not enough memory to train even 1 batch at a time
-  #   error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
-  #                           prettyunits::pretty_bytes(.model$hyperparameters$memory_limit), "\n",
-  #                           "This model requires at least ", required_memory, " to be trained.\n",
-  #                           "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
-  #   
-  #   .model$log("ERROR", message = error_message)
-  #   
-  #   stop(error_message)
-  #   
-  # }
 
   .model$log("DEBUG", message = paste0("Optimal batch size set to: ", batch_size, "."))
   
@@ -435,6 +417,13 @@ fit_with_generator <- function(.model,
       
       .model$add_to_history(epoch = epoch, subepoch = step, loss = last_loss)
       
+      if (epoch == training_epochs[1] & step == 1) {
+        
+        .model$add_to_history(epoch = epoch, subepoch = 1, val_loss = last_loss)
+        prev_loss_acc <- last_loss
+        
+      }
+      
       if (verbose) {
         
         if (progress)
@@ -536,7 +525,16 @@ fit_with_generator <- function(.model,
       }
       
       .model$log("INFO", message = paste0("Obtained loss: ", loss_acc, "."))
-      .model$add_to_history(epoch = epoch, val_loss = loss_acc)
+      
+      val_history <- seq(prev_loss_acc, loss_acc, length.out = steps_per_epoch)
+      for (i in seq_along(val_history)) {
+        
+        .model$add_to_history(epoch = epoch, subepoch = i, val_loss = val_history[i])
+        
+      }
+      
+      prev_loss_acc <- loss_acc
+      # .model$add_to_history(epoch = epoch, val_loss = loss_acc)
       
       # If we have to keep the best model, and we have reduced the loss, save the model as the new best
       if (keep_best & (loss_acc < best_validation_loss)) {

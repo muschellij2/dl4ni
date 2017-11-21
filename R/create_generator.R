@@ -39,7 +39,7 @@ create_generator <- function(model,
   num_windows <- model$check_memory() # %>% compute_batch_size()
   batches_per_file <- ceiling(target_windows_per_file / num_windows)
   message("Number of windows per batch is set to ", num_windows)
-  message("Will use", batches_per_file, "batches to achieve", batches_per_file * num_windows, "windows extracted per each image.")
+  message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.")
   
   next_file <- 1
   sub_epoch <- 0

@@ -37,17 +37,18 @@ scheme <- create_scheme(width = 7,
                         only_convolutionals = FALSE,
                         output_width = 3,
                         num_features = 3,
-                        vol_layers_pattern = list(
-                                                  dense(250),
-                                                  dense(100)),
+                        vol_layers_pattern = list(clf(all = TRUE, 
+                                                      hidden_layers = list( 
+                                                        dense(250),
+                                                        dense(100)))),
                         vol_dropout = 0.15,
                         feature_layers = list(dense(10), 
                                               dense(5)),
                         feature_dropout = 0.15,
                         common_layers = list(clf(all = TRUE, 
                                                  hidden_layers = list( 
-                                                                      dense(200),
-                                                                      dense(100)))),
+                                                   dense(200),
+                                                   dense(100)))),
                         common_dropout = 0.25,
                         last_hidden_layers = list(dense(10)),
                         optimizer = "adadelta",
@@ -102,7 +103,7 @@ test_config <- bet_model %>% create_generator(x_files = info$test$x,
 #                                                          #
 ##%######################################################%##
 
-epochs <- 2
+epochs <- 5
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -116,6 +117,8 @@ bet_model %>% fit_with_generator(train_config = train_config,
                                  prefix = saving_prefix,
                                  metrics_viewer = FALSE,
                                  reset_optimizer = FALSE)
+
+bet_model$plot_history()
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
