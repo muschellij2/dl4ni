@@ -10,7 +10,6 @@ devtools::load_all("../dl4ni.data/")
 ##%######################################################%##
 
 require(neurobase)
-require(dl4ni.data)
 load_keras()
 K <- keras::backend()
 tensorflow::tf$set_random_seed(1234)
@@ -37,25 +36,23 @@ scheme <- create_scheme(width = 7,
                         only_convolutionals = FALSE,
                         output_width = 3,
                         num_features = 3,
-                        vol_layers_pattern = list(clf(all = TRUE, 
-                                                      hidden_layers = list( 
-                                                        dense(250),
-                                                        dense(100)))),
+                        vol_layers_pattern = list( 
+                          dense(250),
+                          dense(100)),
                         vol_dropout = 0.15,
                         feature_layers = list(dense(10), 
                                               dense(5)),
                         feature_dropout = 0.15,
-                        common_layers = list(clf(all = TRUE, 
-                                                 hidden_layers = list( 
-                                                   dense(200),
-                                                   dense(100)))),
+                        common_layers = list(
+                          dense(200),
+                          dense(100)),
                         common_dropout = 0.25,
                         last_hidden_layers = list(dense(10)),
                         optimizer = "adadelta",
                         scale = "z",
                         scale_y = "none")
 
-scheme %>% add_attribute(memory_limit = "3G")
+scheme %>% add_attribute(memory_limit = "2G")
 
 ##%######################################################%##
 #                                                          #
@@ -115,7 +112,7 @@ bet_model %>% fit_with_generator(train_config = train_config,
                                  keep_best = keep_best,
                                  path = saving_path,
                                  prefix = saving_prefix,
-                                 metrics_viewer = FALSE,
+                                 metrics_viewer = TRUE,
                                  reset_optimizer = FALSE)
 
 bet_model$plot_history()

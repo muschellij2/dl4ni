@@ -253,6 +253,14 @@ fit_with_generator <- function(.model,
         
       }
       
+      if (metrics_viewer) {
+        
+        .model$update_render()
+        Sys.sleep(0.1)
+        
+      }
+      
+      
     })
     
   }
@@ -293,15 +301,15 @@ fit_with_generator <- function(.model,
     
     .model$log("INFO", message = "Initializing Viewer")
 
-    view_metrics <- keras:::KerasMetricsCallback$new()
-    view_metrics$view_metrics <- TRUE
-    view_metrics$metrics <- list("loss" = numeric())
-    
-    callback_view <- callback_lambda(
-      on_epoch_end = view_metrics$on_epoch_end
-    )
-    
-    my_callback <- c(my_callback, callback_view)
+    # view_metrics <- keras:::KerasMetricsCallback$new()
+    # view_metrics$view_metrics <- TRUE
+    # view_metrics$metrics <- list("loss" = numeric())
+    # 
+    # callback_view <- callback_lambda(
+    #   on_epoch_end = view_metrics$on_epoch_end
+    # )
+    # 
+    # my_callback <- c(my_callback, callback_view)
     
   }
   
@@ -309,6 +317,9 @@ fit_with_generator <- function(.model,
   training_epochs <- seq(epochs)
   if (starting_epoch > 1) 
     training_epochs <- setdiff(training_epochs, seq(starting_epoch - 1))
+  
+  if (starting_epoch == 1)
+    .model$reset_history()
   
   .model$log("DEBUG", message = paste0("Training from epoch ", training_epochs[1],
                                        " to epoch ", max(training_epochs), "."))
@@ -424,6 +435,26 @@ fit_with_generator <- function(.model,
         
       }
       
+      if (metrics_viewer) {
+        
+        if (epoch == training_epochs[1] & step == 1) {
+          
+          .model$render_history()
+          
+        } else {
+          
+          if (step %% 10 == 0) {
+            
+            .model$update_render()
+            # print("Pausing")
+            Sys.sleep(0.1)
+            
+          }
+          
+        }
+        
+      }
+      
       if (verbose) {
         
         if (progress)
@@ -533,6 +564,13 @@ fit_with_generator <- function(.model,
         
       }
       
+      if (metrics_viewer) {
+        
+        .model$update_render()
+        Sys.sleep(0.1)
+        
+      }
+
       prev_loss_acc <- loss_acc
       # .model$add_to_history(epoch = epoch, val_loss = loss_acc)
       

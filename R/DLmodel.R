@@ -93,36 +93,50 @@ DLmodel <- R6::R6Class(
       require(ggvis)
       
       h <- private$reformat_history()
+      
+      span <- ifelse(nrow(h) < 25, 0.5, 0.2)
 
       h %>% 
         ggvis(~epochs, ~loss) %>% 
         layer_lines(stroke := "darkgray") %>% 
-        layer_smooths(span = 0.2, se = TRUE, fill := "blue", stroke := "darkblue") %>% 
-        layer_lines(x = ~epochs,  y = ~val_loss, stroke := "red") %>% 
+        layer_smooths(span = span, se = TRUE, fill := "blue", stroke := "darkblue") %>% 
+        layer_points(x = ~epochs[val_loss >= 0],  y = ~val_loss[val_loss >= 0], fill := "red", stroke := "darkred") %>% 
         add_axis("x", title = "epochs") %>% 
         private$add_title(title = "Losses History")
       
       
     },
     
+    reset_history = function() {
+      
+      private$history <- data.frame(epoch = NULL, subepoch = NULL, time = NULL, loss = NULL, val_loss = NULL)
+      
+    },
+    
     render_history = function(initialize = TRUE) {
       
-      suppressPackageStartupMessages(require(googleVis))
+      suppressPackageStartupMessages(require(googleVis) & require(rstudioapi))
       
       h <- private$reformat_history()
       
-      tmpfile <- tempfile(fileext = ".html")
       foo <- gvisLineChart(h, 
                            xvar = "epochs", 
                            yvar = c("loss", "val_loss"),
-                           options = list(title = "Loss History",
-                                          titleTextStyle = "{color:'red',fontName:'Courier',fontSize:16}",
-                                          curveType = 'function'))
+                           options = list(width = 480,
+                                          height = 640,
+                                          title = "Loss History",
+                                          titleTextStyle = "{color:'red',fontSize:16}"))
       
-      cat(googleVis::renderGvis(foo)(), file = tmpfile)
+      cat(renderGvis(foo)(), file = private$render_file)
       
       if (initialize)
-        rstudioapi::viewer(url = tmpfile)
+        viewer(url = private$render_file)
+      
+    },
+    
+    update_render = function() {
+      
+      self$render_history(initialize = FALSE)
       
     },
     
@@ -254,6 +268,8 @@ DLmodel <- R6::R6Class(
     
     history = data.frame(epoch = NULL, subepoch = NULL, time = NULL, loss = NULL, val_loss = NULL),
     
+    render_file = tempfile(fileext = ".html"),
+    
     get_log_lines = function(level = c("DEBUG", "WARNING", "INFO", "ERROR")) {
       
       lines <- c()
@@ -318,12 +334,14 @@ DLmodel <- R6::R6Class(
       max_sub_epoch <- max(private$history %>% select(subepoch) %>% unlist())
       
       history2 <- private$history %>% 
-        mutate(epochs = (epoch - 1) + (subepoch - 1) / max_sub_epoch) %>% 
-        filter(loss >= 0 | val_loss >= 0)
+        mutate(epochs = (epoch - 1) + (subepoch - 1) / max_sub_epoch)
       
       losses <- history2 %>% select(epochs, loss) %>% filter(loss >= 0)
       val_losses <- history2 %>% select(epochs, val_loss) %>% filter(val_loss >= 0)
-      h <- inner_join(losses, val_losses)
+      h <- full_join(losses, val_losses, by = "epochs")
+      if (nrow(h) >= 2)
+        if (all(h[1, ] == h[2, ]))
+          h <- h[-1, ]
       
       return(h)
       
