@@ -12,8 +12,8 @@ devtools::load_all("../dl4ni.data/")
 require(neurobase)
 load_keras()
 K <- keras::backend()
-tensorflow::tf$set_random_seed(1234)
-set.seed(1234)
+# tensorflow::tf$set_random_seed(1234)
+# set.seed(1234)
 
 ##%######################################################%##
 #                                                          #
@@ -32,27 +32,29 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-scheme <- create_scheme(width = 7,
-                        only_convolutionals = FALSE,
-                        output_width = 3,
-                        num_features = 3,
-                        vol_layers_pattern = list( 
-                          dense(250),
-                          dense(100)),
-                        vol_dropout = 0.15,
-                        feature_layers = list(dense(10), 
-                                              dense(5)),
-                        feature_dropout = 0.15,
-                        common_layers = list(
-                          dense(200),
-                          dense(100)),
-                        common_dropout = 0.25,
-                        last_hidden_layers = list(dense(10)),
-                        optimizer = "adadelta",
-                        scale = "z",
-                        scale_y = "none")
+scheme <- DLscheme$new()
 
-scheme %>% add_attribute(memory_limit = "2G")
+scheme$add(width = 7,
+           only_convolutionals = FALSE,
+           output_width = 3,
+           num_features = 3,
+           vol_layers_pattern = list( 
+             dense(250),
+             dense(100)),
+           vol_dropout = 0.15,
+           feature_layers = list(dense(10), 
+                                 dense(5)),
+           feature_dropout = 0.15,
+           common_layers = list(
+             dense(200),
+             dense(100)),
+           common_dropout = 0.25,
+           last_hidden_layers = list(dense(10)),
+           optimizer = "adadelta",
+           scale = "z",
+           scale_y = "none")
+
+scheme$add(memory_limit = "2G")
 
 ##%######################################################%##
 #                                                          #
@@ -60,7 +62,7 @@ scheme %>% add_attribute(memory_limit = "2G")
 #                                                          #
 ##%######################################################%##
 
-bet_model <- scheme %>% instantiate_model(problem_info = info)
+bet_model <- scheme$instantiate(problem_info = info)
 
 bet_model$summary()
 
@@ -70,9 +72,9 @@ bet_model$summary()
 #                                                          #
 ##%######################################################%##
 
-g <- bet_model %>% graph_from_model()
+g <- bet_model$graph()
 g %>% plot_graph()
-bet_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
+bet_model$plot(to_file = paste0("model_", problem, ".png"))
 
 ##%######################################################%##
 #                                                          #
@@ -80,19 +82,21 @@ bet_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
 #                                                          #
 ##%######################################################%##
 
-
+# By default, 1024 windows are extracted from each file. 
+# Use 'use_data' to provide a different number.
 target_windows_per_file <- 1024
 
 bet_model$check_memory()
 
-train_config <- bet_model %>% create_generator(x_files = info$train$x,
-                                               y_files = info$train$y,
-                                               target_windows_per_file = target_windows_per_file)
+bet_model$use_data(use = "train",
+                   x_files = info$train$x,
+                   y_files = info$train$y,
+                   target_windows_per_file = target_windows_per_file)
 
-test_config <- bet_model %>% create_generator(x_files = info$test$x,
-                                              y_files = info$test$y,
-                                              target_windows_per_file = target_windows_per_file)
-
+bet_model$use_data(use = "test",
+                   x_files = info$test$x,
+                   y_files = info$test$y,
+                   target_windows_per_file = target_windows_per_file)
 
 ##%######################################################%##
 #                                                          #
@@ -105,25 +109,19 @@ keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-bet_model %>% fit_with_generator(train_config = train_config, 
-                                 validation_config = test_config,
-                                 epochs = epochs,
-                                 starting_epoch = 1,
-                                 keep_best = keep_best,
-                                 path = saving_path,
-                                 prefix = saving_prefix,
-                                 metrics_viewer = TRUE,
-                                 reset_optimizer = FALSE)
+bet_model$fit(epochs = epochs,
+              keep_best = keep_best,
+              path = saving_path,
+              prefix = saving_prefix,
+              metrics_viewer = FALSE)
 
 bet_model$plot_history()
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-bet_model %>% save_model(path = saving_path, 
-                         prefix = saving_prefix, 
-                         comment = "Final model after training")
-
-# bet_model <- load_model(path = saving_path, prefix = saving_prefix)
+bet_model$save(path = saving_path, 
+               prefix = saving_prefix, 
+               comment = "Final model after training")
 
 ##%######################################################%##
 #                                                          #
@@ -140,7 +138,7 @@ input_imgs <- prepare_files_for_inference(file_list = input_file_list)
 ground_truth <- neurobase::readnii(info$outputs[test_index])
 
 # Infer in the input volume
-brain <- bet_model %>% infer_on_volume(V = input_imgs, speed = "faster")
+brain <- bet_model$infer(V = input_imgs, speed = "faster")
 
 # Some values for plotting
 num_classes <- length(info$values)

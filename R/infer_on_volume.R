@@ -11,6 +11,14 @@ infer_on_volume <- function(object,
     config <- object$get_config()
     model <- object
     
+    if (speed == "debug") {
+      
+      speed <- "faster"
+      config$category_method <- "simple"
+      config$regularize <- NULL
+      
+    }
+    
     infer <- config %>% create_inference_function_from_config()
     
     if (is.null(V)) {

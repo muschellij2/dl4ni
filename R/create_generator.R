@@ -6,7 +6,6 @@
 #' @param x_files                  (name) PARAM_DESCRIPTION
 #' @param y_files                  (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param mode                     (call) PARAM_DESCRIPTION, Default: c("sampling", "all")
-#' @param num_windows              (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param target_windows_per_file  (numeric) PARAM_DESCRIPTION, Default: 1024
 #'
 #' @return OUTPUT_DESCRIPTION

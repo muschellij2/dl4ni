@@ -34,7 +34,8 @@ train_output <- function(flow,
                          given_input = NULL,
                          train_split = 0.75,
                          epochs = 10, 
-                         max_sub_epochs = 5,
+                         target_windows_per_file = 1024,
+                         metrics_viewer = FALSE,
                          mode = c("debug", "faster", "medium", "slower"),
                          verbose = TRUE) {
   
@@ -82,7 +83,7 @@ train_output <- function(flow,
   
   model <- flow$processes[[output]]
   
-  if ((inherits(model, "DLmodel") | inherits(model, "DLscheme")) & !flow$trained[[output]]) {
+  if ((inherits(model, "DLmodel") | inherits(model, "DLscheme"))) {
     
     # Temporary results
     tmp_folder <- tempdir()
@@ -158,36 +159,39 @@ train_output <- function(flow,
       if (verbose)
         cat("Preparing model configuration...\n")
       
-      params <- model
-      
-      config <- params %>% instantiate_model_config(inputs = results, outputs = output_filenames, labels_subset = params$labels_subset)
+      scheme <- model
       
       # Model creation
       if (verbose)
         cat("Creating model...\n")
-      model <- config %>% create_model_from_config()
+      model <- scheme$instantiate(inputs = results, 
+                                  outputs = output_filenames, 
+                                  labels_subset = scheme$labels_subset)
       
       flow$processes[[output]] <- model
       
     }
     
-    if (verbose)
-      cat("Training configuration...\n")
-    
-    # Model configuration
-    config <- model$get_config()
-    
-    # Training configuration
-    train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))
-    test_indices <- setdiff(seq(num_subjects), train_indices)
-    
-    train_config <- model %>% create_generator(x_files = lapply(results, function(x) x[train_indices]),
-                                               y_files = output_filenames[train_indices],
-                                               batches_per_file = max_sub_epochs)
-    
-    test_config <- model %>% create_generator(x_files = lapply(results, function(x) x[test_indices]),
-                                              y_files = output_filenames[test_indices],
-                                              batches_per_file = max_sub_epochs)
+    if (!model$has_train_data) {
+      
+      if (verbose)
+        cat("Training configuration...\n")
+      
+      # Training configuration
+      train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))
+      test_indices <- setdiff(seq(num_subjects), train_indices)
+      
+      model$use_data(use = "train",
+                     x_files = lapply(results, function(x) x[train_indices]),
+                     y_files = output_filenames[train_indices],
+                     target_windows_per_file = target_windows_per_file)
+      
+      model$use_data(use = "test",
+                     x_files = lapply(results, function(x) x[test_indices]),
+                     y_files = output_filenames[test_indices],
+                     target_windows_per_file = target_windows_per_file)
+      
+    }
     
     keep_best <- TRUE
     saving_path <- file.path(system.file(package = "dl4ni"), "models")
@@ -204,12 +208,11 @@ train_output <- function(flow,
       
     })
     
-    model %>% fit_with_generator(train_config = train_config, 
-                                 validation_config = test_config,
-                                 epochs = epochs,
-                                 keep_best = keep_best,
-                                 path = saving_path,
-                                 prefix = saving_prefix)
+    model$fit(epochs = epochs,
+              keep_best = keep_best,
+              path = saving_path,
+              prefix = saving_prefix,
+              metrics_viewer = metrics_viewer)
     
     if (verbose)
       cat("Done.\n")

@@ -64,11 +64,13 @@ ALREADY DONE:
   + Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   + Reescribir block_downsample y block_upsample.
   + Poner defaults para batch_normalization, dropout y activation en config.properties.
+  + Sistema de logs y history dentro del DLmodel.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = Pasar todo a clases R6.
+  = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = Cambiar RESNET.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
@@ -80,7 +82,6 @@ WIP:
   = Mejoras de velocidad en create_generator_from_config.
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
-  = Sistema de logs y history dentro del DLmodel
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
   

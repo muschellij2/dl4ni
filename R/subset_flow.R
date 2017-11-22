@@ -111,7 +111,7 @@ subset_flow <- function(flow, outputs) {
     
   }
   
-  # Create a deep copy of the flow to remove dependencies between kers models
+  # Create a deep copy of the flow to remove dependencies between keras models
   res_flow <- new_flow %>% clone_flow()
   
   class(res_flow) <- c("DLflow", class(res_flow))

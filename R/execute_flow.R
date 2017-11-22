@@ -99,17 +99,9 @@ execute_flow <- function(flow, inputs = list(),
                  
                  "DLmodel" = {
                    
-                   if (mode[1] == "debug") {
-                     
-                     mode <- "faster"
-                     config$category_method <- "simple"
-                     config$regularize <- NULL
-                     
-                   }
-                   
                    # Infer on input volumes
                    input_imgs <- flow$computed_outputs[my_inputs]
-                   flow$computed_outputs[[intermediate_output]] <- process %>% infer_on_volume(V = input_imgs, speed = mode[1])
+                   flow$computed_outputs[[intermediate_output]] <- process$infer(V = input_imgs, speed = mode[1])
                    
                  })
           

@@ -95,15 +95,30 @@ DLmodel <- R6::R6Class(
       h <- private$reformat_history()
       
       span <- ifelse(nrow(h) < 25, 0.5, 0.2)
-
-      h %>% 
-        ggvis(~epochs, ~loss) %>% 
-        layer_lines(stroke := "darkgray") %>% 
-        layer_smooths(span = span, se = TRUE, fill := "blue", stroke := "darkblue") %>% 
-        layer_points(x = ~epochs[val_loss >= 0],  y = ~val_loss[val_loss >= 0], fill := "red", stroke := "darkred") %>% 
-        add_axis("x", title = "epochs") %>% 
-        private$add_title(title = "Losses History")
       
+      if (length(h$val_loss[val_loss >= 0]) == 1) {
+        
+        h %>% 
+          ggvis(~epochs, ~loss) %>% 
+          layer_lines(stroke := "darkgray") %>% 
+          layer_smooths(span = span, se = TRUE, fill := "blue", stroke := "darkblue") %>% 
+          layer_points(x = ~epochs[val_loss >= 0],  y = ~val_loss[val_loss >= 0], fill := "red", stroke := "darkred") %>% 
+          add_axis("x", title = "epochs") %>% 
+          add_axis("y", title = "loss") %>% 
+          private$add_title(title = "Losses History")
+        
+      } else {
+        
+        h %>% 
+          ggvis(~epochs, ~loss) %>% 
+          layer_lines(stroke := "darkgray") %>% 
+          layer_smooths(span = span, se = TRUE, fill := "blue", stroke := "darkblue") %>% 
+          layer_lines(x = ~epochs[val_loss >= 0],  y = ~val_loss[val_loss >= 0], stroke := "darkred") %>% 
+          add_axis("x", title = "epochs") %>% 
+          add_axis("y", title = "loss") %>% 
+          private$add_title(title = "Losses History")
+        
+      }
       
     },
     
@@ -247,13 +262,129 @@ DLmodel <- R6::R6Class(
         
       }
       
-    }
+    },
+    
+    graph = function() {
+      
+      self %>% graph_from_model()
+      
+    },
+    
+    plot = function(to_file) {
+      
+      self %>% plot_model(to_file = to_file)
+      
+    },
+    
+    load = function(path, prefix) {
+      
+      self <- load_model(path = path, prefix = prefix)
+      
+    },
+    
+    save = function(path, prefix, comment = "") {
+      
+      self %>% save_model(path, prefix, comment)
+      
+    },
+    
+    use_data = function(use = c("train", "test"),
+                        x_files, 
+                        y_files = NULL,
+                        target_windows_per_file = 1024) {
+      
+      gen <- self %>% create_generator(x_files = x_files, 
+                                       y_files = y_files,
+                                       mode = "sampling",
+                                       target_windows_per_file = target_windows_per_file)
+      
+      if (use[1] == "train") {
+        
+        private$train_config <- gen
+        private$train_files <- list(x = x_files, y = y_files)
+        self$has_train_data <- TRUE
+        
+      } else {
+        
+        private$test_config <- gen
+        private$test_files <- list(x = x_files, y = y_files)
+        
+      }
+      
+    },
+    
+    fit = function(epochs = 10, 
+                   keep_best = TRUE,
+                   metrics_viewer = FALSE,
+                   ...) {
+      
+      args <- list(...)
+      
+      if (keep_best) {
+        
+        # Path and prefix must be provided
+        
+        path <- args$path
+        prefix <- args$prefix
+        
+        if (is.null(path) | is.null(prefix)) {
+          
+          self$log("ERROR", message = "No path and prefix provided when training.")
+          
+          message <- "When training with keep_best == TRUE, path and prefix must be provided."
+          stop(message)
+          
+        }
+        
+      }
+      
+      if (!self$has_train_data) {
+        
+        self$log("ERROR", message = "No training configuration provided.")
+        stop("No training configuration provided. Employ 'use_data' function to provide a training configuration.")
+        
+      }
+      
+      self %>% fit_with_generator(train_config = private$train_config,
+                                  validation_config = private$test_config,
+                                  epochs = epochs,
+                                  starting_epoch = private$last_epoch + 1,
+                                  keep_best = keep_best,
+                                  path = path,
+                                  prefix = prefix,
+                                  metrics_viewer = metrics_viewer)
+      
+      private$last_epoch <- max(private$history$epoch)
+      
+    },
+    
+    reset = function() {
+      
+      self %>% reset_model()
+      
+    },
+    
+    infer = function(V = NULL, 
+                     speed = c("faster", "medium", "slower")) {
+      
+      self %>% infer_on_volume(V = V, speed = speed[1])
+      
+    },
+    
+    has_train_data = FALSE
     
   ),
   
   private = list(
     
     model = NULL,
+    train_config = NULL,
+    test_config = NULL,
+    
+    train_files = NULL,
+    test_files = NULL,
+    
+    last_epoch = 0,
     
     width = NULL,
     
