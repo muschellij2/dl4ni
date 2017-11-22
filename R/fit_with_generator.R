@@ -56,8 +56,14 @@ fit_with_generator <- function(.model,
   extra_args <- list(...)
   
   # At least we require the training configuration
-  if (is.null(train_config) & is.null(generator) & is.null(steps_per_epoch)) 
-    stop("No training configuration/generator provided.")
+  if (is.null(train_config) & is.null(generator) & is.null(steps_per_epoch)) {
+
+    message <- "No training configuration/generator provided."
+    .model$log("ERROR", message = message)
+        
+    stop(message)
+    
+  }
   
   # If we have a train_config, this define the other variables:
   if (!is.null(train_config)) {
@@ -77,8 +83,14 @@ fit_with_generator <- function(.model,
   
   
   # If no validation is provided, a warning will be given
-  if (is.null(validation_config) & is.null(validation_data) & is.null(validation_steps)) 
-    warning("No validation configuration/generator provided.")
+  if (is.null(validation_config) & is.null(validation_data) & is.null(validation_steps)) {
+
+    message <- "No validation configuration/generator provided."
+    .model$log("WARNING", message = message)
+        
+    warning(message)
+    
+  }
   
   # If it is provided, other variables are defined from the configuration.
   if (!is.null(validation_config)) {
@@ -111,41 +123,23 @@ fit_with_generator <- function(.model,
     model_prefix <- prefix
   
   # Initialize variables for training
-  model <- .model$model
+  model <- .model$get_model()
   
   # Compute optimal batch size
-  batch_size <- .model %>% compute_batch_size()
+  batch_size <- .model$check_memory()
+
+  .model$log("DEBUG", message = paste0("Optimal batch size set to: ", batch_size, "."))
   
-  # If batch_size == 0, there is no possibility of training with the specified memory limit.
-  if (batch_size < 1) {
-    
-    required_memory <- prettyunits::pretty_bytes(unclass(.model %>% model_size() * 4))
-    
-    # Not enough memory to train even 1 batch at a time
-    error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
-                            prettyunits::pretty_bytes(.model$hyperparameters$memory_limit), "\n",
-                            "This model requires at least ", required_memory, " to be trained.\n",
-                            "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
-    stop(error_message)
-    
-  }
-  
-  cat("Batch size is stablished at:", batch_size, "\n")
-  
+  if (verbose)
+    cat("Batch size is set to:", batch_size, "\n")
   
   # Unfreeze learning phase (freeze at the end)
   .model %>% set_trainability(trainability = TRUE)
   
-  if ("best_loss" %in% names(.model)) {
-    
-    best_validation_loss <- .model$best_loss
-    
-  } else {
-    
-    best_validation_loss <- Inf
-    
-  }
+  .model$log("DEBUG", message = "Unfreeze learning phase.")
   
+  best_validation_loss <- .model$get_loss()
+    
   epoch <- 0
   
   # Set variables needed to keep always the best model trained so far
@@ -162,9 +156,13 @@ fit_with_generator <- function(.model,
     # always overwrite.
     if (file.exists(save_path) & interactive()) {
       
+      .model$log("WARNING", message = "Existing previous version.")
+      
       choices <- c("Overwrite", "Load previous", "Save both")
       title <- "Already existing model. Choose an action:"
       chosen_output <- utils::select.list(choices = choices, title = title)
+      
+      .model$log("INFO", message = paste0("User selected to ", tolower(chosen_output), "."))
       
       # Perform the required action
       switch(chosen_output,
@@ -207,6 +205,8 @@ fit_with_generator <- function(.model,
       if (verbose)
         message("Model saved in ", save_path)
       
+      .model$log("DEBUG", message = paste0("Model saved in ", save_path))
+      
       
     } else {
       
@@ -220,6 +220,8 @@ fit_with_generator <- function(.model,
       if (verbose)
         message("Model saved in ", save_path)
       
+      .model$log("DEBUG", message = paste0("Model saved in ", save_path))
+      
     }
     
     # Define the action to perform when exiting this training:
@@ -228,20 +230,36 @@ fit_with_generator <- function(.model,
     # This works even when the user interrupts training.
     on.exit({
       
+      .model$log("INFO", message = "Exiting training.")
+      
       if (epoch > 1) {
         
-        message("Loading previous best model, with loss:", best_validation_loss)
+        my_message <- paste0("Loading previous best model, with loss: ", best_validation_loss)
+        
+        message(my_message)
+        
+        .model$log("INFO", message = my_message)
         
         weights_filename <- file.path(model_path, model_prefix, paste0(model_prefix, "_weights.hdf5"))
         
-        .model$model %>% load_model_weights_hdf5(filepath = weights_filename)
+        .model$get_model() %>% load_model_weights_hdf5(filepath = weights_filename)
         
-        # Unfreeze learning phase (freeze at the end)
-        .model %>% set_trainability(trainability = TRUE)
+        # Freeze learning phase (freeze at the end)
+        .model %>% set_trainability(trainability = FALSE)
         
-        .model$best_loss <- best_validation_loss
+        .model$log("DEBUG", message = "Freeze learning phase.")
+        
+        .model$set_loss(best_validation_loss)
         
       }
+      
+      if (metrics_viewer) {
+        
+        .model$update_render()
+        Sys.sleep(0.1)
+        
+      }
+      
       
     })
     
@@ -280,16 +298,18 @@ fit_with_generator <- function(.model,
   if (metrics_viewer) {
     
     message("Initializing Viewer")
+    
+    .model$log("INFO", message = "Initializing Viewer")
 
-    view_metrics <- keras:::KerasMetricsCallback$new()
-    view_metrics$view_metrics <- TRUE
-    view_metrics$metrics <- list("loss" = numeric())
-    
-    callback_view <- callback_lambda(
-      on_epoch_end = view_metrics$on_epoch_end
-    )
-    
-    my_callback <- c(my_callback, callback_view)
+    # view_metrics <- keras:::KerasMetricsCallback$new()
+    # view_metrics$view_metrics <- TRUE
+    # view_metrics$metrics <- list("loss" = numeric())
+    # 
+    # callback_view <- callback_lambda(
+    #   on_epoch_end = view_metrics$on_epoch_end
+    # )
+    # 
+    # my_callback <- c(my_callback, callback_view)
     
   }
   
@@ -298,11 +318,21 @@ fit_with_generator <- function(.model,
   if (starting_epoch > 1) 
     training_epochs <- setdiff(training_epochs, seq(starting_epoch - 1))
   
+  if (starting_epoch == 1)
+    .model$reset_history()
+  
+  .model$log("DEBUG", message = paste0("Training from epoch ", training_epochs[1],
+                                       " to epoch ", max(training_epochs), "."))
+  .model$log("DEBUG", message = paste0("Number of steps per epoch in training is ", steps_per_epoch, "."))
+  .model$log("DEBUG", message = paste0("Number of steps per epoch in testing is ", validation_steps, "."))
+  
   # For each training epoch
   for (epoch in training_epochs) {
     
-    opt_states <- .model$model$optimizer$updates
-    iterations <- .model$model$optimizer$iterations
+    opt_states <- model$optimizer$updates
+    iterations <- model$optimizer$iterations
+    
+    .model$log("INFO", message = paste0("Start Training Epoch ", epoch, "."))
     
     # Information (progress bar) for epochs.
     if (verbose) {
@@ -341,16 +371,21 @@ fit_with_generator <- function(.model,
     # For each subepoch
     for (step in seq(steps_per_epoch)) {
       
-      # Get Training datausing the generator
+      .model$log("DEBUG", message = paste0("Starting step ", step, "."))
+      
+      # Get Training data using the generator
       # data has 2 or 3 components:
       # The first is always the input samples
       # The second is always the desired outputs
       # A possible third indicates sample weights.
       data <- generator()
       
+      .model$log("DEBUG", message = "Data generated.")
+      
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
       
       if (length(data) > 2) {
+        
         # With sample weight
         
         model %>% fit(
@@ -364,6 +399,7 @@ fit_with_generator <- function(.model,
         # ...)
         
       } else {
+        
         # No sample weight
         
         model %>% fit(
@@ -377,14 +413,47 @@ fit_with_generator <- function(.model,
         
       }
       
+      .model$log("DEBUG", message = "Subepoch finished.")
+      
       if (reset_optimizer) {
         
-        .model$model$optimizer$updates <- opt_states
-        .model$model$optimizer$iterations <- iterations
+        .model$log("DEBUG", message = "Resetting optimizer.")
+        
+        model$optimizer$updates <- opt_states
+        model$optimizer$iterations <- iterations
         
       }
       
       last_loss <- last_loss / num_outputs
+      
+      .model$add_to_history(epoch = epoch, subepoch = step, loss = last_loss)
+      
+      if (epoch == training_epochs[1] & step == 1) {
+        
+        .model$add_to_history(epoch = epoch, subepoch = 1, val_loss = last_loss)
+        prev_loss_acc <- last_loss
+        
+      }
+      
+      if (metrics_viewer) {
+        
+        if (epoch == training_epochs[1] & step == 1) {
+          
+          .model$render_history()
+          
+        } else {
+          
+          if (step %% 10 == 0) {
+            
+            .model$update_render()
+            # print("Pausing")
+            Sys.sleep(0.1)
+            
+          }
+          
+        }
+        
+      }
       
       if (verbose) {
         
@@ -408,6 +477,8 @@ fit_with_generator <- function(.model,
     
     # If we have validation data, start the validation
     if (!is.null(validation_data)) {
+      
+      .model$log("INFO", message = "Start validation.")
       
       if (verbose) {
         
@@ -446,6 +517,8 @@ fit_with_generator <- function(.model,
         loss_acc <- rep(0, length(validation_steps))
         for (val_steps in seq(validation_steps)) {
           
+          .model$log("DEBUG", message = paste0("Validation step ", val_steps, "."))
+          
           # Use the generator to get data
           test_data <- validation_data()
           
@@ -482,8 +555,29 @@ fit_with_generator <- function(.model,
         
       }
       
+      .model$log("INFO", message = paste0("Obtained loss: ", loss_acc, "."))
+      
+      val_history <- seq(prev_loss_acc, loss_acc, length.out = steps_per_epoch)
+      for (i in seq_along(val_history)) {
+        
+        .model$add_to_history(epoch = epoch, subepoch = i, val_loss = val_history[i])
+        
+      }
+      
+      if (metrics_viewer) {
+        
+        .model$update_render()
+        Sys.sleep(0.1)
+        
+      }
+
+      prev_loss_acc <- loss_acc
+      # .model$add_to_history(epoch = epoch, val_loss = loss_acc)
+      
       # If we have to keep the best model, and we have reduced the loss, save the model as the new best
       if (keep_best & (loss_acc < best_validation_loss)) {
+        
+        .model$log("INFO", message = "New best model found. Saving.")
         
         # Save everything
         best_validation_loss <- loss_acc

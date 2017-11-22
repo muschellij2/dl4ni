@@ -18,7 +18,7 @@ create_inference_function_from_config <- function(object) {
   
   if (inherits(object, "DLmodel")) {
     
-    config <- object$hyperparameters
+    config <- object$get_config()
     
   } else {
     
@@ -35,7 +35,7 @@ create_inference_function_from_config <- function(object) {
     
     stopifnot(inherits(model, "DLmodel"))
     
-    .model <- model$model
+    .model <- model$get_model()
 
     stride <- switch(speed, 
                      "slower" = 1,
@@ -47,6 +47,8 @@ create_inference_function_from_config <- function(object) {
     maxX <- list()
     
     for (input in seq(num_inputs)) {
+      
+      model$log("INFO", message = "Computing input image statistics.")
       
       if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(as.vector(V[[input]]))
       if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(V[[input]]))
@@ -65,6 +67,8 @@ create_inference_function_from_config <- function(object) {
        seq(from = 1, to = dim(V0)[2], by = stride), 
        seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
     all_idx <- which(V0 > 0) 
+    
+    model$log("INFO", message = "Initializing results.")
     
     if ((config$categorize_output) && (config$category_method == "by_class")) {
       
@@ -97,6 +101,8 @@ create_inference_function_from_config <- function(object) {
     
     num_windows <- round(num_windows / (num_inputs + 2))
     
+    model$log("INFO", message = paste0("Number of windows to read is ", num_windows, "."))
+    
     sampling_indices <- all_idx
     num_batches <- ceiling(length(sampling_indices) / num_windows)
     if (num_batches > 1)
@@ -125,6 +131,8 @@ create_inference_function_from_config <- function(object) {
       if (!progress)
         message("Batch ", batch, " out of ", num_batches)
       
+      model$log("INFO", message = paste0("Start of batch no. ", batch, "."))
+      
       idx <- sampling_indices[batch_idx == batch]
       coords <- idx %>% arrayInd(.dim = dim(V[[1]]))
       
@@ -133,6 +141,8 @@ create_inference_function_from_config <- function(object) {
       z <- coords[, 3] - 1
       
       X_vol <- list()
+      
+      model$log("INFO", message = "Reading inputs.")
       
       for (input in seq(num_inputs)) {
         
@@ -222,16 +232,19 @@ create_inference_function_from_config <- function(object) {
                        "features" = X_coords
                        )
       
-      # inputs <- c(list(X_coords), X_vol)
-      
+
       # Available memory is the memory limit minus the memory reserved for the parameters in the model
-      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$model$count_params()))
+      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$get_model()$count_params()))
       
       # Get the maximum number of objects that fit into the memory limit.
       batch_size <- as.integer(available_memory / 
                                  object.size(vector(mode = "double", length = sum(.model %>% model_units()))))
       
+      model$log("INFO", message = paste0("batch_size is ", batch_size, "."))
+      
       output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
+      
+      model$log("INFO", message = "Writing output to correct fomat.")
       
       if (config$only_convolutionals) {
         
@@ -468,6 +481,8 @@ create_inference_function_from_config <- function(object) {
     # Normalize sum of probabilities
     if (config$categorize_output & config$category_method == "by_class") {
       
+      model$log("INFO", message = "Normalizing output.")
+      
       total_prob <- 0 * res[, , , 1]
       
       for (k in seq(num_classes)) {
@@ -488,6 +503,8 @@ create_inference_function_from_config <- function(object) {
     if ((!config$categorize_output) | (config$categorize_output & config$category_method == "by_class"))
       if (!is.null(config$regularize)) {
         
+        model$log("INFO", message = "Smoothing output.")
+        
         res <- smooth_by_gaussian_kernel(image = res, 
                                          kernel_sigma = config$regularize$sigma, 
                                          kernel_width = config$regularize$width)
@@ -496,17 +513,27 @@ create_inference_function_from_config <- function(object) {
     
     if ((config$categorize_output) & (config$category_method == "by_class")) {
       
+      model$log("INFO", message = "Categorizing output."
+                )
       res <- which_max(res)
       
     }
     
     if (config$categorize_output) {
       
+      model$log("DEBUG", message = "Remapping classes to original indices.")
+      
       res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
       
     }
     
     return(res)
+    
+  }
+  
+  if (inherits(object, "DLmodel")) {
+    
+    object$log("INFO", message = "Inference function created.")
     
   }
   

@@ -9,7 +9,7 @@ instantiate_model_config <- function(scheme,
   stopifnot(!is.null(info) | (!is.null(inputs) & !is.null(outputs)))
   
   default_config <- get_dl4ni_config()
-  scheme_list <- as.list(scheme)
+  scheme_list <- scheme$to_list()
   
   # Overwrite defaults
   for (nm in names(scheme_list)) {
@@ -31,23 +31,30 @@ instantiate_model_config <- function(scheme,
   
   if (!is.null(info)) {
     
-    if (!is.null(labels_subset))
-      info <- do.call(subset_problem, args = labels_subset)
+    if (!is.null(labels_subset)) {
+      
+      args <- labels_subset
+      args$problem_info <- info
+      
+      info <- do.call(subset_problem, args = args)
+      
+    }
     
     to_add <- list(num_inputs = info$num_inputs,
                    num_volumes = info$num_volumes,
                    remap_classes = info$remap_classes)
     
-    if (scheme_list$add_last_layer) {
+    if (default_config$add_last_layer) {
       
       last_layer_info <- info %>% define_last_layer(units = output_width ^ 3,
                                                     only_convolutionals = only_convolutionals, 
                                                     force_categorical = TRUE,
-                                                    hidden_layers = scheme$last_hidden_layers)
+                                                    hidden_layers = default_config$last_hidden_layers)
       
     } else {
       
       last_layer_info <- NULL
+      
     }
     
     to_add$last_layer_info <- last_layer_info

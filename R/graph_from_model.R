@@ -24,7 +24,7 @@ graph_from_model <- function(.model, mode = c("graphviz", "igraph")) {
   # Check the input class
   stopifnot(inherits(.model, "DLmodel"))
   
-  model <- .model$model
+  model <- .model$get_model()
   
   if (mode[1] == "igraph") {
     

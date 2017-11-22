@@ -16,18 +16,20 @@ get_activations <- function(object, layer) {
   # Basic input checks
   stopifnot(inherits(object, "DLmodel"))
   
+  model <- object$get_model()
+  
   # Layer can be "layer_name" or "layer_index"
   # In both cases, we build a model with the same inputs as the original model
   # but the output is the one from the given layer 
   if (is.character(layer)) {
     
-    m <- keras_model(inputs = object$model$input,
-                     outputs = object$model$get_layer(name = layer)$output)
+    m <- keras_model(inputs = model$input,
+                     outputs = model$get_layer(name = layer)$output)
     
   } else {
     
-    m <- keras_model(inputs = object$model$input,
-                     outputs = object$model$get_layer(index = as.integer(layer))$output)
+    m <- keras_model(inputs = model$input,
+                     outputs = model$get_layer(index = as.integer(layer))$output)
     
   }
   

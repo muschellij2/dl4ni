@@ -57,8 +57,8 @@ get_maximum_activation <- function(.model,
   
   .model %>% set_trainability(trainability = FALSE)
   
-  model <- .model$model
-  config <- .model$hyperparameters
+  model <- .model$get_model()
+  config <- .model$get_config()
   
   # The settings to be used in this experiment
   img_size <- c(config$width, config$width, config$width)

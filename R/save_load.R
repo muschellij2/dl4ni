@@ -17,17 +17,11 @@ save_model <- function(.model,
                        comment = "") {
   
   # Check input class
-  if ("DLmodel" %in% class(.model)) {
-    
-    model <- .model$model
-    width <- .model$width
-    hyperparameters <- .model$hyperparameters
-    
-  } else {
-    
-    stop("Model not a DLmodel object.")
-    
-  }
+  stopifnot(inherits(.model, "DLmodel"))
+  
+  model <- .model$get_model()
+  width <- .model$get_width()
+  hyperparameters <- .model$get_config()
   
   # Create saving path
   path <- file.path(path, prefix)
@@ -104,19 +98,9 @@ load_model <- function(path, prefix) {
   # Initialize the model, as created with the former configuration
   output_model <- hyperparameters %>% create_model_from_config()
   
-  # # Load model architecture
-  # model <- model_definition_file %>% readLines() %>% paste0(collapse = "\n") %>% 
-  #   keras::model_from_json()
-  
   # Load model weights
-  output_model$model %>% keras::load_model_weights_hdf5(filepath = weights_definition_file)
-  
-  output_model <- list(model = output_model$model,
-                       width = hyperparameters$width,
-                       hyperparameters = hyperparameters)
-  
-  class(output_model) <- c("DLmodel")
-  
+  output_model$get_model() %>% keras::load_model_weights_hdf5(filepath = weights_definition_file)
+
   return(output_model)
   
 }

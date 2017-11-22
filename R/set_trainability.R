@@ -14,8 +14,11 @@ set_trainability <- function(.model, layer_names = NULL, trainability = FALSE) {
   # Check input class
   stopifnot(inherits(.model, "DLmodel")) 
   
+  
+  model <- .model$get_model()
+  
   # Get layer names
-  all_layer_names <- sapply(.model$model$layers, function(s) s$name)
+  all_layer_names <- sapply(model$layers, function(s) s$name)
   
   if (is.null(layer_names)) {
     
@@ -38,7 +41,7 @@ set_trainability <- function(.model, layer_names = NULL, trainability = FALSE) {
     
     for (i in seq_along(idx)) {
       
-      .model$model$layers[[idx[i]]]$trainable <- trainability[i]
+      model$layers[[idx[i]]]$trainable <- trainability[i]
       
     }
     

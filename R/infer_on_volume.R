@@ -8,8 +8,16 @@ infer_on_volume <- function(object,
   
   if (inherits(object, "DLmodel")) {
     
-    config <- object$hyperparameters
+    config <- object$get_config()
     model <- object
+    
+    if (speed == "debug") {
+      
+      speed <- "faster"
+      config$category_method <- "simple"
+      config$regularize <- NULL
+      
+    }
     
     infer <- config %>% create_inference_function_from_config()
     
