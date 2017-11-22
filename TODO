@@ -64,23 +64,27 @@ ALREADY DONE:
   + Un historial del loss al entrenar que se pueda representar gráficamente (incluso de forma interactiva?).
   + Reescribir block_downsample y block_upsample.
   + Poner defaults para batch_normalization, dropout y activation en config.properties.
+  + Sistema de logs y history dentro del DLmodel.
+  + Pasar todo a clases R6.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
-  = Pasar todo a clases R6.
+  = suppressPackageStartupMessages para todos los paquetes que se cargan.
+  = width distinto en cada dimensión
+  = Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
+  = schemes prefijados
   = Cambiar RESNET.
+  = meshnet
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.
-  = Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   = instantiate_autoencoder.
   = Cambiar el input de un modelo convolucional para que acepte una imagen entera?
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Mejoras de velocidad en create_generator_from_config.
   = Función "is_keras_object" para comprobar que algo es un tensor de tensorflow.
   = infer_probability_map normalizando por la suma de todas las componentes. Así tendríamos la salida 4D directamente.
-  = Sistema de logs y history dentro del DLmodel
   = Incluir "tumor_detection" en el flow. Podría usar las features que usan los de ANTs y Árboles.
   = Se puede hacer otro flow para la transformación a FLAIR usando "only_brain" y "segmentation".
   
