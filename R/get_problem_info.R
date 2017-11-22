@@ -22,70 +22,70 @@ get_problem_info <- function(problem = "foo",
                              input_path = NULL,
                              output_path = NULL,
                              num_subjects = NULL) {
-
+  
   problem_path <- file.path(system.file("problems", package = "dl4ni.data"), problem)
-
+  
   info <- list()
-
+  
   if (file.exists(problem_path) ||
       (!is.null(input_path) && !is.null(output_path) && file.exists(input_path) && file.exists(output_path))) {
-
+    
     if (is.null(input_path) & file.exists(problem_path))
       input_path <- file.path(problem_path, "inputs")
-
+    
     if (is.null(output_path) & file.exists(problem_path))
       output_path <- file.path(problem_path, "outputs")
-
+    
     # Manage several inputs
     input_dirs <- list.dirs(path = input_path, full.names = TRUE)[-1]
-
+    
     num_inputs <- 1
-
+    
     if (length(input_dirs) > 1 & interactive()) {
-
+      
       choices <- sapply(input_dirs, basename)
       title <- "Select inputs to use:"
       chosen_inputs <- select.list(choices = c(choices, "all"), multiple = TRUE, title = title)
       if ("all" %in% chosen_inputs) chosen_inputs <- choices
       chosen_inputs <- match(chosen_inputs, choices)
       num_inputs <- length(chosen_inputs)
-
+      
     } else {
-
+      
       num_inputs <- length(input_dirs)
       chosen_inputs <- seq(num_inputs)
-
+      
     }
-
+    
     inputs <- list()
     for (dir in seq(num_inputs)) {
-
+      
       name <- basename(input_dirs[chosen_inputs[dir]])
       inputs[[name]] <- list.files(path = input_dirs[chosen_inputs[dir]], full.names = TRUE)
       num_all_subjects <- length(inputs[[dir]])
-
+      
     }
-
+    
     if (is.null(num_subjects)) {
-
+      
       num_subjects <- num_all_subjects
-
+      
     } else {
-
+      
       if (num_subjects < num_all_subjects) {
-
+        
         for (dir in seq(num_inputs)) {
-
+          
           inputs[[dir]] <- inputs[[dir]][seq(num_subjects)]
-
+          
         }
-
+        
       } else {
-
+        
         num_subjects <- num_all_subjects
-
+        
       }
-
+      
     }
     
     # Manage inputs (check number of volumes per input file)
@@ -93,72 +93,74 @@ get_problem_info <- function(problem = "foo",
     for (dir in seq(num_inputs)) {
       
       inputs[[dir]] <- inputs[[dir]][seq(num_subjects)]
-      this_dim <- dim(neurobase::readnii(inputs[[dir]][1]))
+      # this_dim <- dim(neurobase::readnii(inputs[[dir]][1]))
+      this_dim <- dim(read_nifti_to_array(inputs[[dir]][1]))
       nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
       num_volumes <- c(num_volumes, nv)
       
     }
     
-
+    
     # Manage outputs
     # Check if there are more than one possible output
     output_dirs <- list.dirs(path = output_path, full.names = TRUE)[-1]
     if (length(output_dirs) > 0) {
-
+      
       # Select one of them, if we are in an interactive session
       if (interactive()) {
-
+        
         choices <- sapply(output_dirs, basename)
         title <- "Choose a possible output:"
         chosen_output <- utils::select.list(choices = choices, title = title)
         chosen_output <- match(chosen_output, choices)
         output_path <- output_dirs[chosen_output]
-
+        
       } else {
-
+        
         # If in a non-interactive session, take the first one
         output_path <- file.path(output_path, output_dirs[1])
-
+        
       }
-
+      
     }
-
+    
     outputs <- list.files(path = output_path, full.names = TRUE)
-
+    
     outputs <- outputs[seq(num_subjects)]
-
+    
     # read one of the output files to detect problem type
     y_file <- outputs[1]
-
-    y <- try(neurobase::readnii(y_file))
-
+    
+    # y <- try(neurobase::readnii(y_file))
+    y <- try(read_nifti_to_array(y_file))
+    
     if (!inherits(y, "try-error")) {
-
+      
       y <- as.array(y)
-
+      
       r <- round(y)
       if (length(which(!dplyr::near(as.vector(y), as.vector(r)))) > 0) {
-
+        
         info$type <- "image_regression"
         info$range <- range(as.vector(y))
-
+        
       } else {
-
+        
         info$type <- "image_labelling"
-
+        
         info$values <- sort(unique(as.vector(r[r != 0])))
         info$remap_classes <- list(source = info$values,
                                    target = seq_along(info$values))
         
       }
-
-
+      
+      
     } else {
-
+      
       info$type <- "subject_classification"
-
+      
     }
-
+    
     info$input_path <- input_path
     info$output_path <- output_path
     info$num_inputs <- num_inputs
@@ -166,12 +168,12 @@ get_problem_info <- function(problem = "foo",
     info$inputs <- inputs
     info$outputs <- outputs
     info$num_volumes <- num_volumes
-
+    
   }
-
+  
   info <- as.environment(info)
   class(info) <- c("DLproblem", class(info))
-
+  
   return(info)
-
+  
 }

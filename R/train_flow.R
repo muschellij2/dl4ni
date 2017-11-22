@@ -124,13 +124,13 @@ train_output <- function(flow,
         
         given_output <- desired_outputs[f]
         
-        if (inherits(previous_results[[given_output]], "array")) {
+        if (inherits(previous_results[[given_output]], "array") & !inherits(previous_results[[given_output]], "niftiImage")) {
           
           previous_results[[given_output]] <- oro.nifti::as.nifti(previous_results[[given_output]])
           
         }
         
-        if (inherits(previous_results[[given_output]], "nifti")) {
+        if (inherits(previous_results[[given_output]], "niftiImage")) {
           
           filenames[f] <- paste0(filenames[f], ".nii.gz")
           

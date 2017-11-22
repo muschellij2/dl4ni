@@ -154,7 +154,9 @@ test_index <- sample(info_bet$test$subject_indices, size = 1)
 # Starting from original image
 file <- info_bet$inputs$T1[1]
 result <- flow$execute(inputs = list(only_brain = file), 
-                       desired_outputs = c("only_brain", "segmentation", "parcellation"))
+                       desired_outputs = c("only_brain", 
+                                           "segmentation", 
+                                           "parcellation"))
 
 original_image <- readnii(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
@@ -176,7 +178,8 @@ for (img in seq_along(result)) {
 # Starting from betted image
 file <- info_seg$inputs$T1[1]
 result <- flow$execute(inputs = list(only_brain = file), 
-                                desired_outputs = c("segmentation", "parcellation"))
+                                desired_outputs = c("segmentation", 
+                                                    "parcellation"))
 
 original_image <- readnii(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")

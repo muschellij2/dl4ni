@@ -65,11 +65,11 @@ ALREADY DONE:
   + Reescribir block_downsample y block_upsample.
   + Poner defaults para batch_normalization, dropout y activation en config.properties.
   + Sistema de logs y history dentro del DLmodel.
+  + Pasar todo a clases R6.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
-  = Pasar todo a clases R6.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = Cambiar RESNET.
   = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
