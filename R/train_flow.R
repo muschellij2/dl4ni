@@ -130,7 +130,7 @@ train_output <- function(flow,
           
         }
         
-        if (inherits(previous_results[[given_output]], "niftiImage")) {
+        if (inherits(previous_results[[given_output]], "niftiImage") | inherits(previous_results[[given_output]], "nifti")) {
           
           filenames[f] <- paste0(filenames[f], ".nii.gz")
           
