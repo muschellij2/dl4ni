@@ -90,13 +90,17 @@ get_problem_info <- function(problem = "foo",
     
     # Manage inputs (check number of volumes per input file)
     num_volumes <- c()
+    types <- c()
     for (dir in seq(num_inputs)) {
       
       inputs[[dir]] <- inputs[[dir]][seq(num_subjects)]
-      # this_dim <- dim(neurobase::readnii(inputs[[dir]][1]))
-      this_dim <- dim(read_nifti_to_array(inputs[[dir]][1]))
+      img <- read_nifti_to_array(inputs[[dir]][1])
+      this_dim <- dim(img)
       nv <- ifelse(length(this_dim) == 3, 1, this_dim[4])
       num_volumes <- c(num_volumes, nv)
+      vt <- volume_type(img)
+      
+      types <- c(types, vt$type)
       
     }
     
@@ -136,24 +140,21 @@ get_problem_info <- function(problem = "foo",
     
     if (!inherits(y, "try-error")) {
       
-      y <- as.array(y)
+      res <- volume_type(y)
       
-      r <- round(y)
-      if (length(which(!dplyr::near(as.vector(y), as.vector(r)))) > 0) {
+      if (res$type == "continuous") {
         
         info$type <- "image_regression"
-        info$range <- range(as.vector(y))
+        info$range <- res$range
         
       } else {
         
         info$type <- "image_labelling"
         
-        info$values <- sort(unique(as.vector(r[r != 0])))
-        info$remap_classes <- list(source = info$values,
-                                   target = seq_along(info$values))
+        info$values <- res$values
+        info$remap_classes <- res$remap_classes
         
       }
-      
       
     } else {
       
@@ -168,6 +169,7 @@ get_problem_info <- function(problem = "foo",
     info$inputs <- inputs
     info$outputs <- outputs
     info$num_volumes <- num_volumes
+    info$input_types <- types
     
   }
   

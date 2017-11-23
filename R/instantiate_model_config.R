@@ -42,6 +42,7 @@ instantiate_model_config <- function(scheme,
     
     to_add <- list(num_inputs = info$num_inputs,
                    num_volumes = info$num_volumes,
+                   input_types = info$input_types,
                    remap_classes = info$remap_classes)
     
     if (default_config$add_last_layer) {

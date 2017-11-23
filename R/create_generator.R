@@ -55,14 +55,61 @@ create_generator <- function(model,
   stdX <- list()
   maxX <- list()
   
+  if (config$use_data_augmentation) {
+    
+    M <- random_transformation_matrix(scale_range = config$augment_scales, 
+                                      rotation_range = config$augment_rotations, 
+                                      translation_range = config$augment_translations)
+    
+  }
+  
   for (input in seq(num_inputs)) {
     
     # cat("Reading", x_files[[input]][1], "\n")
     
-    Vx[[input]] <- read_nifti_to_array(x_files[[input]][1])
-    if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(as.vector(Vx[[input]]))
-    if (config$scale %in% "z") stdX[[input]] <- sd(as.vector(Vx[[input]]))
-    if (config$scale %in% c("max", "meanmax")) maxX[[input]] <- max(as.vector(Vx[[input]]))
+    tmpVx <- read_nifti_to_array(x_files[[input]][next_file])
+    
+    if (config$use_data_augmentation) {
+      
+      interp_method <- 3
+      if (config$input_types[input] == "categorical") {
+        
+        interp_method <- 0
+        
+      }
+      
+      n_dims <- length(dim(tmpVx))
+      
+      if (n_dims == 4) {
+        
+        for (i in seq(dim(tmpVx)[4])) {
+          
+          tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx), method = 3) 
+          
+        }
+        
+        Vx[[input]] <- tmpVx
+        
+      } else {
+        
+        Vx[[input]] <- transform_volume(V = tmpVx, M = M, target_dims = dim(tmpVx), method = interp_method) 
+        
+      }
+      
+    } else {
+      
+      Vx[[input]] <- tmpVx
+      
+    }
+    
+    if (config$scale %in% c("mean", "z", "max", "meanmax")) {
+      
+      v <- as.vector(Vx[[input]])
+      if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(v)
+      if (config$scale %in% "z") stdX[[input]] <- sd(v)
+      if (config$scale %in% c("max", "meanmax")) maxX[[input]] <- max(v)
+      
+    }
     
     if (config$is_autoencoder & !is.null(config$remap_classes)) {
       
@@ -74,11 +121,35 @@ create_generator <- function(model,
   
   # cat("Reading", y_files[1], "\n")
   
-  Vy <- read_nifti_to_array(y_files[1])
+  tmpVy <- read_nifti_to_array(y_files[next_file])
   
-  if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <- mean(as.vector(Vy))
-  if (config$scale_y %in% "z") stdY <- sd(as.vector(Vy))
-  if (config$scale_y %in% c("max", "meanmax")) maxY <- max(as.vector(Vy))
+  if (config$use_data_augmentation) {
+    
+    if (config$categorize_output) {
+      
+      Vy <- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 0) 
+      
+    } else {
+      
+      Vy <- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 3) 
+      
+    }
+    
+  } else {
+    
+    Vy <- tmpVy
+    
+  }
+  
+  if (config$scale_y %in% c("mean", "z", "max", "meanmax")) {
+    
+    vy <- as.vector(Vy)
+    
+    if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <- mean(vy)
+    if (config$scale_y %in% "z") stdY <- sd(vy)
+    if (config$scale_y %in% c("max", "meanmax")) maxY <- max(vy)
+    
+  }
   
   V0 <- Vy * 0 
   V0[seq(from = 1, to = dim(V0)[1], by = stride), 
@@ -180,32 +251,101 @@ create_generator <- function(model,
       stdX <<- list()
       maxX <<- list()
       
+      if (config$use_data_augmentation) {
+        
+        M <<- random_transformation_matrix(scale_range = config$augment_scales, 
+                                           rotation_range = config$augment_rotations, 
+                                           translation_range = config$augment_translations)
+        
+      }
+      
       for (input in seq(num_inputs)) {
         
-        # cat("Reading ", x_files[[input]][next_file], "\n")
-        Vx[[input]] <<- read_nifti_to_array(x_files[[input]][next_file])
-        if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <<- mean(as.vector(Vx[[input]]))
-        if (config$scale %in% "z") stdX[[input]] <<- sd(as.vector(Vx[[input]]))
-        if (config$scale %in% c("max", "meanmax")) maxX[[input]] <<- max(as.vector(Vx[[input]]))
+        # cat("Reading", x_files[[input]][1], "\n")
+        
+        tmpVx <- read_nifti_to_array(x_files[[input]][next_file])
+        
+        if (config$use_data_augmentation) {
+          
+          interp_method <- 3
+          if (config$input_types[input] == "categorical") {
+            
+            interp_method <- 0
+            
+          }
+          
+          n_dims <- length(dim(tmpVx))
+          
+          if (n_dims == 4) {
+            
+            for (i in seq(dim(tmpVx)[4])) {
+              
+              tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx), method = 3) 
+              
+            }
+            
+            Vx[[input]] <<- tmpVx
+            
+          } else {
+            
+            Vx[[input]] <<- transform_volume(V = tmpVx, M = M, target_dims = dim(tmpVx), method = interp_method) 
+            
+          }
+          
+        } else {
+          
+          Vx[[input]] <<- tmpVx
+          
+        }
+        
+        if (config$scale %in% c("mean", "z", "max", "meanmax")) {
+          
+          v <- as.vector(Vx[[input]])
+          if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <<- mean(v)
+          if (config$scale %in% "z") stdX[[input]] <<- sd(v)
+          if (config$scale %in% c("max", "meanmax")) maxX[[input]] <<- max(v)
+          
+        }
         
         if (config$is_autoencoder & !is.null(config$remap_classes)) {
           
-          Vx[[input]] <- map_ids(image = Vx[[input]], config$remap_classes)
+          Vx[[input]] <<- map_ids(image = Vx[[input]], config$remap_classes)
           
         }
         
       }
       
-      # toc()
-      # cat("Reading ", y_files[next_file], "\n")
+      # cat("Reading", y_files[1], "\n")
       
-      # tic("Reading Y")
-      Vy <<- read_nifti_to_array(y_files[next_file])
+      tmpVy <- read_nifti_to_array(y_files[next_file])
       
-      if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <<- mean(as.vector(Vy))
-      if (config$scale_y %in% "z") stdY <<- sd(as.vector(Vy))
-      if (config$scale_y %in% c("max", "meanmax")) maxY <<- max(as.vector(Vy))
+      if (config$use_data_augmentation) {
+        
+        if (config$categorize_output) {
+          
+          Vy <<- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 0) 
+          
+        } else {
+          
+          Vy <<- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 3) 
+          
+        }
+        
+      } else {
+        
+        Vy <<- tmpVy
+        
+      }
       
+      if (config$scale_y %in% c("mean", "z", "max", "meanmax")) {
+        
+        vy <- as.vector(Vy)
+        
+        if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <<- mean(vy)
+        if (config$scale_y %in% "z") stdY <<- sd(vy)
+        if (config$scale_y %in% c("max", "meanmax")) maxY <<- max(vy)
+        
+      }
       # toc()
       
       # tic("Sampling")

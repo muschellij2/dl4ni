@@ -27,24 +27,21 @@ analyze_output <- function(info = NULL, output) {
   
   if (!inherits(y, "try-error")) {
     
-    y <- as.array(y)
+    res <- volume_type(y)
     
-    r <- round(y)
-    if (length(which(!dplyr::near(as.vector(y), as.vector(r)))) > 0) {
+    if (res$type == "continuous") {
       
       info$type <- "image_regression"
-      info$range <- range(as.vector(y))
+      info$range <- res$range
       
     } else {
       
       info$type <- "image_labelling"
       
-      info$values <- sort(unique(as.vector(r[r != 0])))
-      info$remap_classes <- list(source = info$values,
-                                 target = seq_along(info$values))
+      info$values <- res$values
+      info$remap_classes <- res$remap_classes
       
     }
-    
     
   } else {
     

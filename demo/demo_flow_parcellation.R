@@ -68,11 +68,6 @@ flow$add(what = scheme_bigger,
          inputs = list("only_brain_scaled"),
          output = "segmentation")
 
-# Convert segmentation in 4D-volume
-flow$add(what = to_categorical_volume, 
-         inputs = list("segmentation"), 
-         output = "segmentation_4D")
-
 # Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
 # to compute the parcellation
 cortex <- c(6, 45, 630:3000)
@@ -80,7 +75,7 @@ scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
 spinal_cord_labels <- 16
 ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
 flow$add(what = scheme_bigger, 
-         inputs = list("only_brain_scaled", "segmentation_4D"),
+         inputs = list("only_brain_scaled", "segmentation"),
          output = "parcellation", 
          subset = list(subset_classes = scgm_labels,
                        unify_classes = list(cortex, 
