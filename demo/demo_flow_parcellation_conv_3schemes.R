@@ -1,6 +1,7 @@
 ##%######################################################%##
 #                                                          #
-####           Example of Flow for T1 to FLAIR          ####
+####       Example of Flow for Brain Parcellation       ####
+####                   Convolutional                    ####
 #                                                          #
 ##%######################################################%##
 
@@ -14,12 +15,12 @@ load_keras()
 #                                                          #
 ##%######################################################%##
 
-# Basic scheme for all networks in the flow
+# Schemes for all networks in the flow
 width <- 32
 
-scheme_bigger <- DLscheme$new()
+scheme_small <- DLscheme$new()
 
-scheme_bigger$add(width = width,
+scheme_small$add(width = width,
                   only_convolutionals = TRUE,
                   output_width = width,
                   num_features = 3,
@@ -36,7 +37,51 @@ scheme_bigger$add(width = width,
                   scale = "none",
                   scale_y = "none")
 
-scheme_bigger$add(memory_limit = "3G")
+scheme_small$add(memory_limit = "3G")
+
+scheme_medium <- DLscheme$new()
+
+scheme_medium$add(width = width,
+                  only_convolutionals = TRUE,
+                  output_width = width,
+                  num_features = 3,
+                  vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                              mode = "convolutional", 
+                                              initial_filters = 8),
+                  vol_dropout = 0,
+                  feature_layers = list(),
+                  feature_dropout = 0,
+                  common_layers = list(),
+                  common_dropout = 0,
+                  last_hidden_layers = list(),
+                  optimizer = "adadelta",
+                  scale = "none",
+                  scale_y = "none")
+
+scheme_medium$add(memory_limit = "3G")
+
+
+scheme_big <- DLscheme$new()
+
+scheme_big$add(width = width,
+                  only_convolutionals = TRUE,
+                  output_width = width,
+                  num_features = 3,
+                  vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                              mode = "convolutional", 
+                                              initial_filters = 32),
+                  vol_dropout = 0,
+                  feature_layers = list(),
+                  feature_dropout = 0,
+                  common_layers = list(),
+                  common_dropout = 0,
+                  last_hidden_layers = list(),
+                  optimizer = "adadelta",
+                  scale = "none",
+                  scale_y = "none")
+
+scheme_big$add(memory_limit = "3G")
+
 
 ##%######################################################%##
 #                                                          #
@@ -45,7 +90,7 @@ scheme_bigger$add(memory_limit = "3G")
 ##%######################################################%##
 
 # Create new flow
-flow <- DLflow$new(name = "t1_flair", inputs = c("T1"))
+flow <- DLflow$new(name = "parcellation", inputs = c("T1"))
 
 # Scale the T1 image
 flow$add(what = scale_z, 
@@ -53,7 +98,7 @@ flow$add(what = scale_z,
          output = "T1_scaled")
 
 # Starting from a T1, add a trainable model which computes the brain_mask
-flow$add(what = scheme_bigger, 
+flow$add(what = scheme_small, 
          inputs = list("T1_scaled"),
          output = "brain_mask")
 
@@ -68,38 +113,29 @@ flow$add(what = scale_z,
 
 # Starting form the brain extracted image ("only_brain"), add a trainable model which computes the 
 # segmentation
-flow$add(what = scheme_bigger,
+flow$add(what = scheme_small,
          inputs = list("only_brain_scaled"),
          output = "segmentation")
 
 # Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
-flow$add(what = scheme_bigger, 
+# to compute the parcellation
+cortex <- c(6, 45, 630:3000)
+scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
+spinal_cord_labels <- 16
+ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
+flow$add(what = scheme_big, 
          inputs = list("only_brain_scaled", "segmentation"),
-         output = "flair")
-
+         output = "parcellation", 
+         subset = list(subset_classes = scgm_labels,
+                       unify_classes = list(cortex, 
+                                            spinal_cord_labels, 
+                                            ventricles_labels)))
 
 ##%######################################################%##
 #                                                          #
 ####                   Flow Plotting                    ####
 #                                                          #
 ##%######################################################%##
-
-flow$plot()
-
-##%######################################################%##
-#                                                          #
-####                      New flow                      ####
-#                                                          #
-##%######################################################%##
-
-flow <- DLflow$new(name = "t1_flair", inputs = c("T1"))
-flow$load("parcellation.zip")
-flow <- flow$subset("segmentation")
-
-# Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
-flow$add(what = scheme_bigger, 
-         inputs = list("only_brain_scaled", "segmentation"),
-         output = "flair")
 
 flow$plot()
 
@@ -120,29 +156,27 @@ info_bet <- problem %>% get_problem_info()
 problem <- "segmentation2"
 info_seg <- problem %>% get_problem_info()
 
-# To end, t1 to flair
-problem <- "t1_flair"
-info_flair <- problem %>% get_problem_info()
+# To end, parcellation
+problem <- "parcellation"
+info_parc <- problem %>% get_problem_info()
 
 # Train BET
 flow$train(output = "brain_mask", 
            input_filenames = info_bet$inputs, 
            output_filenames = info_bet$outputs, 
-           epochs = 15)
+           epochs = 30)
 
 # Train segmentation
 flow$train(output = "segmentation", 
-           input_filenames = info_seg$inputs,
-           given_input = list("only_brain" = info_seg$inputs$T1),
+           input_filenames = list("only_brain" = info_seg$inputs$T1),
            output_filenames = info_seg$outputs, 
-           epochs = 15)
+           epochs = 30)
 
-# Train T1 to FLAIR
-flow$train(output = "flair", 
-           input_filenames = info_flair$inputs,
-           given_input = list("only_brain" = info_flair$inputs$T1),
-           output_filenames = info_flair$outputs, 
-           epochs = 15)
+# Train parcellation
+flow$train(output = "parcellation", 
+           input_filenames = list("only_brain" = info_parc$inputs$T1),
+           output_filenames = info_parc$outputs, 
+           epochs = 30)
 
 
 ##%######################################################%##
@@ -160,14 +194,11 @@ flow$save(path = system.file("models", package = "dl4ni.models"))
 ##%######################################################%##
 
 # Starting from original image
-file <- info_bet$inputs$T1[5]
-result <- flow$execute(inputs = list(T1 = file), 
-                       desired_outputs = c("brain_mask", "segmentation", "flair"))
+file <- info_bet$inputs$T1[1]
+result <- flow %>% execute_flow(inputs = list(T1 = file), 
+                                desired_outputs = c("brain_mask", "segmentation", "parcellation"))
 
-flair_img <- result$flair
-result$flair <- NULL
-
-original_image <- read_nifti_to_array(file)
+original_image <- readnii(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
 for (img in seq_along(result)) {
   
@@ -184,10 +215,25 @@ for (img in seq_along(result)) {
   
 }
 
-ortho_plot(x = flair_img, 
-           col.y = col.y, 
-           interactiveness = FALSE, 
-           text = paste0("Predicted: FLAIR"))
+# Starting from betted image
+file <- info_seg$inputs$T1[1]
+result <- flow %>% execute_flow(inputs = list(only_brain = file), 
+                                desired_outputs = c("segmentation", "parcellation"))
 
-
+original_image <- readnii(file)
+ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
+for (img in seq_along(result)) {
+  
+  num_classes <- length(unique(as.vector(result[[img]])))
+  col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
+  if (names(result)[img] == "segmentation")
+    col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
+  
+  ortho_plot(x = original_image, 
+             y = result[[img]], 
+             col.y = col.y, 
+             interactiveness = FALSE, 
+             text = paste0("Predicted: ", names(result)[img]))
+  
+}
 

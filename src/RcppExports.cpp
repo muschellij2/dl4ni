@@ -5,6 +5,20 @@
 
 using namespace Rcpp;
 
+// transform_volume
+NumericVector transform_volume(NumericVector V, NumericVector M, IntegerVector target_dims, int method);
+RcppExport SEXP _dl4ni_transform_volume(SEXP VSEXP, SEXP MSEXP, SEXP target_dimsSEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type V(VSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type M(MSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type target_dims(target_dimsSEXP);
+    Rcpp::traits::input_parameter< int >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_volume(V, M, target_dims, method));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_windows_at
 NumericVector get_windows_at(NumericVector V, int width, IntegerVector x, IntegerVector y, IntegerVector z);
 RcppExport SEXP _dl4ni_get_windows_at(SEXP VSEXP, SEXP widthSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
@@ -104,6 +118,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_dl4ni_transform_volume", (DL_FUNC) &_dl4ni_transform_volume, 4},
     {"_dl4ni_get_windows_at", (DL_FUNC) &_dl4ni_get_windows_at, 5},
     {"_dl4ni_results_to_volume", (DL_FUNC) &_dl4ni_results_to_volume, 7},
     {"_dl4ni_results_to_volume_label", (DL_FUNC) &_dl4ni_results_to_volume_label, 6},

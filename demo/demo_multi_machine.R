@@ -21,64 +21,57 @@ info %>% split_train_test_sets()
 
 ##%######################################################%##
 #                                                          #
-####                   Configuration                    ####
+####                   Network Scheme                   ####
 #                                                          #
 ##%######################################################%##
 
-width <- 7
-output_width <- 3
-num_features <- 3
+scheme <- DLscheme$new()
 
-vol_layers_pattern <- list(clf(all = TRUE,
-                               hidden_layers = list(dense(250),
-                                                    dense(200))))
+scheme$add(width = 7,
+           only_convolutionals = FALSE,
+           output_width = 3,
+           num_features = 3,
+           vol_layers_pattern = list(clf(all = TRUE,
+                                         hidden_layers = list(dense(300),
+                                                              dense(200),
+                                                              dense(100),
+                                                              dense(250),
+                                                              dense(100)))),
+           vol_dropout = 0.15,
+           feature_layers = list(dense(10), 
+                                 dense(5)),
+           feature_dropout = 0.15,
+           common_layers = list(clf(all = TRUE, 
+                                    hidden_layers = list(dense(300), 
+                                                         dense(200), 
+                                                         dense(100)))),
+           common_dropout = 0.25,
+           last_hidden_layers = list(dense(10)),
+           optimizer = "adadelta",
+           scale = "z",
+           scale_y = "none")
 
-vol_layers <- info %>% create_vol_layers(vol_layers_pattern)
-
-vol_dropout <- 0.25
-
-feature_layers <- list(clf(hidden_layers = list(dense(10), dense(10))))
-feature_dropout <- 0.15
-
-common_layers <- list(clf(all = TRUE, hidden_layers = list(dense(250), dense(100))))
-# common_layers <- list(dense(250), dense(200))
-common_dropout <- 0.25
-
-last_layer_info <- info %>% define_last_layer(units = output_width ^ 3, 
-                                              force_categorical = FALSE, 
-                                              hidden_layers = list(30, 20))
-
-optimizer <- keras::optimizer_adam()
-
-config <- define_config(window_width = width, 
-                        num_features = num_features,
-                        vol_layers = vol_layers,
-                        vol_dropout = vol_dropout,
-                        feature_layers = feature_layers,
-                        feature_dropout = feature_dropout,
-                        common_layers = common_layers,
-                        common_dropout = common_dropout,
-                        last_layer_info = last_layer_info,
-                        class_balance = FALSE,
-                        regularize = TRUE,
-                        path = "volumes",
-                        optimizer = optimizer, 
-                        output_width = output_width,
-                        scale = "meanmax",
-                        scale_y = "meanmax")
+scheme$add(memory_limit = "2G")
 
 ##%######################################################%##
 #                                                          #
-####                   Model Creation                   ####
+####               Network Instantiation                ####
 #                                                          #
 ##%######################################################%##
 
+modality_model <- scheme$instantiate(problem_info = info)
 
-modality_model <- config %>% create_model_from_config()
-summary(modality_model$model)
+modality_model$summary()
 
-g <- modality_model %>% graph_from_model()
+##%######################################################%##
+#                                                          #
+####                   Model Plotting                   ####
+#                                                          #
+##%######################################################%##
+
+g <- modality_model$graph
 g %>% plot_graph()
+modality_model$plot(to_file = paste0("model_", problem, ".png"))
 
 ##%######################################################%##
 #                                                          #
@@ -86,26 +79,22 @@ g %>% plot_graph()
 #                                                          #
 ##%######################################################%##
 
-max_sub_epochs <- 5
+# By default, 1024 windows are extracted from each file. 
+# Use 'use_data' to provide a different number.
+target_windows_per_file <- 1024
 
-train_config <- config %>% create_generator_from_config(x_files = info$train$x,
-                                                        y_files = info$train$y,
-                                                        mode = "sampling",
-                                                        max_sub_epochs = max_sub_epochs)
+modality_model$check_memory()
 
-test_config <- config %>% create_generator_from_config(x_files = info$test$x,
-                                                       y_files = info$test$y,
-                                                       mode = "sampling",
-                                                       max_sub_epochs = max_sub_epochs)
+modality_model$use_data(use = "train",
+                     x_files = info$train$x,
+                     y_files = info$train$y,
+                     target_windows_per_file = target_windows_per_file)
 
+modality_model$use_data(use = "test",
+                     x_files = info$test$x,
+                     y_files = info$test$y,
+                     target_windows_per_file = target_windows_per_file)
 
-##%######################################################%##
-#                                                          #
-####                 Inference Function                 ####
-#                                                          #
-##%######################################################%##
-
-infer <- config %>% create_inference_function_from_config()
 
 ##%######################################################%##
 #                                                          #
@@ -113,21 +102,23 @@ infer <- config %>% create_inference_function_from_config()
 #                                                          #
 ##%######################################################%##
 
-epochs <- 10
+epochs <- 15
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-modality_model %>% fit_with_generator(train_config = train_config, 
-                                      validation_config = test_config,
-                                      epochs = epochs,
-                                      keep_best = keep_best,
-                                      path = saving_path,
-                                      prefix = saving_prefix)
+modality_model$fit(epochs = epochs,
+                keep_best = keep_best,
+                path = saving_path,
+                prefix = saving_prefix)
+
+modality_model$plot_history()
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-modality_model %>% save_model(path = saving_path, prefix = saving_prefix, comment = "After training")
+modality_model$save(path = saving_path, 
+                 prefix = saving_prefix, 
+                 comment = "Final model after training")
 
 
 ##%######################################################%##
@@ -136,15 +127,18 @@ modality_model %>% save_model(path = saving_path, prefix = saving_prefix, commen
 #                                                          #
 ##%######################################################%##
 
+# Select random test subject
 test_index <- sample(info$test$subject_indices, size = 1)
 input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
+# Read images and ground truth
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
-ground_truth <- neurobase::readnii(info$outputs[test_index])
+ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
+# Predict on the inputs
+modality <- modality_model$infer(V = input_imgs, speed = "faster")
+
+# Plot
 ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)
 ortho_plot(x = ground_truth, text = "Ground Truth", interactiveness = FALSE)
-
-modality <- modality_model %>% infer(V = input_imgs, speed = "faster")
-
 ortho_plot(x = modality, text = "Predicted", interactiveness = FALSE)

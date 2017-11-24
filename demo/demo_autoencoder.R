@@ -31,33 +31,29 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
-width <- 32
+width <- 7
 scheme <- DLscheme$new()
 
 scheme$add(width = width,
            is_autoencoder = TRUE,
-           loss = keras::loss_mean_squared_error,
-           only_convolutionals = TRUE,
-           output_width = width,
+           width = 7,
+           only_convolutionals = FALSE,
+           output_width = 3,
            num_features = 3,
-           vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
-                                       mode = "convolutional", 
-                                       initial_filters = 2),
-           vol_dropout = 0,
-           feature_layers = list(),
-           feature_dropout = 0,
-           common_layers = list(conv3d(filters = 1, kernel_size = c(1, 1, 1))),
-           common_dropout = 0,
-           decoder_layers = c(segnet(depth = as.integer(log2(width) - 1), 
-                                     mode = "convolutional", 
-                                     initial_filters = 2), 
-                              list(conv3d(filters = 1, 
-                                          kernel_size = c(1, 1, 1)))),
-           add_last_layer = FALSE,
-           last_hidden_layers = list(),
+           vol_layers_pattern = list( 
+             dense(250),
+             dense(100)),
+           vol_dropout = 0.15,
+           feature_layers = list(dense(10), 
+                                 dense(5)),
+           feature_dropout = 0.15,
+           common_layers = list(
+             dense(200),
+             dense(100)),
+           common_dropout = 0.25,
+           last_hidden_layers = list(dense(10)),
            optimizer = "adadelta",
-           scale = "meanmax",
-           scale_y = "none")
+           scale = "meanmax")
 
 scheme$add(memory_limit = "2G")
 

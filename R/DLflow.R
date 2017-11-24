@@ -21,13 +21,52 @@ DLflow <- R6::R6Class(
     
     get_inputs = function() {
       
-      private$inputs
+      my_flow <- self$.__enclos_env__$private
+      my_flow$inputs
       
     },
     
     get_outputs = function() {
       
-      private$outputs
+      my_flow <- self$.__enclos_env__$private
+      my_flow$outputs
+      
+    },
+    
+    get_model = function(output) {
+      
+      my_flow <- self$.__enclos_env__$private
+      
+      return(my_flow$processes[[output]])
+      
+    },
+    
+    replace = function(output, with) {
+      
+      if (!(output %in% self$get_outputs())) {
+        
+        message <- paste0("No current definition for output = ", output)
+        stop(message)
+        
+      }
+      
+      my_flow <- self$.__enclos_env__$private
+      my_flow$processes[[output]] <- with
+      
+      if (inherits(with, "DLscheme")) {
+        
+        my_flow$schemes[[output]] <- with
+        
+      }
+      
+      if (inherits(with, "DLmodel")) {
+        
+        scheme <- DLscheme$new()
+        scheme$from_model(with)
+        
+        my_flow$schemes[[output]] <- scheme
+        
+      }
       
     },
     
@@ -107,6 +146,12 @@ DLflow <- R6::R6Class(
                                desired_outputs = desired_outputs, 
                                initialize_outputs = initialize_outputs,
                                mode = mode[1])
+      
+    },
+    
+    run = function(...) {
+      
+      self$execute(...)
       
     },
     
