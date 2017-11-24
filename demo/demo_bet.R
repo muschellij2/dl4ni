@@ -135,7 +135,7 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
 # Load images and ground truth
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
-ground_truth <- neurobase::readnii(info$outputs[test_index])
+ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
 # Infer in the input volume
 brain <- bet_model$infer(V = input_imgs, speed = "faster")

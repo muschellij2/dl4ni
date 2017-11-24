@@ -21,7 +21,7 @@
 #' @importFrom RNifti updateNifti
 #' @import neurobase
 #' 
-ortho_plot <- function(x, y = NULL, text = "", interactiveness = TRUE, force = FALSE, ...) {
+ortho_plot <- function(x, y = NULL, text = "", interactiveness = FALSE, force = FALSE, ...) {
   
   require(neurobase)
   

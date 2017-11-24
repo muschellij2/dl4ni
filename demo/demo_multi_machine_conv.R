@@ -1,12 +1,6 @@
-rm(list = ls())
-rstudioapi::restartSession()
-devtools::load_all()
-devtools::load_all("../dl4ni.data/")
-
 ##%######################################################%##
 #                                                          #
-####               Example For Autoencoder              ####
-####                   Convolutional                    ####
+####           Example For Brain Multi-Machine          ####
 #                                                          #
 ##%######################################################%##
 
@@ -20,7 +14,7 @@ load_keras()
 #                                                          #
 ##%######################################################%##
 
-problem <- "brain_extraction"
+problem <- "multi-machine"
 info <- problem %>% get_problem_info()
 
 info %>% split_train_test_sets()
@@ -31,32 +25,25 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
+
 width <- 32
 scheme <- DLscheme$new()
 
 scheme$add(width = width,
-           is_autoencoder = TRUE,
-           loss = keras::loss_mean_squared_error,
            only_convolutionals = TRUE,
            output_width = width,
            num_features = 3,
            vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
                                        mode = "convolutional", 
-                                       initial_filters = 2),
+                                       initial_filters = 4),
            vol_dropout = 0,
            feature_layers = list(),
            feature_dropout = 0,
-           common_layers = list(conv3d(filters = 1, kernel_size = c(1, 1, 1))),
+           common_layers = list(),
            common_dropout = 0,
-           decoder_layers = c(segnet(depth = as.integer(log2(width) - 1), 
-                                     mode = "convolutional", 
-                                     initial_filters = 2), 
-                              list(conv3d(filters = 1, 
-                                          kernel_size = c(1, 1, 1)))),
-           add_last_layer = FALSE,
            last_hidden_layers = list(),
-           optimizer = "adadelta",
-           scale = "meanmax",
+           optimizer = "nadam",
+           scale = "z",
            scale_y = "none")
 
 scheme$add(memory_limit = "2G")
@@ -67,9 +54,9 @@ scheme$add(memory_limit = "2G")
 #                                                          #
 ##%######################################################%##
 
-ae_model <- scheme$instantiate(problem_info = info)
+modality_model <- scheme$instantiate(problem_info = info)
 
-ae_model$summary()
+modality_model$summary()
 
 ##%######################################################%##
 #                                                          #
@@ -77,9 +64,9 @@ ae_model$summary()
 #                                                          #
 ##%######################################################%##
 
-g <- ae_model$graph()
+g <- modality_model$graph
 g %>% plot_graph()
-ae_model$plot(to_file = paste0("model_", problem, ".png"))
+modality_model$plot(to_file = paste0("model_", problem, ".png"))
 
 ##%######################################################%##
 #                                                          #
@@ -91,17 +78,17 @@ ae_model$plot(to_file = paste0("model_", problem, ".png"))
 # Use 'use_data' to provide a different number.
 target_windows_per_file <- 1024
 
-ae_model$check_memory()
+modality_model$check_memory()
 
-ae_model$use_data(use = "train",
-                  x_files = info$train$x,
-                  y_files = info$train$y,
-                  target_windows_per_file = target_windows_per_file)
+modality_model$use_data(use = "train",
+                        x_files = info$train$x,
+                        y_files = info$train$y,
+                        target_windows_per_file = target_windows_per_file)
 
-ae_model$use_data(use = "test",
-                  x_files = info$test$x,
-                  y_files = info$test$y,
-                  target_windows_per_file = target_windows_per_file)
+modality_model$use_data(use = "test",
+                        x_files = info$test$x,
+                        y_files = info$test$y,
+                        target_windows_per_file = target_windows_per_file)
 
 
 ##%######################################################%##
@@ -110,23 +97,23 @@ ae_model$use_data(use = "test",
 #                                                          #
 ##%######################################################%##
 
-epochs <- 1
+epochs <- 15
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-ae_model$fit(epochs = epochs,
-             keep_best = keep_best,
-             path = saving_path,
-             prefix = saving_prefix)
+modality_model$fit(epochs = epochs,
+                   keep_best = keep_best,
+                   path = saving_path,
+                   prefix = saving_prefix)
 
-ae_model$plot_history()
+modality_model$plot_history()
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-ae_model$save(path = saving_path, 
-              prefix = saving_prefix, 
-              comment = "Final model after training")
+modality_model$save(path = saving_path, 
+                    prefix = saving_prefix, 
+                    comment = "Final model after training")
 
 
 ##%######################################################%##
@@ -135,24 +122,18 @@ ae_model$save(path = saving_path,
 #                                                          #
 ##%######################################################%##
 
-# Select random test image
+# Select random test subject
 test_index <- sample(info$test$subject_indices, size = 1)
 input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
-# Load images and ground truth
+# Read images and ground truth
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
-ground_truth <- input_imgs[[1]]
+ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
-# Infer in the input volume
-reconstruction <- ae_model$infer(V = input_imgs, speed = "faster")
+# Predict on the inputs
+modality <- modality_model$infer(V = input_imgs, speed = "faster")
 
-# Plot Ground Truth results
-ortho_plot(x = ground_truth,
-           text = "Ground Truth", 
-           interactiveness = FALSE)
-
-# Plot Model results
-ortho_plot(x = reconstruction, 
-           text = "Predicted", 
-           interactiveness = FALSE)
-
+# Plot
+ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)
+ortho_plot(x = ground_truth, text = "Ground Truth", interactiveness = FALSE)
+ortho_plot(x = modality, text = "Predicted", interactiveness = FALSE)

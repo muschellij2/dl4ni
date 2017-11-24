@@ -72,6 +72,7 @@ WIP:
   = README.md para github
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
+  = DLflow$get_model(output)
   = Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   = schemes prefijados
   = Cambiar RESNET.

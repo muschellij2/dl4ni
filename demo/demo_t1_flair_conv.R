@@ -26,23 +26,26 @@ info %>% split_train_test_sets()
 ##%######################################################%##
 
 width <- 32
+scheme <- DLscheme$new()
 
-scheme <- create_scheme(width = width,
-                        only_convolutionals = TRUE,
-                        output_width = width,
-                        num_features = 3,
-                        vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
-                                                    mode = "convolutional", 
-                                                    initial_filters = 4),
-                        vol_dropout = 0,
-                        feature_layers = list(),
-                        feature_dropout = 0,
-                        common_layers = list(),
-                        common_dropout = 0,
-                        last_hidden_layers = list(),
-                        optimizer = "nadam",
-                        scale = "z",
-                        scale_y = "none")
+scheme$add(width = width,
+           only_convolutionals = TRUE,
+           output_width = width,
+           num_features = 3,
+           vol_layers_pattern = segnet(depth = as.integer(log2(width) - 1), 
+                                       mode = "convolutional", 
+                                       initial_filters = 4),
+           vol_dropout = 0,
+           feature_layers = list(),
+           feature_dropout = 0,
+           common_layers = list(),
+           common_dropout = 0,
+           last_hidden_layers = list(),
+           optimizer = "nadam",
+           scale = "z",
+           scale_y = "none")
+
+scheme$add(memory_limit = "2G")
 
 ##%######################################################%##
 #                                                          #
@@ -50,9 +53,9 @@ scheme <- create_scheme(width = width,
 #                                                          #
 ##%######################################################%##
 
-flair_model <- scheme %>% instantiate_model(problem_info = info)
+flair_model <- scheme$instantiate(problem_info = info)
 
-summary(flair_model$model)
+flair_model$summary()
 
 ##%######################################################%##
 #                                                          #
@@ -60,9 +63,9 @@ summary(flair_model$model)
 #                                                          #
 ##%######################################################%##
 
-g <- flair_model %>% graph_from_model()
+g <- flair_model$graph
 g %>% plot_graph()
-flair_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
+flair_model$plot(to_file = paste0("model_", problem, ".png"))
 
 ##%######################################################%##
 #                                                          #
@@ -70,25 +73,21 @@ flair_model %>% plot_model(to_file = paste0("model_", problem, ".png"))
 #                                                          #
 ##%######################################################%##
 
-target_windows_per_file <- 1000
+# By default, 1024 windows are extracted from each file. 
+# Use 'use_data' to provide a different number.
+target_windows_per_file <- 1024
 
-batch_size <- bet_model %>% compute_batch_size()
+flair_model$check_memory()
 
-if (batch_size == 0) {
-  
-  message("Do not continue!! Not enough memory!!")
-  
-}
+flair_model$use_data(use = "train",
+                     x_files = info$train$x,
+                     y_files = info$train$y,
+                     target_windows_per_file = target_windows_per_file)
 
-batches_per_file <- as.integer(target_windows_per_file / batch_size)
-
-train_config <- flair_model %>% create_generator(x_files = info$train$x,
-                                                 y_files = info$train$y,
-                                                 batches_per_file = batches_per_file)
-
-test_config <- flair_model %>% create_generator(x_files = info$test$x,
-                                                y_files = info$test$y,
-                                                batches_per_file = batches_per_file)
+flair_model$use_data(use = "test",
+                     x_files = info$test$x,
+                     y_files = info$test$y,
+                     target_windows_per_file = target_windows_per_file)
 
 
 ##%######################################################%##
@@ -102,21 +101,18 @@ keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
-flair_model %>% fit_with_generator(train_config = train_config, 
-                                   validation_config = test_config,
-                                   epochs = epochs,
-                                   starting_epoch = 1,
-                                   keep_best = keep_best,
-                                   path = saving_path,
-                                   prefix = saving_prefix)
+flair_model$fit(epochs = epochs,
+                keep_best = keep_best,
+                path = saving_path,
+                prefix = saving_prefix)
+
+flair_model$plot_history()
 
 saving_prefix <- paste0(saving_prefix, "_final")
 
-flair_model %>% save_model(path = saving_path, 
-                           prefix = saving_prefix, 
-                           comment = "Final model after training")
-
-# flair_model <- load_model(path = saving_path, prefix = saving_prefix)
+flair_model$save(path = saving_path, 
+                 prefix = saving_prefix, 
+                 comment = "Final model after training")
 
 
 ##%######################################################%##
@@ -131,10 +127,10 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
 # Read images and ground truth
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
-ground_truth <- neurobase::readnii(info$outputs[test_index])
+ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
 # Predict on the inputs
-flair <- flair_model %>% infer(V = input_imgs, speed = "faster")
+flair <- flair_model$infer(V = input_imgs, speed = "faster")
 
 # Plot
 ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)

@@ -49,7 +49,7 @@ float evaluate_volume(double* vol, int* size, int x, int y, int z) {
   int index = get_index(size, x, y, z);
   float value = 0;
   
-  if (index > 0) value = vol[index];
+  if (index >= 0) value = vol[index];
   
   return value;
   
@@ -84,15 +84,15 @@ float nearest_interpolation(float v000, float v001, float v010,
                               float v110, float v111, 
                               float dx, float dy, float dz) {
   
-  if (dx <= 0.5 & dy <= 0.5 & dz <= 0.5) return v000;
-  if (dx <= 0.5 & dy <= 0.5 & dz >= 0.5) return v001;
-  if (dx <= 0.5 & dy >= 0.5 & dz <= 0.5) return v010;
-  if (dx <= 0.5 & dy >= 0.5 & dz >= 0.5) return v011;
+  if ((dx <= 0.5) & (dy <= 0.5) & (dz <= 0.5)) return v000;
+  if ((dx <= 0.5) & (dy <= 0.5) & (dz >= 0.5)) return v001;
+  if ((dx <= 0.5) & (dy >= 0.5) & (dz <= 0.5)) return v010;
+  if ((dx <= 0.5) & (dy >= 0.5) & (dz >= 0.5)) return v011;
   
-  if (dx >= 0.5 & dy <= 0.5 & dz <= 0.5) return v100;
-  if (dx >= 0.5 & dy <= 0.5 & dz >= 0.5) return v101;
-  if (dx >= 0.5 & dy >= 0.5 & dz <= 0.5) return v110;
-  if (dx >= 0.5 & dy >= 0.5 & dz >= 0.5) return v111;
+  if ((dx >= 0.5) & (dy <= 0.5) & (dz <= 0.5)) return v100;
+  if ((dx >= 0.5) & (dy <= 0.5) & (dz >= 0.5)) return v101;
+  if ((dx >= 0.5) & (dy >= 0.5) & (dz <= 0.5)) return v110;
+  if ((dx >= 0.5) & (dy >= 0.5) & (dz >= 0.5)) return v111;
 
   return 0.0;
   
@@ -151,30 +151,19 @@ void transform_volume(double* source_vol, double* target_vol, int* source_dims, 
         
         int index = getIndex(target_dims, x, y, z);
         
-        // Rprintf("index = %u\n", index);
-        // Rprintf("x,y,z = %u,%u,%u\n", x,y,z);
-        
         float px = x - target_dims[0] / 2;
         float py = y - target_dims[1] / 2;
         float pz = z - target_dims[2] / 2;
-        
-        // Rprintf("px,py,pz = %u,%u,%u\n", px,py,pz);
         
         float source_x = matrix[0] * px + matrix[4] * py + matrix[8] * pz + matrix[12];
         float source_y = matrix[1] * px + matrix[5] * py + matrix[9] * pz + matrix[13];
         float source_z = matrix[2] * px + matrix[6] * py + matrix[10] * pz + matrix[14];
 
-        // Rprintf("sx,sy,sz = %u,%u,%u\n", source_x,source_y,source_z);
-        
         source_x += source_dims[0] / 2;
         source_y += source_dims[1] / 2;
         source_z += source_dims[2] / 2;
         
-        // Rprintf("sx,sy,sz = %u,%u,%u\n", source_x,source_y,source_z);
-        
         value = interpolate(source_vol, source_dims, source_x, source_y, source_z, method);
-        
-        // Rprintf("value = %f\n", value);
         
         target_vol[index] = value;
         
