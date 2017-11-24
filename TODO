@@ -66,16 +66,15 @@ ALREADY DONE:
   + Poner defaults para batch_normalization, dropout y activation en config.properties.
   + Sistema de logs y history dentro del DLmodel.
   + Pasar todo a clases R6.
-  + replace
+  + DLflow$get_model(output)
+  + DLflow$replace(output, with)
+  + Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
-  = DLflow$get_model(output)
-  = DLflow$replace(output, with)
-  = Usar data augmentation con las imágenes... Pequeños giros y/o traslaciones.
   = schemes prefijados
   = Cambiar RESNET.
   = meshnet
