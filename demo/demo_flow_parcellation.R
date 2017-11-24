@@ -148,12 +148,12 @@ test_index <- sample(info_bet$test$subject_indices, size = 1)
 
 # Starting from original image
 file <- info_bet$inputs$T1[1]
-result <- flow$execute(inputs = list(only_brain = file), 
-                       desired_outputs = c("only_brain", 
+result <- flow$execute(inputs = list(T1 = file), 
+                       desired_outputs = c("brain_mask", 
                                            "segmentation", 
                                            "parcellation"))
 
-original_image <- readnii(file)
+original_image <- read_nifti_to_array(file)
 ortho_plot(x = original_image, interactiveness = FALSE, text = "Original Image")
 for (img in seq_along(result)) {
   
