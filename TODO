@@ -66,6 +66,7 @@ ALREADY DONE:
   + Poner defaults para batch_normalization, dropout y activation en config.properties.
   + Sistema de logs y history dentro del DLmodel.
   + Pasar todo a clases R6.
+  + replace
 
 WIP:
   = Comentarios y documentación en todas las funciones
