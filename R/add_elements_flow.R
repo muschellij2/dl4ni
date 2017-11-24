@@ -92,6 +92,15 @@ add_process <- function(flow,
     
   }
   
+  if (inherits(proc, "DLmodel")) {
+    
+    scheme <- DLscheme$new()
+    
+    scheme$from_model(proc)
+    flow$schemes[[output]] <- scheme
+    
+  }
+  
   # Add its pipeline (updating all previous pipelines)
   inputs <- which(V(flow$graph)$type == "Input")
   for (target_idx in setdiff(seq(new_vertex_idx), inputs)) {
