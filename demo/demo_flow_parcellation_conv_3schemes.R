@@ -80,7 +80,7 @@ scheme_big$add(width = width,
                   scale = "none",
                   scale_y = "none")
 
-scheme_big$add(memory_limit = "3G")
+scheme_big$add(memory_limit = "3.5G")
 
 
 ##%######################################################%##

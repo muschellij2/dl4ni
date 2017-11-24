@@ -1,3 +1,39 @@
+#' DLflow Class
+#'
+#' @docType class
+#' @importFrom R6 R6Class
+#'
+#' @export
+#' @keywords data
+#'
+#' @return Object of \code{\link{R6Class}} and \code{DLflow}.
+#'
+#' @format \code{\link{R6Class}} object.
+#'
+#' @examples
+#' DLflow$new()
+#'
+#' @section Methods:
+#' \describe{
+#'   \item{Documentation}{For full documentation of each method follow the corresponding link. }
+#'   \item{\code{initialize(name, inputs = list())}}{METHOD DESCRIPTION. Documented in \link{DLflow.initialize}.}
+#'   \item{\code{name()}}{METHOD DESCRIPTION. Documented in \link{DLflow.name}.}
+#'   \item{\code{get_inputs()}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_inputs}.}
+#'   \item{\code{get_outputs()}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_outputs}.}
+#'   \item{\code{get_model(output)}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_model}.}
+#'   \item{\code{replace(output, with)}}{METHOD DESCRIPTION. Documented in \link{DLflow.replace}.}
+#'   \item{\code{add(what = NULL, inputs = NULL, output = NULL, subset = NULL)}}{METHOD DESCRIPTION. Documented in \link{DLflow.add}.}
+#'   \item{\code{execute(inputs = list(), desired_outputs = NULL, initialize_outputs = TRUE, mode = c("debug", "faster", "medium", "slower"))}}{METHOD DESCRIPTION. Documented in \link{DLflow.execute}.}
+#'   \item{\code{run(...)}}{METHOD DESCRIPTION. Documented in \link{DLflow.run}.}
+#'   \item{\code{train(output, input_filenames, output_filenames, train_split = 0.75, epochs = 10, target_windows_per_file = 1024, mode = c("debug", "faster", "medium", "slower"))}}{METHOD DESCRIPTION. Documented in \link{DLflow.train}.}
+#'   \item{\code{graph()}}{METHOD DESCRIPTION. Documented in \link{DLflow.graph}.}
+#'   \item{\code{plot(interactive = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLflow.plot}.}
+#'   \item{\code{reset(outputs = 'all')}}{METHOD DESCRIPTION. Documented in \link{DLflow.reset}.}
+#'   \item{\code{save(path = tempdir(), file_prefix = self$name())}}{METHOD DESCRIPTION. Documented in \link{DLflow.save}.}
+#'   \item{\code{load(filename)}}{METHOD DESCRIPTION. Documented in \link{DLflow.load}.}
+#'   \item{\code{subset(outputs)}}{METHOD DESCRIPTION. Documented in \link{DLflow.subset}.}
+#'   \item{\code{clone(deep = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLflow.clone}.}
+#'  }
 DLflow <- R6::R6Class(
   
   classname = "DLflow",

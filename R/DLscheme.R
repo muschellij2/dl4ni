@@ -1,3 +1,29 @@
+#' DLscheme Class
+#'
+#' @docType class
+#' @importFrom R6 R6Class
+#'
+#' @export
+#' @keywords data
+#'
+#' @return Object of \code{\link{R6Class}} and \code{DLscheme}.
+#'
+#' @format \code{\link{R6Class}} object.
+#'
+#' @examples
+#' DLscheme$new()
+#'
+#' @section Methods:
+#' \describe{
+#'   \item{Documentation}{For full documentation of each method follow the corresponding link. }
+#'   \item{\code{initialize()}}{METHOD DESCRIPTION. Documented in \link{DLscheme.initialize}.}
+#'   \item{\code{add(...)}}{METHOD DESCRIPTION. Documented in \link{DLscheme.add}.}
+#'   \item{\code{instantiate(problem_info = NULL, inputs = NULL, outputs = NULL, labels_subset = NULL)}}{METHOD DESCRIPTION. Documented in \link{DLscheme.instantiate}.}
+#'   \item{\code{to_list()}}{METHOD DESCRIPTION. Documented in \link{DLscheme.to_list}.}
+#'   \item{\code{from_list(config)}}{METHOD DESCRIPTION. Documented in \link{DLscheme.from_list}.}
+#'   \item{\code{from_model(model)}}{METHOD DESCRIPTION. Documented in \link{DLscheme.from_model}.}
+#'   \item{\code{clone(deep = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLscheme.clone}.}
+#'  }
 DLscheme <- R6::R6Class(
   
   classname = "DLscheme",
