@@ -73,12 +73,13 @@ ALREADY DONE:
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
+  = Raise memory limit a un modelo, no desde el esquema.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
   = schemes prefijados
   = Cambiar RESNET.
   = meshnet
-  = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida.
+  = Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida. Se separa cada dataset en un repositorio, si no se copian los outputs se sobreentiende que son los mismos que los inputs. Tiene que haber una carpeta de caché, como hace keras para organizar los datos que va a usar.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.
   = instantiate_autoencoder.

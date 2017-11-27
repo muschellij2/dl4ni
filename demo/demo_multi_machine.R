@@ -49,7 +49,7 @@ scheme$add(width = 7,
            last_hidden_layers = list(dense(10)),
            optimizer = "adadelta",
            scale = "meanmax",
-           scale_y = "none")
+           scale_y = "meanmax")
 
 scheme$add(memory_limit = "2G")
 

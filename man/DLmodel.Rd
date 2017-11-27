@@ -9,7 +9,7 @@
 DLmodel
 }
 \value{
-Object of \code{\link{R6Class}} and \code{DLmodel}.
+Object of class \code{\link{R6Class}} and \code{DLmodel}.
 }
 \description{
 DLmodel Class
@@ -18,38 +18,38 @@ DLmodel Class
 
 \describe{
   \item{Documentation}{For full documentation of each method follow the corresponding link. }
-  \item{\code{initialize(...)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.initialize}.}
-  \item{\code{update(...)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.update}.}
-  \item{\code{summary()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.summary}.}
-  \item{\code{log(level = c("DEBUG", "INFO", "WARNING", "ERROR"), message = '...')}}{METHOD DESCRIPTION. Documented in \link{DLmodel.log}.}
-  \item{\code{add_to_history(epoch = 0, subepoch = 0, time = Sys.time(), loss = NA, val_loss = NA)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.add_to_history}.}
-  \item{\code{plot_history()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.plot_history}.}
-  \item{\code{reset_history()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.reset_history}.}
-  \item{\code{render_history(initialize = TRUE)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.render_history}.}
-  \item{\code{update_render()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.update_render}.}
-  \item{\code{get_model()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_model}.}
-  \item{\code{get_width()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_width}.}
-  \item{\code{set_width(width)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.set_width}.}
-  \item{\code{get_loss()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_loss}.}
-  \item{\code{set_loss(loss)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.set_loss}.}
-  \item{\code{get_encoder()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_encoder}.}
-  \item{\code{get_decoder()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_decoder}.}
-  \item{\code{get_config()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_config}.}
-  \item{\code{get_history()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.get_history}.}
-  \item{\code{print_log(level = c("DEBUG", "WARNING", "INFO", "ERROR"))}}{METHOD DESCRIPTION. Documented in \link{DLmodel.print_log}.}
-  \item{\code{errors()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.errors}.}
-  \item{\code{warnings()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.warnings}.}
-  \item{\code{save_log(filename, level = c("DEBUG", "WARNING", "INFO", "ERROR"))}}{METHOD DESCRIPTION. Documented in \link{DLmodel.save_log}.}
-  \item{\code{check_memory()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.check_memory}.}
-  \item{\code{graph()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.graph}.}
-  \item{\code{plot(to_file)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.plot}.}
-  \item{\code{load(path, prefix)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.load}.}
-  \item{\code{save(path, prefix, comment)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.save}.}
-  \item{\code{use_data(use = c("train", "test"), x_files, y_files = NULL, target_windows_per_file = 1024)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.use_data}.}
-  \item{\code{fit(epochs = 10, keep_best = TRUE, metrics_viewer = FALSE, ...)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.fit}.}
-  \item{\code{reset()}}{METHOD DESCRIPTION. Documented in \link{DLmodel.reset}.}
-  \item{\code{infer(V = NULL, speed = c("faster", "medium", "slower"))}}{METHOD DESCRIPTION. Documented in \link{DLmodel.infer}.}
-  \item{\code{clone(deep = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLmodel.clone}.}
+  \item{\code{initialize(...)}}{Create new object. Documented in \link{DLmodel.initialize}.}
+  \item{\code{update(...)}}{Update fields of the object. Documented in \link{DLmodel.update}.}
+  \item{\code{summary()}}{Model summary. Documented in \link{DLmodel.summary}.}
+  \item{\code{log(level = c("DEBUG", "INFO", "WARNING", "ERROR"), message = '...')}}{Add a message to the object log. Documented in \link{DLmodel.log}.}
+  \item{\code{add_to_history(epoch = 0, subepoch = 0, time = Sys.time(), loss = NA, val_loss = NA)}}{Adds a new entry to the loss history of the model. Documented in \link{DLmodel.add_to_history}.}
+  \item{\code{plot_history()}}{Plots this object's loss history. Documented in \link{DLmodel.plot_history}.}
+  \item{\code{reset_history()}}{Deletes all loss history of this object. Documented in \link{DLmodel.reset_history}.}
+  \item{\code{render_history(initialize = TRUE)}}{Uses RStudio Viewer pane to plot loss history. Documented in \link{DLmodel.render_history}.}
+  \item{\code{update_render()}}{Updates the render of loss history in Viewer pane. Documented in \link{DLmodel.update_render}.}
+  \item{\code{get_model()}}{Returns the keras model. Documented in \link{DLmodel.get_model}.}
+  \item{\code{get_width()}}{Window width used to train the model. Documented in \link{DLmodel.get_width}.}
+  \item{\code{set_width(width)}}{Sets window width for the model. Documented in \link{DLmodel.set_width}.}
+  \item{\code{get_loss()}}{Returns the best loss achieved by the model, or \code{Inf} if it hasn't been trained yet. Documented in \link{DLmodel.get_loss}.}
+  \item{\code{set_loss(loss)}}{Sets the loss of the model. Documented in \link{DLmodel.set_loss}.}
+  \item{\code{get_encoder()}}{If the model is an autoencoder, returns the encoder part. Documented in \link{DLmodel.get_encoder}.}
+  \item{\code{get_decoder()}}{If the model is an autoencoder, returns the decoder part. Documented in \link{DLmodel.get_decoder}.}
+  \item{\code{get_config()}}{Returns the configuration of the model. From it, one can re-build the whole model. Documented in \link{DLmodel.get_config}.}
+  \item{\code{get_history()}}{Returns the loss history as a data.frame. Documented in \link{DLmodel.get_history}.}
+  \item{\code{print_log(level = c("DEBUG", "WARNING", "INFO", "ERROR"))}}{Prints this object's log. Documented in \link{DLmodel.print_log}.}
+  \item{\code{errors()}}{Prints errors produced when using this object. Documented in \link{DLmodel.errors}.}
+  \item{\code{warnings()}}{Prints warnings produced when using this object. Documented in \link{DLmodel.warnings}.}
+  \item{\code{save_log(filename, level = c("DEBUG", "WARNING", "INFO", "ERROR"))}}{Saves log to a file. Documented in \link{DLmodel.save_log}.}
+  \item{\code{check_memory()}}{Checks whether the model can be trained given current memory limits. Documented in \link{DLmodel.check_memory}.}
+  \item{\code{graph()}}{Returns the graph of the model. Documented in \link{DLmodel.graph}.}
+  \item{\code{plot(to_file)}}{Plots this model's graph. Documented in \link{DLmodel.plot}.}
+  \item{\code{load(path, prefix)}}{Load a model stored in a given path, given file prefix. Documented in \link{DLmodel.load}.}
+  \item{\code{save(path, prefix, comment)}}{Saves the model in a given path, given file prefix. Documented in \link{DLmodel.save}.}
+  \item{\code{use_data(use = c("train", "test"), x_files, y_files = NULL, target_windows_per_file = 1024)}}{Assigns data for training r testing, to be used when fitting the model. Documented in \link{DLmodel.use_data}.}
+  \item{\code{fit(epochs = 10, keep_best = TRUE, metrics_viewer = FALSE, ...)}}{Trains the model. Documented in \link{DLmodel.fit}.}
+  \item{\code{reset()}}{Resets the model to the original (untrained) state. Documented in \link{DLmodel.reset}.}
+  \item{\code{infer(V = NULL, speed = c("faster", "medium", "slower"))}}{Run inference over a volume. Documented in \link{DLmodel.infer}.}
+  \item{\code{clone(deep = FALSE)}}{Clones the model. Documented in \link{DLmodel.clone}.}
  }
 }
 
