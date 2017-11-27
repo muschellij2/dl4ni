@@ -22,6 +22,12 @@ instantiate_model_config <- function(scheme,
   output_width <- default_config$output_width
   only_convolutionals <- default_config$only_convolutionals
   
+  if (!is.null(scheme_list$is_autoencoder) && scheme_list$is_autoencoder & is.null(outputs)) {
+    
+    outputs <- inputs[[1]]
+    
+  }
+  
   if (is.null(info)) {
     
     # Create info from data provided

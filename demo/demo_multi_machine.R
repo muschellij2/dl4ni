@@ -48,7 +48,7 @@ scheme$add(width = 7,
            common_dropout = 0.25,
            last_hidden_layers = list(dense(10)),
            optimizer = "adadelta",
-           scale = "z",
+           scale = "meanmax",
            scale_y = "none")
 
 scheme$add(memory_limit = "2G")
@@ -81,7 +81,7 @@ modality_model$plot(to_file = paste0("model_", problem, ".png"))
 
 # By default, 1024 windows are extracted from each file. 
 # Use 'use_data' to provide a different number.
-target_windows_per_file <- 1024
+target_windows_per_file <- 1024 * 8
 
 modality_model$check_memory()
 

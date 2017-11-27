@@ -147,7 +147,7 @@ DLmodel <- R6::R6Class(
       
       span <- ifelse(nrow(h) < 25, 0.5, 0.2)
       
-      if (length(h$val_loss[val_loss >= 0]) == 1) {
+      if (length(h$val_loss[h$val_loss >= 0]) == 1) {
         
         h %>% 
           ggvis(~epochs, ~loss) %>% 

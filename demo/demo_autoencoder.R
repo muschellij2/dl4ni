@@ -11,7 +11,6 @@ devtools::load_all("../dl4ni.data/")
 ##%######################################################%##
 
 require(neurobase)
-require(dl4ni.data)
 load_keras()
 
 ##%######################################################%##
@@ -36,22 +35,21 @@ scheme <- DLscheme$new()
 
 scheme$add(width = width,
            is_autoencoder = TRUE,
-           width = 7,
            only_convolutionals = FALSE,
            output_width = 3,
            num_features = 3,
-           vol_layers_pattern = list( 
-             dense(250),
-             dense(100)),
+           vol_layers_pattern = list(clf(all = TRUE, 
+                                         hidden_layers =  list(dense(250),
+                                                               dense(100)))),
            vol_dropout = 0.15,
            feature_layers = list(dense(10), 
                                  dense(5)),
            feature_dropout = 0.15,
-           common_layers = list(
-             dense(200),
-             dense(100)),
+           common_layers = list(clf(all = TRUE, 
+                                    hidden_layers =  list(dense(250),
+                                                          dense(100)))),
            common_dropout = 0.25,
-           last_hidden_layers = list(dense(10)),
+           last_hidden_layers = list(dense(20), dense(10)),
            optimizer = "adadelta",
            scale = "meanmax")
 
@@ -63,7 +61,7 @@ scheme$add(memory_limit = "2G")
 #                                                          #
 ##%######################################################%##
 
-ae_model <- scheme$instantiate(problem_info = info)
+ae_model <- scheme$instantiate(inputs = info$inputs)
 
 ae_model$summary()
 
@@ -85,7 +83,7 @@ ae_model$plot(to_file = paste0("model_", problem, ".png"))
 
 # By default, 1024 windows are extracted from each file. 
 # Use 'use_data' to provide a different number.
-target_windows_per_file <- 1024
+target_windows_per_file <- 1024 * 8
 
 ae_model$check_memory()
 
@@ -106,7 +104,7 @@ ae_model$use_data(use = "test",
 #                                                          #
 ##%######################################################%##
 
-epochs <- 1
+epochs <- 30
 keep_best <- TRUE
 saving_path <- file.path(system.file(package = "dl4ni"), "models")
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
@@ -139,8 +137,10 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- input_imgs[[1]]
 
+ground_truth <- do.call(paste0("scale_", scheme$scale), args = list(ground_truth))
+
 # Infer in the input volume
-reconstruction <- ae_model$infer(V = input_imgs, speed = "faster")
+reconstruction <- ae_model$infer(V = input_imgs, speed = "debug")
 
 # Plot Ground Truth results
 ortho_plot(x = ground_truth,
@@ -148,7 +148,7 @@ ortho_plot(x = ground_truth,
            interactiveness = FALSE)
 
 # Plot Model results
-ortho_plot(x = reconstruction, 
+ortho_plot(x = reconstruction * 255, 
            text = "Predicted", 
            interactiveness = FALSE)
 

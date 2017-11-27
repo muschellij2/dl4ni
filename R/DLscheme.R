@@ -46,9 +46,23 @@ DLscheme <- R6::R6Class(
       
       if (is.null(problem_info)) {
         
-        if (is.null(inputs) | is.null(outputs)) {
+        if (is.null(inputs)) {
           
-          stop("problem_info, inputs and outputs cannot be all NULL.")
+          stop("problem_info, and inputs cannot be both NULL.")
+          
+        } else {
+          
+          if (!is.null(self$is_autoencoder) && self$is_autoencoder & is.null(outputs)) {
+            
+            outputs <- inputs[[1]]
+            
+          }
+          
+          if (is.null(outputs)) {
+            
+            stop("outputs can only be NULL when building an autoencoder.")
+            
+          }
           
         }
         
