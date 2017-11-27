@@ -31,7 +31,7 @@ create_generator <- function(model,
   num_inputs <- length(config$vol_layers)
   
   mode <- mode[1]
-  radius <- 0.5 * (config$width + 1)
+  radius <- floor(0.5 * (config$width + 1))
   
   stride <- ifelse(mode == "all", radius, 1)
   
@@ -84,7 +84,7 @@ create_generator <- function(model,
         
         for (i in seq(dim(tmpVx)[4])) {
           
-          tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx), method = 3) 
+          tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx)[1:3], method = interp_method) 
           
         }
         
@@ -435,15 +435,23 @@ create_generator <- function(model,
     # tic("Reading inputs")
     X_vol <- list()
     
+    X_coords <- cbind(x, y, z)
+    X_coords[, 1] <- X_coords[, 1] / dim(Vx[[input]])[1]
+    X_coords[, 2] <- X_coords[, 2] / dim(Vx[[input]])[2]
+    X_coords[, 3] <- X_coords[, 3] / dim(Vx[[input]])[3]
+    
+    
     for (input in seq(num_inputs)) {
       
       X <- get_windows_at(Vx[[input]], config$width, x, y, z)
-      X_coords <- X[, 1:3]
-      X_coords[, 1] <- X_coords[, 1] / dim(Vx[[input]])[1]
-      X_coords[, 2] <- X_coords[, 2] / dim(Vx[[input]])[2]
-      X_coords[, 3] <- X_coords[, 3] / dim(Vx[[input]])[3]
       
       X_vol[[input]] <- X[, -c(1:3)]
+      
+      if (num_windows == 1) {
+        
+        dim(X_vol[[input]]) <- c(1, length(X_vol[[input]]))
+        
+      }
       
       if (config$is_autoencoder) {
         
@@ -556,6 +564,12 @@ create_generator <- function(model,
       if (config$categorize_output) {
         
         Y_new <- to_categorical_volume_cpp(Y[, , , , 1], unique_labels = unique_labels)
+        
+        if (num_windows == 1) {
+          
+          dim(Y_new) <- c(1, dim(Y_new))
+          
+        }
         
         return(list(x_input, Y_new))
         
