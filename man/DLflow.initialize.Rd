@@ -2,18 +2,15 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.initialize}
 \alias{DLflow.initialize}
-\title{FUNCTION_TITLE}
+\title{Flow Creation}
 \arguments{
-\item{name}{(character) PARAM_DESCRIPTION, Default: ''}
+\item{name}{(character) Name of the flow, Default: ''}
 
-\item{inputs}{(call) PARAM_DESCRIPTION, Default: list()}
+\item{inputs}{(list) Character vector or list with the names of the inputs, Default: list()}
 }
 \value{
-OUTPUT_DESCRIPTION
+A new flow.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function creates a new \code{DLflow}, with given name and inputs.
 }

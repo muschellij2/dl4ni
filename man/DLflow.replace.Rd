@@ -2,18 +2,16 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.replace}
 \alias{DLflow.replace}
-\title{FUNCTION_TITLE}
+\title{Replace Part of a Flow}
 \arguments{
-\item{output}{(name) PARAM_DESCRIPTION}
+\item{output}{(character) Name of the output (part of the flow) to substitute.}
 
-\item{with}{(name) PARAM_DESCRIPTION}
+\item{with}{(\code{\link{DLmodel}}, \code{\link{DLscheme}} or function) The object that is replacing the previous one.}
 }
 \value{
-OUTPUT_DESCRIPTION
+The flow with the replaced object.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function is used to replace a part of the flow, such as a \code{\link{DLmodel}}, a
+\code{\link{DLscheme}} or a function, with another object of one these classes.
 }

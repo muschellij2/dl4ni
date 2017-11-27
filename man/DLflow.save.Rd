@@ -2,18 +2,12 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.save}
 \alias{DLflow.save}
-\title{FUNCTION_TITLE}
+\title{Save a Flow}
 \arguments{
-\item{path}{(call) PARAM_DESCRIPTION, Default: tempdir()}
+\item{path}{(character) Path where to store the flow, Default: tempdir()}
 
-\item{file_prefix}{(call) PARAM_DESCRIPTION, Default: self$name()}
-}
-\value{
-OUTPUT_DESCRIPTION
+\item{file_prefix}{(character) Filename, Default: the flow name.}
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function saves a flow to disk.
 }

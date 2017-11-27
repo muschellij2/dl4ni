@@ -2,16 +2,7 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.run}
 \alias{DLflow.run}
-\title{FUNCTION_TITLE}
-\arguments{
-\item{...}{(name) PARAM_DESCRIPTION}
-}
-\value{
-OUTPUT_DESCRIPTION
-}
+\title{Execute a Flow}
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function runs the computation graph of the flow to obtain some outputs, given input files.
 }

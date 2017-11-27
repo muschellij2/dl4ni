@@ -2,16 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.reset}
 \alias{DLflow.reset}
-\title{FUNCTION_TITLE}
+\title{Reset Outputs of a Flow}
 \arguments{
-\item{outputs}{(character) PARAM_DESCRIPTION, Default: 'all'}
-}
-\value{
-OUTPUT_DESCRIPTION
+\item{outputs}{(character) List of computed outputs to remove, Default: 'all'}
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function deletes previous computed results in a flow.
 }

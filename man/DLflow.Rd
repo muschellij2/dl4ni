@@ -18,23 +18,26 @@ DLflow Class
 
 \describe{
   \item{Documentation}{For full documentation of each method follow the corresponding link. }
-  \item{\code{initialize(name, inputs = list())}}{METHOD DESCRIPTION. Documented in \link{DLflow.initialize}.}
-  \item{\code{name()}}{METHOD DESCRIPTION. Documented in \link{DLflow.name}.}
-  \item{\code{get_inputs()}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_inputs}.}
-  \item{\code{get_outputs()}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_outputs}.}
-  \item{\code{get_model(output)}}{METHOD DESCRIPTION. Documented in \link{DLflow.get_model}.}
-  \item{\code{replace(output, with)}}{METHOD DESCRIPTION. Documented in \link{DLflow.replace}.}
-  \item{\code{add(what = NULL, inputs = NULL, output = NULL, subset = NULL)}}{METHOD DESCRIPTION. Documented in \link{DLflow.add}.}
-  \item{\code{execute(inputs = list(), desired_outputs = NULL, initialize_outputs = TRUE, mode = c("debug", "faster", "medium", "slower"))}}{METHOD DESCRIPTION. Documented in \link{DLflow.execute}.}
-  \item{\code{run(...)}}{METHOD DESCRIPTION. Documented in \link{DLflow.run}.}
-  \item{\code{train(output, input_filenames, output_filenames, train_split = 0.75, epochs = 10, target_windows_per_file = 1024, mode = c("debug", "faster", "medium", "slower"))}}{METHOD DESCRIPTION. Documented in \link{DLflow.train}.}
-  \item{\code{graph()}}{METHOD DESCRIPTION. Documented in \link{DLflow.graph}.}
-  \item{\code{plot(interactive = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLflow.plot}.}
-  \item{\code{reset(outputs = 'all')}}{METHOD DESCRIPTION. Documented in \link{DLflow.reset}.}
-  \item{\code{save(path = tempdir(), file_prefix = self$name())}}{METHOD DESCRIPTION. Documented in \link{DLflow.save}.}
-  \item{\code{load(filename)}}{METHOD DESCRIPTION. Documented in \link{DLflow.load}.}
-  \item{\code{subset(outputs)}}{METHOD DESCRIPTION. Documented in \link{DLflow.subset}.}
-  \item{\code{clone(deep = FALSE)}}{METHOD DESCRIPTION. Documented in \link{DLflow.clone}.}
+  \item{\code{initialize(name, inputs = list())}}{Create a new flow with the given name and inputs. Documented in \link{DLflow.initialize}.}
+  \item{\code{name()}}{Returns the name of the flow. Documented in \link{DLflow.name}.}
+  \item{\code{get_inputs()}}{Returns the inputs of the flow. Documented in \link{DLflow.get_inputs}.}
+  \item{\code{get_outputs()}}{Returns the outputs of the flow. Documented in \link{DLflow.get_outputs}.}
+  \item{\code{get_model(output)}}{Returns the \code{\link{DLmodel}} that computes the given output. 
+  Documented in \link{DLflow.get_model}.}
+  \item{\code{replace(output, with)}}{Replace a function, scheme or model that computes an output 
+  with another function, scheme or model. Documented in \link{DLflow.replace}.}
+  \item{\code{add(what = NULL, inputs = NULL, output = NULL, subset = NULL)}}{Adds a function, scheme or model to the flow, 
+  that transforms the given inputs into the given output. Documented in \link{DLflow.add}.}
+  \item{\code{execute(inputs = list(), desired_outputs = NULL, initialize_outputs = TRUE, mode = c("debug", "faster", "medium", "slower"))}}{Execute the flow to obtain some outputs, given input files. Documented in \link{DLflow.execute}.}
+  \item{\code{run(...)}}{Just a wrapper for \code{execute}. Documented in \link{DLflow.run}.}
+  \item{\code{train(output, input_filenames, output_filenames, train_split = 0.75, epochs = 10, target_windows_per_file = 1024, mode = c("debug", "faster", "medium", "slower"))}}{Train the model to compute an output. Documented in \link{DLflow.train}.}
+  \item{\code{graph()}}{Returns the graph of the flow. Documented in \link{DLflow.graph}.}
+  \item{\code{plot(interactive = FALSE)}}{Plots the graph of the flow. Documented in \link{DLflow.plot}.}
+  \item{\code{reset(outputs = 'all')}}{Remove the specified computed outputs. Documented in \link{DLflow.reset}.}
+  \item{\code{save(path = tempdir(), file_prefix = self$name())}}{Save the flow to disk. Documented in \link{DLflow.save}.}
+  \item{\code{load(filename)}}{Load a flow from disk. Documented in \link{DLflow.load}.}
+  \item{\code{subset(outputs)}}{Take a subset of the flow, for given outputs. Documented in \link{DLflow.subset}.}
+  \item{\code{clone(deep = FALSE)}}{Clone a flow. Documented in \link{DLflow.clone}.}
  }
 }
 

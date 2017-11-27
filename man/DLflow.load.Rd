@@ -2,16 +2,13 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.load}
 \alias{DLflow.load}
-\title{FUNCTION_TITLE}
+\title{Load a Flow}
 \arguments{
-\item{filename}{(name) PARAM_DESCRIPTION}
+\item{filename}{(character) Path to a file where a flow is stored.}
 }
 \value{
-OUTPUT_DESCRIPTION
+The loaded flow.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function loads a flow from disk.
 }

@@ -2,16 +2,13 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.get_model}
 \alias{DLflow.get_model}
-\title{FUNCTION_TITLE}
+\title{Models from a Flow}
 \arguments{
-\item{output}{(name) PARAM_DESCRIPTION}
+\item{output}{(character) The name of the output that the required model computes.}
 }
 \value{
-OUTPUT_DESCRIPTION
+A \code{\link{DLmodel}} that is used to compute the given output.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function returns a model that computes a specific output in a flow.
 }

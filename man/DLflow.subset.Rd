@@ -2,16 +2,14 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.subset}
 \alias{DLflow.subset}
-\title{FUNCTION_TITLE}
+\title{Flow Subsetting}
 \arguments{
-\item{outputs}{(name) PARAM_DESCRIPTION}
+\item{outputs}{(character vector) List of the outputs to retain.}
 }
 \value{
-OUTPUT_DESCRIPTION
+A new flow which is complete in the sense that it contains the required \code{outputs} and all parts of the bigger flow
+which lead to those outputs.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function extracts just a subflow from the parent flow, specifying the outputs to retain.
 }

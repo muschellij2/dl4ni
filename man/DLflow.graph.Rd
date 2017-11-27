@@ -2,13 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.graph}
 \alias{DLflow.graph}
-\title{FUNCTION_TITLE}
+\title{Flow Graph}
 \value{
-OUTPUT_DESCRIPTION
+The graph, as an \code{\link{igraph}} object.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function returns the computation graph of the flow.
 }

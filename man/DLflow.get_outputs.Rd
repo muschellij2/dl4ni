@@ -2,13 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.get_outputs}
 \alias{DLflow.get_outputs}
-\title{FUNCTION_TITLE}
+\title{Flow Outputs}
 \value{
-OUTPUT_DESCRIPTION
+A character vector with the names of the available outputs.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function returns the list of names of the outputs available in this flow.
 }

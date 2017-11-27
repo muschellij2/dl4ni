@@ -2,16 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.plot}
 \alias{DLflow.plot}
-\title{FUNCTION_TITLE}
+\title{Plot a Flow}
 \arguments{
-\item{interactive}{(logical) PARAM_DESCRIPTION, Default: FALSE}
-}
-\value{
-OUTPUT_DESCRIPTION
+\item{interactive}{(logical) Use interactive JavaScript visualization?, Default: FALSE}
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function plots the computation graph of the flow.
 }

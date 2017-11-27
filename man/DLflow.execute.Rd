@@ -2,22 +2,19 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.execute}
 \alias{DLflow.execute}
-\title{FUNCTION_TITLE}
+\title{Execute a Flow}
 \arguments{
-\item{inputs}{(call) PARAM_DESCRIPTION, Default: list()}
+\item{inputs}{(list) List of input filenames, Default: list()}
 
-\item{desired_outputs}{(NULL) PARAM_DESCRIPTION, Default: NULL}
+\item{desired_outputs}{(character vector) List of names of the outputs to compute, Default: NULL}
 
-\item{initialize_outputs}{(logical) PARAM_DESCRIPTION, Default: TRUE}
+\item{initialize_outputs}{(logical) Delete previous runs?, Default: TRUE}
 
-\item{mode}{(call) PARAM_DESCRIPTION, Default: c("debug", "faster", "medium", "slower")}
+\item{mode}{(character) Inference mode, Default: c("debug", "faster", "medium", "slower")}
 }
 \value{
-OUTPUT_DESCRIPTION
+A list with as many (named) fields as desired outputs. The names of the fields are those of the outputs.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function runs the computation graph of the flow to obtain some outputs, given input files.
 }

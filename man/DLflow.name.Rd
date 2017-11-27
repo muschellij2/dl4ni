@@ -2,13 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.name}
 \alias{DLflow.name}
-\title{FUNCTION_TITLE}
+\title{Name of a Flow}
 \value{
-OUTPUT_DESCRIPTION
+The name of the flow as a string.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function returns the name of a flow.
 }

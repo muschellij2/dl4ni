@@ -2,13 +2,10 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.get_inputs}
 \alias{DLflow.get_inputs}
-\title{FUNCTION_TITLE}
+\title{Flow Inputs}
 \value{
-OUTPUT_DESCRIPTION
+A character vector with the names of the inputs of the flow.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function returns the list of names of the inputs to this flow.
 }

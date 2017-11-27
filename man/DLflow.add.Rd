@@ -2,22 +2,22 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.add}
 \alias{DLflow.add}
-\title{FUNCTION_TITLE}
+\title{Add an Item to a Flow}
 \arguments{
-\item{what}{(NULL) PARAM_DESCRIPTION, Default: NULL}
+\item{what}{(character, \code{\link{DLscheme}}, \code{\link{DLmodel}} or function) Item to add, Default: NULL}
 
-\item{inputs}{(NULL) PARAM_DESCRIPTION, Default: NULL}
+\item{inputs}{(character) List of required inputs, Default: NULL}
 
-\item{output}{(NULL) PARAM_DESCRIPTION, Default: NULL}
+\item{output}{(character) The "name " of the item inside the flow, Default: NULL}
 
-\item{subset}{(NULL) PARAM_DESCRIPTION, Default: NULL}
+\item{subset}{(list) PARAM_DESCRIPTION, Default: NULL}
 }
 \value{
-OUTPUT_DESCRIPTION
+The updated flow.
 }
 \description{
-FUNCTION_DESCRIPTION
+This function adds an item (input, \code{\link{DLscheme}}, \code{\link{DLmodel}} or function) to the flow.
 }
 \details{
-DETAILS
+If the item to add is an input, the only required (and used) argument is \code{what}. If it's a function or a \code{\link{DLscheme}} or a \code{\link{DLmodel}}, mandatory arguments are \code{what}, \code{inputs} and \code{output}.
 }

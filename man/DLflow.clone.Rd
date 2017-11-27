@@ -2,16 +2,13 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.clone}
 \alias{DLflow.clone}
-\title{FUNCTION_TITLE}
+\title{Clone Flow}
 \arguments{
-\item{deep}{(logical) PARAM_DESCRIPTION, Default: FALSE}
+\item{deep}{(logical) Deep copy of the flow?, Default: FALSE}
 }
 \value{
-OUTPUT_DESCRIPTION
+A new flow with exactly the same information.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+This function clones a flow.
 }

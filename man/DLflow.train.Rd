@@ -2,28 +2,29 @@
 % Please edit documentation in R/methods_DLflow.R
 \name{DLflow.train}
 \alias{DLflow.train}
-\title{FUNCTION_TITLE}
+\title{Train Part of a Flow}
 \arguments{
-\item{output}{(name) PARAM_DESCRIPTION}
+\item{output}{(charcater) Name of the output (model) to train.}
 
-\item{input_filenames}{(name) PARAM_DESCRIPTION}
+\item{input_filenames}{(list) List of input files to train with, that is, the X in the training phase.}
 
-\item{output_filenames}{(name) PARAM_DESCRIPTION}
+\item{output_filenames}{(list) List of output files, representing the Y in the training phase.}
 
-\item{train_split}{(numeric) PARAM_DESCRIPTION, Default: 0.75}
+\item{train_split}{(numeric) Ratio of input files used for training, the remaining are used for validation, Default: 0.75}
 
-\item{epochs}{(numeric) PARAM_DESCRIPTION, Default: 10}
+\item{epochs}{(numeric) Number of epochs to train for, Default: 10}
 
-\item{target_windows_per_file}{(numeric) PARAM_DESCRIPTION, Default: 1024}
+\item{target_windows_per_file}{(numeric) Number of windows to extract, as a minimum, per file, Default: 1024}
 
-\item{mode}{(call) PARAM_DESCRIPTION, Default: c("debug", "faster", "medium", "slower")}
+\item{mode}{(character) Inference mode for the required inputs of this part of the flow, in case they had to be computed, Default: c("debug", "faster", "medium", "slower")}
 }
 \value{
-OUTPUT_DESCRIPTION
+The flow with the trained model.
 }
 \description{
-FUNCTION_DESCRIPTION
+This function is used to train a \code{\link{DLmodel}} that specifies an output of the flow.
 }
 \details{
-DETAILS
+In case the part of the flow is currently defined by a \code{\link{DLscheme}}, a \code{\link{DLmodel}} is instatiated
+taking into account given inputs and output filenames. This is the model to be trained.
 }
