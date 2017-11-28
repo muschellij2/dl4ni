@@ -46,18 +46,26 @@ create_model_from_config <- function(config) {
     
     # The input is always a vector, with width ^ 3 components for each of the volumes inside the image
     # (there can be 4D images).
-    vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
+    if (config$only_convolutionals) {
+      
+      vol_inputs[[v_input]] <- layer_input(shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) 
+      
+    } else {
+      
+      vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
+      
+    }
     
     vol_outputs[[v_input]] <- vol_inputs[[v_input]]
     
     # When using only convolutional layers, we have to reshape the input to match the volume
-    if (config$only_convolutionals) {
-      
-      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
-        layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
-        layer_permute(dims = c(3, 2, 1, 4))
-      
-    }
+    # if (config$only_convolutionals) {
+    #   
+    #   vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
+    #     layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
+    #     layer_permute(dims = c(3, 2, 1, 4))
+    #   
+    # }
     
     # Add layers in this path
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
