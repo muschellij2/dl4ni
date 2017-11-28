@@ -453,6 +453,10 @@ create_generator <- function(model,
         
       }
       
+      if (config$only_convolutionals)
+        X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, 1))
+      
+      
       if (config$is_autoencoder) {
         
         if (config$categorize_input) {
