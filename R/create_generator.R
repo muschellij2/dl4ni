@@ -280,7 +280,7 @@ create_generator <- function(model,
             
             for (i in seq(dim(tmpVx)[4])) {
               
-              tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx), method = 3) 
+              tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx)[1:3], method = interp_method) 
               
             }
             
