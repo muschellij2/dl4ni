@@ -21,7 +21,8 @@ load_keras()
 ##%######################################################%##
 
 problem <- "brain_extraction"
-info <- problem %>% get_problem_info()
+problem_path <- problem %>% get_dataset()
+info <- problem_path %>% get_problem_info()
 
 info %>% split_train_test_sets()
 

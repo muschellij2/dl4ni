@@ -101,15 +101,18 @@ flow$plot()
 
 # First, the brain_mask
 problem <- "brain_extraction"
-info_bet <- problem %>% get_problem_info()
+problem_path <- problem %>% get_dataset()
+info_bet <- problem_path %>% get_problem_info()
 
 # Now, segmentation
-problem <- "segmentation2"
-info_seg <- problem %>% get_problem_info()
+problem <- "segmentation"
+problem_path <- problem %>% get_dataset()
+info_seg <- problem_path %>% get_problem_info()
 
 # To end, parcellation
 problem <- "parcellation"
-info_parc <- problem %>% get_problem_info()
+problem_path <- problem %>% get_dataset()
+info_parc <- problem_path %>% get_problem_info()
 
 # Train BET
 flow$train(output = "brain_mask", 

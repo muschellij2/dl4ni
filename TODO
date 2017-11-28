@@ -73,7 +73,10 @@ ALREADY DONE:
 WIP:
   = Comentarios y documentación en todas las funciones
   = README.md para github
-  = Raise memory limit a un modelo, no desde el esquema.
+  = Raise memory limit a un modelo, no desde el esquema. (Not enough memory to train the model, raise the memory limit?)
+  = Actualizar para usar la última versión del paquete keras.
+  = TESTS
+  = Meter en get_problem_info que si un dataset no tiene directorio de outputs, éste debe apuntar al de inputs.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
   = schemes prefijados

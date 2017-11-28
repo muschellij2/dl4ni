@@ -15,7 +15,8 @@ load_keras()
 ##%######################################################%##
 
 problem <- "brats_lgg"
-info <- problem %>% get_problem_info(num_subjects = 10)
+problem_path <- problem %>% get_dataset()
+info <- problem_path %>% get_problem_info()
 
 info %>% split_train_test_sets()
 

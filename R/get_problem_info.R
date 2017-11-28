@@ -2,7 +2,7 @@
 #'
 #' @description FUNCTION_DESCRIPTION
 #'
-#' @param problem         (character) PARAM_DESCRIPTION, Default: 'foo'
+#' @param problem_path    (character) PARAM_DESCRIPTION, Default: 'foo'
 #' @param input_path      (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param output_path     (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param num_subjects    (NULL) PARAM_DESCRIPTION, Default: NULL
@@ -18,23 +18,33 @@
 #' @importFrom neurobase readnii
 #' @importFrom dplyr near
 #' @importFrom utils select.list
-get_problem_info <- function(problem = "foo",
+get_problem_info <- function(problem_path = NULL,
                              input_path = NULL,
                              output_path = NULL,
                              num_subjects = NULL) {
   
-  problem_path <- file.path(system.file("problems", package = "dl4ni.data"), problem)
+  if (is.null(problem_path) & is.null(input_path)) {
+    
+    stop("At least one of 'problem_path' or 'input_path' must be provided.")
+    
+  }
   
   info <- list()
   
   if (file.exists(problem_path) ||
-      (!is.null(input_path) && !is.null(output_path) && file.exists(input_path) && file.exists(output_path))) {
+      (!is.null(input_path) && file.exists(input_path))) {
     
     if (is.null(input_path) & file.exists(problem_path))
       input_path <- file.path(problem_path, "inputs")
     
+    if (!file.exists(input_path))
+      stop("Input path: ", input_path, " does not exist.")
+    
     if (is.null(output_path) & file.exists(problem_path))
       output_path <- file.path(problem_path, "outputs")
+    
+    if (is.null(output_path) || !file.exists(output_path))
+      output_path <- input_path
     
     # Manage several inputs
     input_dirs <- list.dirs(path = input_path, full.names = TRUE)[-1]
@@ -170,6 +180,10 @@ get_problem_info <- function(problem = "foo",
     info$outputs <- outputs
     info$num_volumes <- num_volumes
     info$input_types <- types
+    
+  } else {
+    
+    stop("Not a valid path.")
     
   }
   
