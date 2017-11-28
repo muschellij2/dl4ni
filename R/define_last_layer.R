@@ -3,7 +3,7 @@
 #' @description This function uses the information about a problem to define
 #' a possible last layer.
 #'
-#' @param info                 (environment) Problem information as returned by \code{\link[dl4ni.data]{get_problem_info}}.
+#' @param info                 (environment) Problem information as returned by \code{\link{get_problem_info}}.
 #' @param units                (integer) Number of output units
 #' @param only_convolutionals  (logical) If \code{TRUE}, just returns convolutional layers, otherwise dense layers, Default: FALSE
 #' @param force_categorical    (logical) When only 2 classes in a classification problem, one can use a \code{softsign} regression or a categorical layer, Default: TRUE 
