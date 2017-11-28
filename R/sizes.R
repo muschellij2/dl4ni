@@ -14,7 +14,7 @@ model_size <- function(model) {
   params_size <- model$get_model()$count_params()
   
   # Total size
-  total_size <- object.size(vector(mode = "double", length = data_size + params_size))
+  total_size <- object.size(vector(mode = "double", length = 1000)) * (data_size + params_size) / 1000
   
   return(total_size)
   
