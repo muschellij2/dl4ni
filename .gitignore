@@ -7,5 +7,4 @@ src/*.so
 src/*.dll
 model.png
 model*.png
-test*.*
 demo_old
