@@ -20,39 +20,13 @@ add_layers <- function(object,
   # Initialize output
   output <- object
   
-  # # If layers_definition consists only in numbers, take them as dense layers with as
-  # # many units as each number indicates
-  # if (!is.list(layers_definition) && is.vector(layers_definition) ) {
-  #   
-  #   tmp <- layers_definition
-  #   
-  #   layers_definition <- list()
-  #   if (length(tmp) > 0) {
-  #     
-  #     for (i in seq_along(tmp)) {
-  #       
-  #       layers_definition[[i]] <- dense(units = tmp[i])
-  #       
-  #     }
-  #     
-  #   }
-  #   
-  # }
-  
   # If we have layers
   if (length(layers_definition) > 0) {
     
     # Loop over all layers to add
     for (i in seq_along(layers_definition)) {
       
-      # If one of them is numeric, as before, take it as a dense layer.
       layer_to_add <- layers_definition[[i]]
-      
-      # if (is.numeric(layer_to_add)) {
-      #   
-      #   layer_to_add <- dense(units = layer_to_add)
-      #   
-      # }
       
       # Default specifications for inner layers
       defaults <- get_default_specs()

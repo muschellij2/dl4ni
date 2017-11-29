@@ -74,6 +74,7 @@ ALREADY DONE:
   + README.md para github
   + Cambiar el factor 4 de compute_batch_size.
   + Aligerar el número de parámetros de los modelos.
+  + check layer definition conformity
 
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -81,7 +82,6 @@ WIP:
   = Actualizar para usar la última versión del paquete keras.
   = build_model en el flow, para acompañar a train_output.
   = model$memory_size()
-  = check layer definition conformity
   = TESTS. Comenzar por los genéricos que cubran mucho y seguir por otros más específicos.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión

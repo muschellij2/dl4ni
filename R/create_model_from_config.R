@@ -58,43 +58,10 @@ create_model_from_config <- function(config) {
     
     vol_outputs[[v_input]] <- vol_inputs[[v_input]]
     
-    # When using only convolutional layers, we have to reshape the input to match the volume
-    # if (config$only_convolutionals) {
-    #   
-    #   vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
-    #     layer_reshape(target_shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) %>% 
-    #     layer_permute(dims = c(3, 2, 1, 4))
-    #   
-    # }
-    
     # Add layers in this path
     vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
       add_layers(layers_definition = config$vol_layers[[v_input]],
                  clf = FALSE) 
-    
-    # # Shape of the output of the path
-    # shape <- vol_outputs[[v_input]] %>% object_shape()
-    # 
-    # # If we are not considering convolutional layers, and the output of the path is volumetric 
-    # # (length(shape) > 2), then flatten the output, since in succesive layers we can combine
-    # # this output with dense layers.
-    # if (!config$only_convolutionals & length(shape) > 2) {
-    #   
-    #   vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>%
-    #     layer_flatten()
-    #   
-    # }
-    # 
-    # # Concatenate the individual volume outputs
-    # if (v_input == 1) {
-    #   
-    #   individual_outputs <- vol_outputs[[v_input]]
-    #   
-    # } else {
-    #   
-    #   individual_outputs <- layer_concatenate(list(individual_outputs, vol_outputs[[v_input]]))
-    #   
-    # }
     
   }
   
