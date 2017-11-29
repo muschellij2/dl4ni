@@ -8,7 +8,7 @@ define_last_layer(info, units, only_convolutionals = FALSE,
   force_categorical = TRUE, multioutput = TRUE, ...)
 }
 \arguments{
-\item{info}{(environment) Problem information as returned by \code{\link[dl4ni.data]{get_problem_info}}.}
+\item{info}{(environment) Problem information as returned by \code{\link{get_problem_info}}.}
 
 \item{units}{(integer) Number of output units}
 

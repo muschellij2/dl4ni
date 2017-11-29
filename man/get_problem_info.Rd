@@ -4,11 +4,11 @@
 \alias{get_problem_info}
 \title{FUNCTION_TITLE}
 \usage{
-get_problem_info(problem = "foo", input_path = NULL, output_path = NULL,
-  num_subjects = NULL)
+get_problem_info(problem_path = NULL, input_path = NULL,
+  output_path = NULL, num_subjects = NULL)
 }
 \arguments{
-\item{problem}{(character) PARAM_DESCRIPTION, Default: 'foo'}
+\item{problem_path}{(character) PARAM_DESCRIPTION, Default: 'foo'}
 
 \item{input_path}{(NULL) PARAM_DESCRIPTION, Default: NULL}
 
