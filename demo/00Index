@@ -1,0 +1,20 @@
+demo_autoencoder                          Create and use an autoencoder with dense layers.
+demo_autoencoder_conv                     Create and use an autoencoder with convolutional layers.
+demo_bet                                  Create a dense model to perform brain extraction.
+demo_bet_conv                             Create a convolutional model to perform brain extraction.
+demo_flow_lesion_load                     Toy flow illustrating the computation graph to perform lesion load estimation.
+demo_flow_parcellation                    Create a flow to perform brain extraction, segmentation and parcellation using dense layers.
+demo_flow_parcellation_conv               Create a flow to perform brain extraction, segmentation and parcellation using convolutional layers.
+demo_flow_parcellation_conv_3schemes      Create a flow to perform brain extraction, segmentation and parcellation using convolutional layers, with a scheme different for each model in the flow.
+demo_flow_t1_flair                        Create a flow to perform brain extraction, segmentation and the transformation from T1 to FLAIR using dense layers.
+demo_flow_t1_flair_conv                   Create a flow to perform brain extraction, segmentation and the transformation from T1 to FLAIR using convolutional layers.
+demo_multi_machine                        Create a model to perform the conversion between different machines or modalities, using dense layers.
+demo_multi_machine_conv                   Create a model to perform the conversion between different machines or modalities, using convolutional layers.
+demo_parcellation                         Create a model to perform brain parcellation with dense layers.
+demo_parcellation_conv                    Create a model to perform brain parcellation with convolutional layers.
+demo_segmentation                         Create a model to perform brain tissue segmentation with dense layers.
+demo_segmentation_conv                    Create a model to perform brain tissue segmentation with convolutional layers.
+demo_t1_flair                             Create a model to convert from T1 to FLAIR with dense layers.
+demo_t1_flair_conv                        Create a model to convert from T1 to FLAIR with convolutional layers.
+demo_tumor                                Create a model to perform tumor delineation with dense layers.
+demo_tumor_conv                           Create a model to perform tumor delineation with convolutional layers.
