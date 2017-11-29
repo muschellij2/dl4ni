@@ -89,10 +89,13 @@ add_layers <- function(object,
                if (is_volumetric) {
                  
                  new_params <- list(filters = params$units,
-                                    kernel_size = input_shape[1:3])
+                                    kernel_size = input_shape[1:3],
+                                    activation = this_config$activation)
                  new_layer <- do.call(layer_conv_3d, args = new_params)
                  
                } else {
+                 
+                 params$activation <- this_config$activation
                  
                  new_layer <- do.call(layer_dense, args = params)
                  
@@ -105,7 +108,7 @@ add_layers <- function(object,
                # Add additional secondary layers as specified
                if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                
-               output <- output %>% layer_activation(activation = this_config$activation)
+               # output <- output %>% layer_activation(activation = this_config$activation)
                
                if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                
@@ -272,6 +275,8 @@ add_layers <- function(object,
                  
                }
                
+               params$activation <- this_config$activation
+               
                # The convolutinal layer to add
                new_layer <- do.call(layer_conv_3d, args = params)
                
@@ -293,7 +298,7 @@ add_layers <- function(object,
                  # Add secondary layers as needed
                  if (this_config$batch_normalization) output <- output %>% layer_batch_normalization()
                  
-                 output <- output %>% layer_activation(activation = this_config$activation)
+                 # output <- output %>% layer_activation(activation = this_config$activation)
                  
                  if (this_config$dropout > 0) output <- output %>% layer_dropout(rate = this_config$dropout)
                  
@@ -309,7 +314,19 @@ add_layers <- function(object,
       if (clf) {
         
         # Concatenate input and output of this block of layers.
-        output <- layer_concatenate(c(object, output))
+        # This may fail, since only denses, convolutional with the same shapes, can be merged
+        # Thus, we try to concatenate and if we fail, just make a warning and use the previous output
+        tmp_output <- try(layer_concatenate(c(object, output)), silent = TRUE)
+        
+        if (!inherits(tmp_output, "try-error")) {
+          
+          output <- tmp_output
+          
+        } else {
+          
+          warning("Layers could not be concatenated. Using simple output instead.")
+          
+        }
         
       }
       
