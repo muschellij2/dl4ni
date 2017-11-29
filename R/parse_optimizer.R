@@ -28,6 +28,8 @@ parse_optimizer <- function(optimizer) {
     
   } else {
     
+    if (is.null(optimizer)) return(NULL)
+    
     if (!inherits(optimizer, "keras.optimizers.Optimizer")) {
       
       stop("'optimizer' is not a valid optimizer for Keras.")

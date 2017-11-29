@@ -9,6 +9,9 @@
 #' 
 normalize_layers <- function(layers_definition) {
   
+  # If layers_definition is NULL, return an empty list
+  if (is.null(layers_definition)) return(list())
+  
   # If layers_definition consists only in numbers, take them as dense layers with as
   # many units as each number indicates
   if (!is.list(layers_definition) && is.vector(layers_definition) && all(is.numeric(layers_definition))) {

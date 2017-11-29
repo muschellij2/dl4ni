@@ -21,7 +21,8 @@
 get_problem_info <- function(problem_path = NULL,
                              input_path = NULL,
                              output_path = NULL,
-                             num_subjects = NULL) {
+                             num_subjects = NULL,
+                             interactive = TRUE) {
   
   if (is.null(problem_path) & is.null(input_path)) {
     
@@ -30,6 +31,7 @@ get_problem_info <- function(problem_path = NULL,
   }
   
   info <- list()
+  interactive <- interactive & interactive()
   
   if (file.exists(problem_path) ||
       (!is.null(input_path) && file.exists(input_path))) {
@@ -51,7 +53,7 @@ get_problem_info <- function(problem_path = NULL,
     
     num_inputs <- 1
     
-    if (length(input_dirs) > 1 & interactive()) {
+    if (length(input_dirs) > 1 & interactive) {
       
       choices <- sapply(input_dirs, basename)
       title <- "Select inputs to use:"
@@ -121,7 +123,7 @@ get_problem_info <- function(problem_path = NULL,
     if (length(output_dirs) > 0) {
       
       # Select one of them, if we are in an interactive session
-      if (interactive()) {
+      if (interactive) {
         
         choices <- sapply(output_dirs, basename)
         title <- "Choose a possible output:"
@@ -132,7 +134,7 @@ get_problem_info <- function(problem_path = NULL,
       } else {
         
         # If in a non-interactive session, take the first one
-        output_path <- file.path(output_path, output_dirs[1])
+        output_path <- output_dirs[1]
         
       }
       

@@ -146,7 +146,7 @@ create_model_from_config <- function(config) {
                    "features" = input_features)
   
   # If we have decoder layers, define the encoder, decoder and complete model.
-  if (!is.null(config$decoder_layers)) {
+  if (length(config$decoder_layers) > 0) {
     
     result$log("INFO", message = "Creating autoencoder.")
     

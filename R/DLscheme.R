@@ -110,7 +110,7 @@ DLscheme <- R6::R6Class(
     
     from_list = function(config) {
       
-      stopifot(is.list(config))
+      stopifnot(is.list(config))
       
       # Remove particular elements that are going to be appended in the instantiation phase
       config$vol_layers <- NULL
@@ -124,9 +124,11 @@ DLscheme <- R6::R6Class(
     
     from_model = function(model) {
       
-      stopfinot(inherits(model, "DLmodel"))
+      stopifnot(inherits(model, "DLmodel"))
       
       config <- model$get_config()
+      config$from_model <- NULL
+      config$from_list <- NULL
       
       self$from_list(config)
       

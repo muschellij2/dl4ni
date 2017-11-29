@@ -79,3 +79,9 @@ get_dataset <- function(dataset,
   }
   
 }
+
+installed_datasets <- function() {
+  
+  list.dirs(get_dataset_dir(), recursive = FALSE, full.names = FALSE)
+  
+}

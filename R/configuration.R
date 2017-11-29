@@ -53,19 +53,23 @@ define_config <- function(...) {
   if (is.null(config$decoder_layers)) {
     
     # General case in which we are not defining an autoencoder.
-    if (config$categorize_output) {
+    if (!is.null(config$categorize_output)) {
       
-      # Number of classes of the last layer.
-      config$num_classes <- config$last_layer_info$num_classes + 1
-      
-      # Make class balancing
-      if (config$num_classes > 2) {
+      if (config$categorize_output) {
         
-        config$class_balance <- "extensive"
+        # Number of classes of the last layer.
+        config$num_classes <- config$last_layer_info$num_classes + 1
         
-      } else {
-        
-        config$class_balance <- "simple"
+        # Make class balancing
+        if (config$num_classes > 2) {
+          
+          config$class_balance <- "extensive"
+          
+        } else {
+          
+          config$class_balance <- "simple"
+          
+        }
         
       }
       
@@ -81,7 +85,7 @@ define_config <- function(...) {
   }
   
   # Specific logic for the inference
-  if (!is.null(config$regularize) && config$categorize_output && config$category_method == "simple") {
+  if (!is.null(config$regularize) && !is.null(config$categorize_output) && isTRUE(config$categorize_output) && (config$category_method == "simple")) {
     
     # No need to smooth the output image if the category_method is "simple"
     config$regularize <- NULL
