@@ -21,6 +21,7 @@ This package has been written and is developed with some key features in mind:
 - Highly customizable models, allowing concatenation and merging of models, layers, branching...
 - Creation of a common interface for all models built with this package, regarding training, testing and inference. This is achieved by the use of R6 classes.
 - Tackle different types of problems: classification, labelling or regression.
+- Work natively with NIfTI files.
 - Native 3D, although vector representations of images are allowed (and, in some cases, adviced).
 - Simple memory management. Users can impose memory constraints when training a model, batch size is automatically adjusted.
 - Dataset repositories. Some datasets regarding typical Neuroimaging problems (brain extraction, segmentation, parcellation...) are released in public repositories, and a mechanism to get these datasets into our local system to be able to train models is also included in the package.
