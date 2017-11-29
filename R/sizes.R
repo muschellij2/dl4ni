@@ -32,10 +32,10 @@ compute_batch_size <- function(model) {
   
   # Max batch_size (https://stackoverflow.com/questions/46654424/how-to-calculate-optimal-batch-size)
   config <- model$get_config()
-  batch_size <- config$memory_limit / (4 * model_size(model))
+  batch_size <- config$memory_limit / model_size(model)
   
   # Better if it is a power of two
-  optimal_batch_size <- as.integer(2 ^ floor(log2(batch_size)))
+  optimal_batch_size <- as.integer(round_to_power2(batch_size))
   
   return(optimal_batch_size)
   

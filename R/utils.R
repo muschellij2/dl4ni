@@ -36,3 +36,25 @@ convert_to_bytes <- function(x) {
   num * unname(mult[unit])
   
 }
+
+
+round_to_multiple <- function(v, factor = 32, upper = FALSE) {
+  
+  coef <- v / factor
+  
+  if (upper) {
+    
+    return(ceiling(coef) * factor)
+    
+  } else {
+    
+    return(floor(coef) * factor)
+  }
+  
+}
+
+round_to_power2 <- function(x) {
+  
+  2 ^ floor(log2(x))
+  
+}
