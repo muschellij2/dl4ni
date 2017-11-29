@@ -72,8 +72,33 @@ add_attribute <- function(scheme, ...) {
     
     optimizer <- parse_optimizer(args[["optimizer"]])
     args[["optimizer"]] <- optimizer
-
+    
   } 
+  
+  # If we are given layers definitions, normalize them.
+  if ("vol_layers_pattern" %in% var_names) {
+    
+    args$vol_layers_pattern <- normalize_layers(args$vol_layers_pattern)
+    
+  }
+  
+  if ("feature_layers" %in% var_names) {
+    
+    args$feature_layers <- normalize_layers(args$feature_layers)
+    
+  }
+  
+  if ("common_layers" %in% var_names) {
+    
+    args$common_layers <- normalize_layers(args$common_layers)
+    
+  }
+  
+  if ("decoder_layers" %in% var_names) {
+    
+    args$decoder_layers <- normalize_layers(args$decoder_layers)
+    
+  }
   
   # Assign all variables to the "scheme" environment
   lapply(var_names, function(vn) {

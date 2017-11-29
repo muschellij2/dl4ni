@@ -72,6 +72,8 @@ ALREADY DONE:
   + Datasets para los problemas online, es decir, pasar dl4ni.data a que los datasets se descarguen de forma automática de algún repositorio, como el MNIST en otros paquetes. Función get_dataset(repo_name) que descarga a alguna ubicación temporal o predefinida. Se separa cada dataset en un repositorio, si no se copian los outputs se sobreentiende que son los mismos que los inputs. Tiene que haber una carpeta de caché, como hace keras para organizar los datos que va a usar.
   + Meter en get_problem_info que si un dataset no tiene directorio de outputs, éste debe apuntar al de inputs.
   + README.md para github
+  + Cambiar el factor 4 de compute_batch_size.
+  + Aligerar el número de parámetros de los modelos.
 
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -79,9 +81,7 @@ WIP:
   = Actualizar para usar la última versión del paquete keras.
   = build_model en el flow, para acompañar a train_output.
   = model$memory_size()
-  = Cambiar el factor 4 de compute_batch_size.
   = check layer definition conformity
-  = Aligerar el número de parámetros de los modelos.
   = TESTS. Comenzar por los genéricos que cubran mucho y seguir por otros más específicos.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
