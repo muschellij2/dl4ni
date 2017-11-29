@@ -62,6 +62,7 @@ get_dataset <- function(dataset,
   if (!inherits(path, "try-error")) {
     
     # Ok, unzip the dataset and create destination folder if it does not exist.
+    dir.create(get_dataset_dir(), recursive = TRUE, showWarnings = FALSE)
     L <- unzip(zipfile = path, exdir = get_dataset_dir(), list = TRUE)
     unzip(zipfile = path, exdir = get_dataset_dir())
     extracted_folder <- L$Name[1]
