@@ -155,6 +155,16 @@ create_inference_function_from_config <- function(object) {
         
         X_vol[[input]] <- X[, -c(1:3)]
         
+        if (num_windows == 1) {
+          
+          dim(X_vol[[input]]) <- c(1, length(X_vol[[input]]))
+          
+        }
+        
+        if (config$only_convolutionals)
+          X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, 1))
+        
+        
         if (config$is_autoencoder) {
           
           if (config$categorize_input) {
