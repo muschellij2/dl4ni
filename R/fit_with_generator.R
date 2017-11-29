@@ -170,7 +170,7 @@ fit_with_generator <- function(.model,
              "Overwrite" = {
                
                .model %>% save_model(path = model_path, prefix = model_prefix, 
-                                     comment = paste0(timestamp(quiet = TRUE), ":", " New initial state.\n"))
+                                     comment = paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ":", " New initial state.\n"))
                
                saveRDS(best_validation_loss, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
                
@@ -196,7 +196,7 @@ fit_with_generator <- function(.model,
                dir.create(save_path, recursive = TRUE, showWarnings = FALSE)
                
                .model %>% save_model(path = model_path, prefix = model_prefix, 
-                                     comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
+                                     comment = paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ":", " Initial state.\n"))
                
                saveRDS(best_validation_loss, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
                
@@ -215,7 +215,7 @@ fit_with_generator <- function(.model,
       dir.create(save_path, recursive = TRUE, showWarnings = FALSE)
       
       .model %>% save_model(path = model_path, prefix = model_prefix, 
-                            comment = paste0(timestamp(quiet = TRUE), ":", " Initial state.\n"))
+                            comment = paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ":", " Initial state.\n"))
       
       if (verbose)
         message("Model saved in ", save_path)
@@ -585,7 +585,7 @@ fit_with_generator <- function(.model,
         saveRDS(object = loss_acc, file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
         
         .model %>% save_model(path = model_path, prefix = model_prefix, 
-                              comment = paste0(timestamp(quiet = TRUE), ":", " Model with loss: ", loss_acc, "\n"))
+                              comment = paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ":", " Model with loss: ", loss_acc, "\n"))
         
         message("New best model found with loss: ", sprintf("%.5f", loss_acc))
         

@@ -115,9 +115,8 @@ DLmodel <- R6::R6Class(
     
     log = function(level = c("DEBUG", "INFO", "WARNING", "ERROR"), message = "...") {
       
-      line_to_add <- paste0(timestamp(stamp = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-                                      prefix = "[", suffix = "] ", quiet = TRUE),
-                            level[1], ": ",
+      line_to_add <- paste0("(", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ") [",
+                            level[1], "] ",
                             message)
       
       private$log_lines <- c(private$log_lines, line_to_add)
