@@ -27,11 +27,13 @@ add_trainable_model <- function(flow,
   
   # Basic checks
   stopifnot(inherits(flow, "DLflow"))
-
   stopifnot(inherits(scheme, "DLscheme"))
-  stopifnot(!is.null(scheme$vol_layers_pattern))
-  stopifnot(!is.null(scheme$last_hidden_layers))
-  stopifnot(!is.null(scheme$units) | !is.null(scheme$output_width))
+  
+  scheme$check()
+
+  # stopifnot(!is.null(scheme$vol_layers_pattern))
+  # stopifnot(!is.null(scheme$last_hidden_layers))
+  # stopifnot(!is.null(scheme$units) | !is.null(scheme$output_width))
   
   if (is.null(scheme$units))
     scheme$units <- scheme$output_width ^ 3

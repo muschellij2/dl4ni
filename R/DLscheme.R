@@ -62,6 +62,12 @@ DLscheme <- R6::R6Class(
       
     },
     
+    check = function() {
+      
+      self %>% check_scheme()
+      
+    },
+    
     instantiate = function(problem_info = NULL, 
                            inputs = NULL, 
                            outputs = NULL, 

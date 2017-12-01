@@ -100,6 +100,12 @@ add_attribute <- function(scheme, ...) {
     
   }
   
+  if ("last_hidden_layers" %in% var_names) {
+    
+    args$last_hidden_layers <- normalize_layers(args$last_hidden_layers)
+    
+  }
+  
   # Assign all variables to the "scheme" environment
   lapply(var_names, function(vn) {
     
@@ -114,3 +120,17 @@ add_attribute <- function(scheme, ...) {
   
 }
 
+
+check_scheme <- function(scheme) {
+  
+  scheme$vol_layers_pattern <- scheme$vol_layers_pattern %>% normalize_layers()
+  scheme$feature_layers <- scheme$feature_layers %>% normalize_layers()
+  scheme$common_layers <- scheme$common_layers %>% normalize_layers()
+  scheme$decoder_layers <- scheme$decoder_layers %>% normalize_layers()
+  scheme$last_hidden_layers <- scheme$last_hidden_layers %>% normalize_layers()
+  
+  defaults <- get_dl4ni_config()
+  if (is.null(scheme$width)) scheme$width <- defaults$width
+  if (is.null(scheme$output_width)) scheme$output_width <- defaults$output_width
+  
+}

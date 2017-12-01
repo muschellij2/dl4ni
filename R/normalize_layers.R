@@ -54,6 +54,12 @@ normalize_layers <- function(layers_definition) {
           
         }
         
+        if (!is.null(current_layer$params) || !is.null(current_layer$params$hidden_layers)) {
+          
+          current_layer$params$hidden_layers <- current_layer$params$hidden_layers %>% normalize_layers()
+          
+        }
+        
       }
       
     } 

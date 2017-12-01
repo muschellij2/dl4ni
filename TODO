@@ -80,6 +80,8 @@ WIP:
   = Comentarios y documentación en todas las funciones
   = Raise memory limit a un modelo, no desde el esquema. (Not enough memory to train the model, raise the memory limit?)
   = Actualizar para usar la última versión del paquete keras.
+  = Error en DLmodel.fit cuando keep_best == FALSE, no se definen path y prefix.
+  = multiwidth.
   = build_model en el flow, para acompañar a train_output.
   = model$memory_size()
   = TESTS. Comenzar por los genéricos que cubran mucho y seguir por otros más específicos.
