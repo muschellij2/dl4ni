@@ -216,3 +216,9 @@ upsampling <- function(mode = c("upsampling", "convolutional"), ...) {
   list(type = "upsampling", params = list(mode = mode[1], ...))
   
 }
+
+pad <- function(padding = 1L) {
+  
+  list(type = "pad", params = list("padding" = padding))
+  
+}

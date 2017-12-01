@@ -12,10 +12,11 @@ meshnet <- function(num_filters = 21,
   for (b in seq(num_blocks)) {
     
     blocks <- c(blocks, 
+                list(pad(padding = dils[b])),
                 list(conv3d(filters = num_filters, 
                        kernel_size = c(3, 3, 3), 
                        dilation_rate = dils[b], 
-                       padding = "same",
+                       padding = "valid",
                        activation = "relu",
                        batch_normalization = TRUE,
                        dropout = dropout)))

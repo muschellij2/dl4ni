@@ -168,6 +168,15 @@ add_layers <- function(object,
                
              },
              
+             # Padding layer
+             "pad" = {
+               
+               params$object <- output
+               
+               output <- do.call(layer_zero_padding_3d, args = params)
+               
+             },
+             
              # Maxpooling layer
              "maxpooling" = {
                
