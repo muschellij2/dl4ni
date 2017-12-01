@@ -35,6 +35,13 @@ normalize_layers <- function(layers_definition) {
   if (!is.list(layers_definition))
     layers_definition <- list(layers_definition)
   
+  # If layers_definition is just a layer, check:
+  if ("type" %in% names(layers_definition)) {
+    
+    layers_definition <- list(layers_definition)
+    
+  }
+  
   # Check that each item of the list is numeric or a list with at least "type" field.
   if (length(layers_definition) > 0) {
     
