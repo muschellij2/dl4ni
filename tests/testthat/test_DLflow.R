@@ -1,0 +1,100 @@
+context("DLflow")
+
+
+test_that("DLflow initializes as expected", {
+
+  # Create flow
+  flow <- DLflow$new(name = "foo", inputs = c("A", "B"))
+  
+  # Expectations
+  # Class
+  expect_is(flow, "DLflow")
+  
+  # Correct name
+  expect_true(flow$name() == "foo")
+  
+  # Retrieving inputs
+  expect_identical(sort(flow$get_inputs()), c("A", "B"))
+  
+  # No outputs at the beginning
+  expect_identical(setdiff(flow$get_outputs(), flow$get_inputs()), character(0))
+
+})
+
+test_that("DLflow adds inputs", {
+  
+  # Create flow
+  flow <- DLflow$new(name = "foo", inputs = c("A", "B"))
+  original_inputs <- flow$get_inputs()
+  
+  # Add a new input
+  flow$add(inputs = "C")
+  
+  # Expect we have the new input added
+  expect_identical(setdiff(flow$get_inputs(), original_inputs), "C")
+  
+})
+
+test_that("DLflow adds schemes as output", {
+  
+  # Create the flow
+  flow <- DLflow$new(name = "foo", inputs = c("A", "B"))
+  
+  # Create simplest scheme
+  scheme <- DLscheme$new()
+  scheme$add(add_last_layer = FALSE)
+  
+  # To add an scheme, we need at least inputs and outputs
+  expect_error(flow$add(what = scheme))
+  expect_error(flow$add(what = scheme, inputs = "A"))
+  
+  # This does not work because "C" is not an input of the flow.
+  expect_error(flow$add(what = scheme, inputs = c("A", "C"), output = "new_output"))
+  
+  # This should work
+  flow$add(what = scheme, inputs = c("A", "B"), output = "new_output")
+  
+  # Expectations
+  # We have added an output that does not correspond to an input 
+  expect_identical(setdiff(flow$get_outputs(), flow$get_inputs()), "new_output")
+  
+  # We can retrieve the scheme
+  scheme2 <- flow$get_model("new_output")
+  expect_is(scheme2, "DLscheme")
+  
+})
+
+test_that("DLflow adds models as output", {
+  
+  skip_if_not(length(installed_datasets()) > 0)
+  
+  # Create flow
+  flow <- DLflow$new(name = "foo", inputs = c("A", "B"))
+  
+  # Create simplest scheme to build a model
+  scheme <- DLscheme$new()
+  scheme$add(add_last_layer = FALSE)
+  
+  problem_path <- get_dataset(available_datasets[1])
+  info <- get_problem_info(problem_path, interactive = FALSE)
+  model <- scheme$instantiate(problem_info = info)
+  
+  # To add a model, we need at least inputs and outputs
+  expect_error(flow$add(what = model))
+  expect_error(flow$add(what = model, inputs = "A"))
+  
+  # "C" is not an input
+  expect_error(flow$add(what = model, inputs = c("A", "C"), output = "new_output"))
+  
+  # This should work
+  flow$add(what = model, inputs = c("A", "B"), output = "new_output")
+  
+  # Expectations
+  # New output is added to the flow
+  expect_identical(setdiff(flow$get_outputs(), flow$get_inputs()), "new_output")
+  
+  # We can retrieve the model
+  model2 <- flow$get_model("new_output")
+  expect_is(model2, "DLmodel")
+  
+})
