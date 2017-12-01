@@ -28,7 +28,7 @@ define_config <- function(...) {
       args[[field]] <- args$last_layer_info[[field]]
       
     }
-
+    
   }
   
   # Overwrite the defaults
@@ -50,7 +50,7 @@ define_config <- function(...) {
   }
   
   # Specific logic for when using autoencoders
-  if (is.null(config$decoder_layers)) {
+  if (is.null(config$decoder_layers) | (length(config$decoder_layers) == 0) ) {
     
     # General case in which we are not defining an autoencoder.
     if (!is.null(config$categorize_output)) {
@@ -91,16 +91,16 @@ define_config <- function(...) {
     config$regularize <- NULL
     
   }
-
+  
   # Specific logic for when using autoencoders
-  if (!is.null(config$decoder_layers)) {
+  if (!is.null(config$decoder_layers) & (length(config$decoder_layers) > 0)) {
     
     config$is_autoencoder <- TRUE
     config$output_width <- config$width
     
   }
   
-  config$add_last_layer <- !(is.null(config$last_layer))
+  config$add_last_layer <- (!(is.null(config$last_layer)) && (length(config$last_layer) > 0))
   
   # Memory limit
   config$memory_limit <- config$memory_limit %>% convert_to_bytes()
