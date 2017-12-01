@@ -36,8 +36,7 @@ level_block <- function(object,
                         activation = "relu",
                         dropout = 0,
                         batch_normalization = TRUE,
-                        use_maxpooling = TRUE,
-                        use_upsampling = TRUE,
+                        mode = c("sampling", "convolutional"),
                         residual = FALSE) {
   
   if (depth > 0) {
@@ -49,7 +48,7 @@ level_block <- function(object,
                        residual = residual, 
                        dropout = dropout)
     
-    if (use_maxpooling) {
+    if (mode == "sampling") {
       
       res <- res1 %>% layer_max_pooling_3d()
       
@@ -69,11 +68,10 @@ level_block <- function(object,
                                activation = activation, 
                                batch_normalization = batch_normalization, 
                                dropout = dropout, 
-                               use_maxpooling = use_maxpooling, 
-                               use_upsampling = use_upsampling, 
+                               mode = c("sampling", "convolutional"),
                                residual = residual)
     
-    if (use_upsampling) {
+    if (mode == "sampling") {
       
       res <- res %>% 
         layer_upsampling_3d() %>% 
@@ -125,8 +123,7 @@ block_unet <- function(object,
                        final_activation = "softmax",
                        dropout = 0.5, 
                        batch_normalization = FALSE, 
-                       use_maxpooling = TRUE, 
-                       use_upsampling = TRUE, 
+                       mode = c("sampling", "convolutional"),
                        residual = FALSE) {
   
   res <- level_block(object, 
@@ -136,8 +133,7 @@ block_unet <- function(object,
                      activation = activation, 
                      dropout = dropout, 
                      batch_normalization = batch_normalization, 
-                     use_maxpooling = use_maxpooling, 
-                     use_upsampling = use_upsampling, 
+                     mode = mode,
                      residual = residual) 
   
   if (out_filters > 0)

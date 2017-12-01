@@ -75,6 +75,9 @@ ALREADY DONE:
   + Cambiar el factor 4 de compute_batch_size.
   + Aligerar el número de parámetros de los modelos.
   + check layer definition conformity
+  + Unificar parámetros U-Net y SegNet.
+  + schemes prefijados
+  + meshnet
 
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -87,9 +90,7 @@ WIP:
   = TESTS. Comenzar por los genéricos que cubran mucho y seguir por otros más específicos.
   = suppressPackageStartupMessages para todos los paquetes que se cargan.
   = width distinto en cada dimensión
-  = schemes prefijados
   = Cambiar RESNET.
-  = meshnet
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.
   = instantiate_autoencoder.
