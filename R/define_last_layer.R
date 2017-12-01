@@ -83,7 +83,8 @@ define_last_layer <- function(info,
                                 last_layer <- conv3d(filters = num_classes + 1,
                                                      kernel_size = c(3, 3, 3),
                                                      padding = "same",
-                                                     activation = output_activation)
+                                                     activation = output_activation,
+                                                     batch_normalization = FALSE)
                                 multioutput <- FALSE
                                 loss <- loss_function
                                 
@@ -198,7 +199,8 @@ define_last_layer <- function(info,
                                 last_layer <- conv3d(filters = 1,
                                                      kernel_size = c(3, 3, 3),
                                                      padding = "same",
-                                                     activation = output_activation)
+                                                     activation = output_activation,
+                                                     batch_normalization = FALSE)
                                 
                               } else {
                                 

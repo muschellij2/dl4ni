@@ -25,7 +25,8 @@ block_categorical <- function(object,
   
   # Final layer in each path
   finalize_layers <- list(dense(units = num_classes, 
-                                activation = "softmax"))
+                                activation = "softmax", 
+                                batch_normalization = FALSE))
   
   # Build the independent paths.
   outputs <- object %>% block_paths(hidden_layers = hidden_layers, 

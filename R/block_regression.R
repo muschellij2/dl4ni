@@ -24,7 +24,8 @@ block_regression <- function(object,
   
   # Final layer in each path
   finalize_layers <- list(dense(units = 1, 
-                                activation = output_activation))
+                                activation = output_activation,
+                                batch_normalization = FALSE))
   
   # Build the independent paths.
   output <- object %>% block_paths(hidden_layers = hidden_layers, 
