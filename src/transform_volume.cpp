@@ -94,8 +94,6 @@ float nearest_interpolation(float v000, float v001, float v010,
   if ((dx >= 0.5) & (dy >= 0.5) & (dz <= 0.5)) return v110;
   if ((dx >= 0.5) & (dy >= 0.5) & (dz >= 0.5)) return v111;
 
-  return 0.0;
-  
 }
 
 

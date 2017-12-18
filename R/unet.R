@@ -48,7 +48,7 @@ level_block <- function(object,
                        residual = residual, 
                        dropout = dropout)
     
-    if (mode == "sampling") {
+    if (mode[1] == "sampling") {
       
       res <- res1 %>% layer_max_pooling_3d()
       
@@ -71,7 +71,7 @@ level_block <- function(object,
                                mode = c("sampling", "convolutional"),
                                residual = residual)
     
-    if (mode == "sampling") {
+    if (mode[1] == "sampling") {
       
       res <- res %>% 
         layer_upsampling_3d() %>% 

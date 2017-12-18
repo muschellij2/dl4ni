@@ -300,7 +300,8 @@ DLmodel <- R6::R6Class(
         error_message <- paste0("Not enough memory to train this model. Optimal batch size is 0 for the memory limit: ", 
                                 prettyunits::pretty_bytes(private$hyperparameters$memory_limit), "\n",
                                 "This model requires at least ", required_memory, " to be trained.\n",
-                                "We suggest to increase this limit by adding: memory_limit = ", required_memory, " to the scheme.\n")
+                                "We suggest to increase this limit by adding: memory_limit = ", 
+                                required_memory, " to the scheme.\n")
         
         self$log("ERROR", message = error_message)
         
@@ -385,6 +386,11 @@ DLmodel <- R6::R6Class(
           stop(message)
           
         }
+        
+      } else {
+        
+        path <- tempdir()
+        prefix <- basename(tempfile())
         
       }
       

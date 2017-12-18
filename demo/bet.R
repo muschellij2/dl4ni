@@ -1,7 +1,6 @@
 rm(list = ls())
 rstudioapi::restartSession()
 devtools::load_all()
-devtools::load_all("../dl4ni.data/")
 
 ##%######################################################%##
 #                                                          #
