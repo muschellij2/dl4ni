@@ -158,6 +158,7 @@ DLscheme <- R6::R6Class(
       config <- model$get_config()
       config$from_model <- NULL
       config$from_list <- NULL
+      config$check <- NULL
       
       self$from_list(config)
       

@@ -128,7 +128,7 @@ check_scheme <- function(scheme) {
   scheme$common_layers <- scheme$common_layers %>% normalize_layers()
   scheme$decoder_layers <- scheme$decoder_layers %>% normalize_layers()
   scheme$last_hidden_layers <- scheme$last_hidden_layers %>% normalize_layers()
-  
+
   defaults <- get_dl4ni_config()
   if (is.null(scheme$width)) scheme$width <- defaults$width
   if (is.null(scheme$output_width)) scheme$output_width <- defaults$output_width

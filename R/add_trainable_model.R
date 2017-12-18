@@ -21,7 +21,7 @@ add_trainable_model <- function(flow,
                                 inputs,
                                 output,
                                 subset = NULL,
-                                verbose = TRUE) {
+                                verbose = FALSE) {
   
   suppressPackageStartupMessages(require(igraph))
   

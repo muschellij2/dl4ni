@@ -75,6 +75,8 @@ test_that("DLflow adds models as output", {
   scheme <- DLscheme$new()
   scheme$add(add_last_layer = FALSE)
   
+  available_datasets <- installed_datasets()
+  
   problem_path <- get_dataset(available_datasets[1])
   info <- get_problem_info(problem_path, interactive = FALSE)
   model <- scheme$instantiate(problem_info = info)
