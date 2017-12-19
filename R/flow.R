@@ -100,9 +100,11 @@ plot_flow <- function(flow, interactive = FALSE) {
   # Graph plot
   if (interactive && require(htmlwidgets) && require(threejs)) {
     
-    threejs::graphjs(flow$graph, main = "Network", bg = "gray10", edge.arrow.size = .4, 
-                     vertex.label = NA, edge.curved = 0, layout = cbind(L$layout, 0), showLabels = TRUE, 
-                     stroke = FALSE, curvature = 0.1, attraction = 0.9, repulsion = 0.8, opacity = 0.9)
+    warning("Not implemented yet!")
+    
+    # threejs::graphjs(flow$graph, main = "Network", bg = "gray10", edge.arrow.size = .4, 
+    #                  vertex.label = NA, edge.curved = 0, layout = cbind(L$layout, 0), showLabels = TRUE, 
+    #                  stroke = FALSE, curvature = 0.1, attraction = 0.9, repulsion = 0.8, opacity = 0.9)
     
   } else {
     

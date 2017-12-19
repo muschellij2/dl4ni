@@ -145,6 +145,7 @@ test_that("A DLflow can do basic operations", {
   
   # Plot
   expect_works(flow$plot())
+  expect_warning(flow$plot(interactive = TRUE))
   
   # Subset
   expect_works(new_flow <- flow$subset(outputs = "brain_mask"))
@@ -231,58 +232,130 @@ test_that("A DLflow works for a fully-connected model", {
   
 })
 
-
-# test_that("A DLflow works for a convolutional model", {
-#   
-#   # We'll use a modified BET (non-convolutional) demo
-#   load_keras()
-#   
-#   # Get the dataset
-#   problem <- "brain_extraction"
-#   problem_path <- problem %>% get_dataset()
-#   info_bet <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
-#   
-#   info_bet %>% split_train_test_sets()
-#   
-#   # Model scheme
-#   scheme <- scheme_unet(width = 16, initial_filters = 1, full_depth = TRUE)
-#   
-#   scheme$add(memory_limit = "2G")
-#   
-#   # Create new flow
-#   flow <- DLflow$new(name = "brain_extraction", inputs = c("T1"))
-#   
-#   # Scale the T1 image
-#   flow$add(what = scale_z, 
-#            inputs = list("T1"), 
-#            output = "T1_scaled")
-#   
-#   # Starting from a T1, add a trainable model which computes the brain_mask
-#   flow$add(what = scheme, 
-#            inputs = list("T1_scaled"),
-#            output = "brain_mask")
-#   
-#   # To compute the brain extracted image, we multiply the T1 and the brain_mask
-#   flow$add(what = function(T1, brain_mask) {T1 * brain_mask}, 
-#            output = "only_brain")
-#   
-#   expect_works(flow$plot())
-#   
-#   # Train BET
-#   expect_works(flow$train(output = "brain_mask", 
-#                           input_filenames = info_bet$inputs, 
-#                           output_filenames = info_bet$outputs, 
-#                           epochs = 1))
-#   
-#   expect_works(flow$save(path = getwd(), file_prefix = "test"))
-#   
-#   test_index <- sample(info_bet$test$subject_indices, size = 1)
-#   
-#   # Starting from original image
-#   file <- info_bet$inputs$T1[1]
-#   expect_works(result <- flow$execute(inputs = list(T1 = file), 
-#                                       desired_outputs = c("only_brain")) )
-#   
-#   expect_named(result, expected = c("only_brain"))
-#   
-# })
+test_that("DLflow trains correctly", {
+  
+  load_keras()
+  
+  # Basic scheme for all networks in the flow
+  scheme_bigger <- DLscheme$new()
+  
+  scheme_bigger$add(width = 7,
+                    output_width = 3,
+                    num_features = 3,
+                    vol_layers_pattern = list(dense(10)),
+                    vol_dropout = 0.1,
+                    feature_layers = list(dense(10)),
+                    feature_dropout = 0.15,
+                    common_layers = list(dense(10)),
+                    common_dropout = 0.1,
+                    last_hidden_layers = list(dense(2)),
+                    optimizer = "adadelta",
+                    scale = "none",
+                    scale_y = "none")
+  
+  scheme_bigger$add(memory_limit = "1G")
+  
+  # Create new flow
+  flow <- DLflow$new(name = "parcellation", inputs = c("T1"))
+  
+  # Scale the T1 image
+  flow$add(what = scale_z, 
+           inputs = list("T1"), 
+           output = "T1_scaled")
+  
+  # Starting from a T1, add a trainable model which computes the brain_mask
+  flow$add(what = scheme_bigger, 
+           inputs = list("T1_scaled"),
+           output = "brain_mask")
+  
+  # To compute the brain extracted image, we multiply the T1 and the brain_mask
+  flow$add(what = function(T1, brain_mask) {T1 * brain_mask}, 
+           output = "only_brain")
+  
+  # Scale the brain extracted image
+  flow$add(what = scale_z, 
+           inputs = list("only_brain"), 
+           output = "only_brain_scaled")
+  
+  # Starting form the brain extracted image ("only_brain"), add a trainable model which computes the 
+  # segmentation
+  flow$add(what = scheme_bigger,
+           inputs = list("only_brain_scaled"),
+           output = "segmentation")
+  
+  # Using brain extracted and scaled image ("only_brain_scaled") and the segmentation, add a trainable model
+  # to compute the parcellation
+  cortex <- c(6, 45, 630:3000)
+  scgm_labels <- c(10, 11, 12, 13, 17, 18, 49:54)
+  spinal_cord_labels <- 16
+  ventricles_labels <- c(4, 5, 14, 15, 24, 43, 44, 72)
+  flow$add(what = scheme_bigger, 
+           inputs = list("only_brain_scaled", "segmentation"),
+           output = "parcellation", 
+           subset = list(subset_classes = scgm_labels,
+                         unify_classes = list(cortex, 
+                                              spinal_cord_labels, 
+                                              ventricles_labels)))
+  
+  # Let's train the different models:
+  # Define the training sets:
+  
+  # First, the brain_mask
+  problem <- "brain_extraction"
+  problem_path <- problem %>% get_dataset()
+  info_bet <- problem_path %>% get_problem_info()
+  
+  # Now, segmentation
+  problem <- "segmentation"
+  problem_path <- problem %>% get_dataset()
+  info_seg <- problem_path %>% get_problem_info()
+  
+  # To end, parcellation
+  problem <- "parcellation"
+  problem_path <- problem %>% get_dataset()
+  info_parc <- problem_path %>% get_problem_info()
+  
+  # This should fail. Not all previous processes are trained.
+  # Train parcellation
+  expect_error(flow$train(output = "parcellation", 
+                          input_filenames = list("only_brain" = info_parc$inputs$T1),
+                          output_filenames = info_parc$outputs, 
+                          epochs = 1))
+  
+  # This should work.
+  # Train segmentation
+  expect_works(flow$train(output = "segmentation", 
+                          input_filenames = list("only_brain" = info_seg$inputs$T1),
+                          output_filenames = info_seg$outputs, 
+                          epochs = 20))
+  
+  path <- tempdir()
+  file_prefix <- basename(tempfile())
+  expect_works(flow$save(path = path, file_prefix = file_prefix))
+  expect_works(flow$load(file.path(path, paste0(file_prefix, ".zip"))))
+  
+  # Test the inference
+  # Starting from betted image
+  file <- info_seg$inputs$T1[1]
+  expect_error(result <- flow$execute(inputs = list(only_brain = file), 
+                                      desired_outputs = c("segmentation", "parcellation")))
+  
+  expect_works(result <- flow$execute(inputs = list(only_brain = file), 
+                                      desired_outputs = c("segmentation")))
+  
+  expect_named(result, expected = c("segmentation"))
+  original_image <- readnii(file)
+  expect_works(ortho_plot(x = original_image, 
+                          interactiveness = FALSE, 
+                          text = "Original Image"))
+  
+  col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
+  
+  expect_works(ortho_plot(x = original_image, 
+                          y = result[["segmentation"]], 
+                          col.y = col.y, 
+                          interactiveness = FALSE, 
+                          text = paste0("Predicted: ", names(result)[img])))
+  
+  
+})

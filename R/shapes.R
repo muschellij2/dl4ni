@@ -60,11 +60,13 @@ model_units <- function(model) {
 parse_shape <- function(shape) {
   
   suppressWarnings({
+    
     shape %>% 
       as.character() %>% 
       gsub(x = ., pattern = "(\\(|\\))", replacement = "") %>% 
       strsplit(x = ., split = ",") %>% .[[1]] %>% 
       as.numeric() %>% .[-1]
+    
   })
   
 }
