@@ -232,57 +232,57 @@ test_that("A DLflow works for a fully-connected model", {
 })
 
 
-test_that("A DLflow works for a convolutional model", {
-  
-  # We'll use a modified BET (non-convolutional) demo
-  load_keras()
-  
-  # Get the dataset
-  problem <- "brain_extraction"
-  problem_path <- problem %>% get_dataset()
-  info_bet <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
-  
-  info_bet %>% split_train_test_sets()
-  
-  # Model scheme
-  scheme <- scheme_unet(width = 16, initial_filters = 1, full_depth = TRUE)
-  
-  scheme$add(memory_limit = "2G")
-  
-  # Create new flow
-  flow <- DLflow$new(name = "brain_extraction", inputs = c("T1"))
-  
-  # Scale the T1 image
-  flow$add(what = scale_z, 
-           inputs = list("T1"), 
-           output = "T1_scaled")
-  
-  # Starting from a T1, add a trainable model which computes the brain_mask
-  flow$add(what = scheme, 
-           inputs = list("T1_scaled"),
-           output = "brain_mask")
-  
-  # To compute the brain extracted image, we multiply the T1 and the brain_mask
-  flow$add(what = function(T1, brain_mask) {T1 * brain_mask}, 
-           output = "only_brain")
-  
-  expect_works(flow$plot())
-  
-  # Train BET
-  expect_works(flow$train(output = "brain_mask", 
-                          input_filenames = info_bet$inputs, 
-                          output_filenames = info_bet$outputs, 
-                          epochs = 1))
-  
-  expect_works(flow$save(path = getwd(), file_prefix = "test"))
-  
-  test_index <- sample(info_bet$test$subject_indices, size = 1)
-  
-  # Starting from original image
-  file <- info_bet$inputs$T1[1]
-  expect_works(result <- flow$execute(inputs = list(T1 = file), 
-                                      desired_outputs = c("only_brain")) )
-  
-  expect_named(result, expected = c("only_brain"))
-  
-})
+# test_that("A DLflow works for a convolutional model", {
+#   
+#   # We'll use a modified BET (non-convolutional) demo
+#   load_keras()
+#   
+#   # Get the dataset
+#   problem <- "brain_extraction"
+#   problem_path <- problem %>% get_dataset()
+#   info_bet <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
+#   
+#   info_bet %>% split_train_test_sets()
+#   
+#   # Model scheme
+#   scheme <- scheme_unet(width = 16, initial_filters = 1, full_depth = TRUE)
+#   
+#   scheme$add(memory_limit = "2G")
+#   
+#   # Create new flow
+#   flow <- DLflow$new(name = "brain_extraction", inputs = c("T1"))
+#   
+#   # Scale the T1 image
+#   flow$add(what = scale_z, 
+#            inputs = list("T1"), 
+#            output = "T1_scaled")
+#   
+#   # Starting from a T1, add a trainable model which computes the brain_mask
+#   flow$add(what = scheme, 
+#            inputs = list("T1_scaled"),
+#            output = "brain_mask")
+#   
+#   # To compute the brain extracted image, we multiply the T1 and the brain_mask
+#   flow$add(what = function(T1, brain_mask) {T1 * brain_mask}, 
+#            output = "only_brain")
+#   
+#   expect_works(flow$plot())
+#   
+#   # Train BET
+#   expect_works(flow$train(output = "brain_mask", 
+#                           input_filenames = info_bet$inputs, 
+#                           output_filenames = info_bet$outputs, 
+#                           epochs = 1))
+#   
+#   expect_works(flow$save(path = getwd(), file_prefix = "test"))
+#   
+#   test_index <- sample(info_bet$test$subject_indices, size = 1)
+#   
+#   # Starting from original image
+#   file <- info_bet$inputs$T1[1]
+#   expect_works(result <- flow$execute(inputs = list(T1 = file), 
+#                                       desired_outputs = c("only_brain")) )
+#   
+#   expect_named(result, expected = c("only_brain"))
+#   
+# })
