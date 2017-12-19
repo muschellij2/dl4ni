@@ -1,3 +1,6 @@
 RcppExports.gcno
 transform_volume.gcno
 volume_to_windows.gcno
+RcppExports.gcda
+transform_volume.gcda
+volume_to_windows.gcda

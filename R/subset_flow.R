@@ -107,11 +107,12 @@ subset_flow <- function(flow, outputs) {
     pipeline <- pipeline[pipeline %in% nodes_for_target]
     
     # Update the list of current required inputs and the pipeline for the current node
-    flow$pipeline[[target_name]] <- setdiff(pipeline, inputs)
+    new_flow$pipeline[[target_name]] <- setdiff(pipeline, inputs)
     
   }
   
   # Create a deep copy of the flow to remove dependencies between keras models
+  class(new_flow) <- "DLflow"
   res_flow <- new_flow %>% clone_flow()
   
   class(res_flow) <- c("DLflow", class(res_flow))
