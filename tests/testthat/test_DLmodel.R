@@ -84,6 +84,6 @@ test_that("DLmodel works as expected for a fully connected model", {
   ground_truth <- read_nifti_to_array(info$outputs[test_index])
   
   # Infer in the input volume
-  expect_works(brain <- bet_model$infer(V = input_imgs, speed = "faster"))
+  expect_works(brain <- bet_model$infer(V = input_imgs, speed = "faster", verbose = FALSE))
   
 })

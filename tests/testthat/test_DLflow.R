@@ -111,13 +111,11 @@ test_that("A DLflow can do basic operations", {
              only_convolutionals = FALSE,
              output_width = 3,
              num_features = 3,
-             vol_layers_pattern = list( 
-               dense(25)),
+             vol_layers_pattern = list(dense(25)),
              vol_dropout = 0.15,
              feature_layers = list(dense(10)),
              feature_dropout = 0.15,
-             common_layers = list(
-               dense(20)),
+             common_layers = list(dense(20)),
              common_dropout = 0.25,
              last_hidden_layers = list(dense(10)),
              optimizer = "adadelta",
@@ -181,13 +179,11 @@ test_that("A DLflow works for a fully-connected model", {
              only_convolutionals = FALSE,
              output_width = 3,
              num_features = 3,
-             vol_layers_pattern = list( 
-               dense(25)),
+             vol_layers_pattern = list(dense(25)),
              vol_dropout = 0.15,
              feature_layers = list(dense(10)),
              feature_dropout = 0.15,
-             common_layers = list(
-               dense(20)),
+             common_layers = list(dense(20)),
              common_dropout = 0.25,
              last_hidden_layers = list(dense(10)),
              optimizer = "adadelta",
@@ -320,14 +316,16 @@ test_that("DLflow trains correctly", {
   expect_error(flow$train(output = "parcellation", 
                           input_filenames = list("only_brain" = info_parc$inputs$T1),
                           output_filenames = info_parc$outputs, 
-                          epochs = 1))
+                          epochs = 1,
+                          verbose = FALSE))
   
   # This should work.
   # Train segmentation
   expect_works(flow$train(output = "segmentation", 
                           input_filenames = list("only_brain" = info_seg$inputs$T1),
                           output_filenames = info_seg$outputs, 
-                          epochs = 20))
+                          epochs = 1,
+                          verbose = FALSE))
   
   path <- tempdir()
   file_prefix <- basename(tempfile())
@@ -344,18 +342,18 @@ test_that("DLflow trains correctly", {
                                       desired_outputs = c("segmentation")))
   
   expect_named(result, expected = c("segmentation"))
-  original_image <- neurobase::readnii(file)
+  expect_works(original_image <- read_nifti_to_array(file))
   expect_works(ortho_plot(x = original_image, 
                           interactiveness = FALSE, 
                           text = "Original Image"))
   
-  col.y <- scales::alpha(colour = scales::viridis_pal()(num_classes), alpha = 0.25)
+  col.y <- scales::alpha(colour = scales::viridis_pal()(3), alpha = 0.25)
   
   expect_works(ortho_plot(x = original_image, 
                           y = result[["segmentation"]], 
                           col.y = col.y, 
                           interactiveness = FALSE, 
-                          text = paste0("Predicted: ", names(result)[img])))
+                          text = paste0("Predicted: segmentation")))
   
   
 })
