@@ -19,7 +19,8 @@ create_generator <- function(model,
                              x_files, 
                              y_files = NULL,
                              mode = "sampling",
-                             target_windows_per_file = 1024) {
+                             target_windows_per_file = 1024,
+                             verbose = FALSE) {
   
   stopifnot(inherits(model, "DLmodel"))
   
@@ -37,8 +38,13 @@ create_generator <- function(model,
   
   num_windows <- model$check_memory() # %>% compute_batch_size()
   batches_per_file <- ceiling(target_windows_per_file / num_windows)
-  message("Number of windows per batch is set to ", num_windows)
-  message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.")
+  
+  if (verbose) {
+    
+    message("Number of windows per batch is set to ", num_windows) #!exclude
+    message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.") #!exclude
+    
+  }
   
   next_file <- 1
   sub_epoch <- 0
@@ -160,7 +166,9 @@ create_generator <- function(model,
   if (mode == "all") {
     
     sampling_indices <- all_idx
-    message("Number of actual windows: ", length(sampling_indices))
+    
+    if (verbose)
+      message("Number of actual windows: ", length(sampling_indices)) #!exclude
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
     max_epochs <- min(c(num_batches, batches_per_file))
@@ -218,8 +226,8 @@ create_generator <- function(model,
   }
   
   # print(batch_idx)
-  
-  message("Number of batches per volume: ", num_batches)
+  if (verbose)
+    message("Number of batches per volume: ", num_batches) #!exclude
   
   max_epochs <- min(c(num_batches, batches_per_file))
   

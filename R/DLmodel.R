@@ -371,26 +371,49 @@ DLmodel <- R6::R6Class(
       
       args <- list(...)
       
+      verbose <- FALSE
+      if (!is.null(args$verbose)) verbose <- args$verbose
+      
       if (keep_best) {
         
         # Path and prefix must be provided
-        
-        path <- args$path
-        prefix <- args$prefix
-        
-        if (is.null(path) | is.null(prefix)) {
+        tmp_path <- tempfile()
+        warn <- FALSE
+        if (is.null(args$path) || !file.exists(args$path)) {
           
-          self$log("ERROR", message = "No path and prefix provided when training.")
+          warn <- TRUE
+          path <- dirname(tmp_path)
           
-          message <- "When training with keep_best == TRUE, path and prefix must be provided."
-          stop(message)
+        } else {
+          
+          path <- args$path
+          
+        }
+        
+        if (is.null(args$prefix)) {
+          
+          prefix <- basename(tmp_path)
+          
+          
+        } else {
+          
+          prefix <- args$prefix
+          
+        }
+          
+        if (warn) {
+          
+          self$log("WARNING", message = paste0("No path provided when training. Using ", path, "."))
+          
+          message <- "When training with keep_best == TRUE, at least path must be provided."
+          warning(message)
           
         }
         
       } else {
         
-        path <- tempdir()
-        prefix <- basename(tempfile())
+        path <- dirname(tmp_path)
+        prefix <- basename(tmp_path)
         
       }
       
@@ -408,7 +431,8 @@ DLmodel <- R6::R6Class(
                                   keep_best = keep_best,
                                   path = path,
                                   prefix = prefix,
-                                  metrics_viewer = metrics_viewer)
+                                  metrics_viewer = metrics_viewer,
+                                  verbose = verbose)
       
       private$last_epoch <- max(private$history$epoch)
       
@@ -421,7 +445,7 @@ DLmodel <- R6::R6Class(
     },
     
     infer = function(V = NULL, 
-                     speed = c("faster", "medium", "slower")) {
+                     speed = c("faster", "medium", "slower"), ...) {
       
       self %>% infer_on_volume(V = V, speed = speed[1])
       

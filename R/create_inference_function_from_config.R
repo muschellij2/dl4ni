@@ -29,6 +29,7 @@ create_inference_function_from_config <- function(object) {
   f_inference <- function(model, 
                           V, 
                           speed = c("faster", "medium", "slower"), 
+                          verbose = FALSE,
                           ...) {
     
     num_inputs <- length(V)
@@ -81,6 +82,7 @@ create_inference_function_from_config <- function(object) {
         num_classes <- config$last_layer$params$num_classes
         
       }
+      
       res <- array(0, dim = c(dim(V[[1]]), num_classes))
       
     } else {
@@ -110,15 +112,15 @@ create_inference_function_from_config <- function(object) {
     else
       batch_idx <- rep(1, times = length(sampling_indices))
     
-    if (require(progress)) {
+    if (verbose && require(progress)) {
       
-      progress <- TRUE
-      pb_infer <- progress_bar$new(format = " Batch :batch/:total [:bar] ETA: :eta . Elapsed: :elapsed",
-                                   total = num_batches,
-                                   clear = FALSE,
-                                   width = 60)
+      progress <- TRUE #!exclude
+      pb_infer <- progress_bar$new(format = " Batch :batch/:total [:bar] ETA: :eta . Elapsed: :elapsed", #!exclude
+                                   total = num_batches, #!exclude
+                                   clear = FALSE, #!exclude
+                                   width = 60) #!exclude
       
-      pb_infer$update(ratio = 0, tokens = list(batch = 0))
+      pb_infer$update(ratio = 0, tokens = list(batch = 0)) #!exclude
       
     } else {
       
@@ -128,8 +130,8 @@ create_inference_function_from_config <- function(object) {
     
     for (batch in seq(num_batches)) {
       
-      if (!progress)
-        message("Batch ", batch, " out of ", num_batches)
+      if (verbose && !progress)
+        message("Batch ", batch, " out of ", num_batches) #!exclude
       
       model$log("INFO", message = paste0("Start of batch no. ", batch, "."))
       
@@ -240,6 +242,7 @@ create_inference_function_from_config <- function(object) {
                        "both" = c(list(X_coords), X_vol),
                        
                        "features" = X_coords
+                       
                        )
       
 
@@ -456,9 +459,9 @@ create_inference_function_from_config <- function(object) {
       }
       
       
-      if (progress) {
+      if (verbose && progress) {
         
-        pb_infer$tick(tokens = list(batch = batch))
+        pb_infer$tick(tokens = list(batch = batch)) #!exclude
         
       }
       

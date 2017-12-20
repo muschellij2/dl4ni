@@ -21,7 +21,8 @@ execute_flow <- function(flow, inputs = list(),
                          given_inputs = NULL, 
                          desired_outputs = NULL, 
                          initialize_outputs = TRUE,
-                         mode = c("debug", "faster", "medium", "slower")) {
+                         mode = c("debug", "faster", "medium", "slower"),
+                         verbose = FALSE) {
   
   require(igraph)
   
@@ -82,7 +83,8 @@ execute_flow <- function(flow, inputs = list(),
           # if this process is already computed, go to the next one
           if (!is.null(flow$computed_outputs[[intermediate_output]])) next
           
-          cat("Computing", intermediate_output, "...\n")
+          if (verbose)
+            cat("Computing", intermediate_output, "...\n") #!exclude
           
           process <- flow$processes[[intermediate_output]]
           my_inputs <- flow$inmediate_inputs[[intermediate_output]]

@@ -11,7 +11,7 @@
 #' @param epochs              (numeric) PARAM_DESCRIPTION, Default: 10
 #' @param max_sub_epochs      (numeric) PARAM_DESCRIPTION, Default: 5
 #' @param mode                (call) PARAM_DESCRIPTION, Default: c("debug", "faster", "medium", "slower")
-#' @param verbose             (logical) PARAM_DESCRIPTION, Default: TRUE
+#' @param verbose             (logical) PARAM_DESCRIPTION, Default: FALSE
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -37,7 +37,7 @@ train_output <- function(flow,
                          target_windows_per_file = 1024,
                          metrics_viewer = FALSE,
                          mode = c("debug", "faster", "medium", "slower"),
-                         verbose = TRUE) {
+                         verbose = FALSE) {
   
   # Basic check
   stopifnot(inherits(flow, "DLflow"))
@@ -47,7 +47,7 @@ train_output <- function(flow,
   stopifnot(all(file.exists(unlist(input_filenames))), all(file.exists(unlist(output_filenames))))
   
   if (verbose)
-    cat("Checking previous steps are trained...\n")
+    cat("Checking previous steps are trained...\n") #!exclude
   
   # Check that previous steps in the pipeline are trained
   needed_outputs <- flow$inmediate_inputs[[output]]
@@ -79,7 +79,7 @@ train_output <- function(flow,
   }
   
   if (verbose)
-    cat("   Everything is Ok...\n")
+    cat("   Everything is Ok...\n") #!exclude
   
   model <- flow$processes[[output]]
   
@@ -94,7 +94,7 @@ train_output <- function(flow,
     desired_outputs <- needed_outputs 
     
     if (verbose)
-      cat("Obtaining required inputs...\n")
+      cat("Obtaining required inputs...\n") #!exclude
     
     results <- list()
     
@@ -102,7 +102,7 @@ train_output <- function(flow,
     for (s in seq(num_subjects)) {
       
       if (verbose)
-        cat("Subject number", s, "out of", num_subjects, "...\n")
+        cat("Subject number", s, "out of", num_subjects, "...\n") #!exclude
       
       # Input files for this subject
       input_file_list <- lapply(given_input, function(x) x[s])
@@ -153,17 +153,18 @@ train_output <- function(flow,
     if (inherits(model, "DLscheme")) {
       
       if (verbose)
-        cat("Scheme detected. Model must be built....\n")
+        cat("Scheme detected. Model must be built....\n") #!exclude
       
       # Configuration of the model
       if (verbose)
-        cat("Preparing model configuration...\n")
+        cat("Preparing model configuration...\n") #!exclude
       
       scheme <- model
       
       # Model creation
       if (verbose)
-        cat("Creating model...\n")
+        cat("Creating model...\n") #!exclude
+      
       model <- scheme$instantiate(inputs = results, 
                                   outputs = output_filenames, 
                                   labels_subset = scheme$labels_subset)
@@ -175,7 +176,7 @@ train_output <- function(flow,
     if (!model$has_train_data) {
       
       if (verbose)
-        cat("Training configuration...\n")
+        cat("Training configuration...\n") #!exclude
       
       # Training configuration
       train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))
@@ -199,7 +200,7 @@ train_output <- function(flow,
     
     # Actual training
     if (verbose)
-      cat("Actual training...\n")
+      cat("Actual training...\n") #!exclude
     
     # Mark as trained in the output
     on.exit({
@@ -212,10 +213,11 @@ train_output <- function(flow,
               keep_best = keep_best,
               path = saving_path,
               prefix = saving_prefix,
-              metrics_viewer = metrics_viewer)
+              metrics_viewer = metrics_viewer,
+              verbose = verbose)
     
     if (verbose)
-      cat("Done.\n")
+      cat("Done.\n") #!exclude
     
   }
   
