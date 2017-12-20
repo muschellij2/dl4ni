@@ -9,7 +9,7 @@ test_that("block_multivalued works as expected", {
   input <- layer_input(shape = c(100)) 
   
   expect_works(output <- input %>% 
-                 block_categorical(hidden_layers = list(dense(10)), num_values = 5, units = 10))
+                 block_multivalued(hidden_layers = list(dense(10)), num_values = 5, units = 10))
   
   expect_works(model <- keras_model(input, output))
   

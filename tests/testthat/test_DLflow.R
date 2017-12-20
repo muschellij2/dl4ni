@@ -303,17 +303,17 @@ test_that("DLflow trains correctly", {
   # First, the brain_mask
   problem <- "brain_extraction"
   problem_path <- problem %>% get_dataset()
-  info_bet <- problem_path %>% get_problem_info()
+  info_bet <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
   
   # Now, segmentation
   problem <- "segmentation"
   problem_path <- problem %>% get_dataset()
-  info_seg <- problem_path %>% get_problem_info()
+  info_seg <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
   
   # To end, parcellation
   problem <- "parcellation"
   problem_path <- problem %>% get_dataset()
-  info_parc <- problem_path %>% get_problem_info()
+  info_parc <- problem_path %>% get_problem_info(num_subjects = 5, interactive = FALSE)
   
   # This should fail. Not all previous processes are trained.
   # Train parcellation
@@ -344,7 +344,7 @@ test_that("DLflow trains correctly", {
                                       desired_outputs = c("segmentation")))
   
   expect_named(result, expected = c("segmentation"))
-  original_image <- readnii(file)
+  original_image <- neurobase::readnii(file)
   expect_works(ortho_plot(x = original_image, 
                           interactiveness = FALSE, 
                           text = "Original Image"))
