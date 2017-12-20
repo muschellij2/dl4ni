@@ -55,11 +55,11 @@ float evaluate_volume(double* vol, int* size, int x, int y, int z) {
   
 }
 
-//Trilinear interpolation kernel,wraped from FLIRT
+//Trilinear interpolation kernel, wrapped from FLIRT
 float trilinear_interpolation(float v000, float v001, float v010, 
-                             float v011, float v100, float v101, 
-                             float v110, float v111, 
-                             float dx, float dy, float dz) {
+                              float v011, float v100, float v101, 
+                              float v110, float v111, 
+                              float dx, float dy, float dz) {
   
   float temp1, temp2, temp3, temp4, temp5, temp6;
   
@@ -80,24 +80,28 @@ float trilinear_interpolation(float v000, float v001, float v010,
 }
 
 float nearest_interpolation(float v000, float v001, float v010, 
-                              float v011, float v100, float v101, 
-                              float v110, float v111, 
-                              float dx, float dy, float dz) {
+                            float v011, float v100, float v101, 
+                            float v110, float v111, 
+                            float dx, float dy, float dz) {
   
-  if ((dx <= 0.5) & (dy <= 0.5) & (dz <= 0.5)) return v000;
-  if ((dx <= 0.5) & (dy <= 0.5) & (dz >= 0.5)) return v001;
-  if ((dx <= 0.5) & (dy >= 0.5) & (dz <= 0.5)) return v010;
-  if ((dx <= 0.5) & (dy >= 0.5) & (dz >= 0.5)) return v011;
+  float result = 0.0;
   
-  if ((dx >= 0.5) & (dy <= 0.5) & (dz <= 0.5)) return v100;
-  if ((dx >= 0.5) & (dy <= 0.5) & (dz >= 0.5)) return v101;
-  if ((dx >= 0.5) & (dy >= 0.5) & (dz <= 0.5)) return v110;
-  if ((dx >= 0.5) & (dy >= 0.5) & (dz >= 0.5)) return v111;
-
+  if ((dx <= 0.5) & (dy <= 0.5) & (dz <= 0.5)) result = v000;
+  if ((dx <= 0.5) & (dy <= 0.5) & (dz >= 0.5)) result = v001;
+  if ((dx <= 0.5) & (dy >= 0.5) & (dz <= 0.5)) result = v010;
+  if ((dx <= 0.5) & (dy >= 0.5) & (dz >= 0.5)) result = v011;
+  
+  if ((dx >= 0.5) & (dy <= 0.5) & (dz <= 0.5)) result = v100;
+  if ((dx >= 0.5) & (dy <= 0.5) & (dz >= 0.5)) result = v101;
+  if ((dx >= 0.5) & (dy >= 0.5) & (dz <= 0.5)) result = v110;
+  if ((dx >= 0.5) & (dy >= 0.5) & (dz >= 0.5)) result = v111;
+  
+  return result;
+  
 }
 
 
-//Get the interoplated value,wraped from FLIRT
+//Get the interpolated value, wrapped from FLIRT
 float interpolate(double* vol, int* vol_size, 
                   float point_x, float point_y, float point_z,
                   int method) {
@@ -120,7 +124,7 @@ float interpolate(double* vol, int* vol_size,
   v101 = evaluate_volume(vol, vol_size, ix + 1, iy, iz + 1);
   v110 = evaluate_volume(vol, vol_size, ix + 1, iy + 1, iz);
   v111 = evaluate_volume(vol, vol_size, ix + 1, iy + 1, iz + 1);
-
+  
   float result;  
   if (method == 3) {
     
@@ -156,7 +160,7 @@ void transform_volume(double* source_vol, double* target_vol, int* source_dims, 
         float source_x = matrix[0] * px + matrix[4] * py + matrix[8] * pz + matrix[12];
         float source_y = matrix[1] * px + matrix[5] * py + matrix[9] * pz + matrix[13];
         float source_z = matrix[2] * px + matrix[6] * py + matrix[10] * pz + matrix[14];
-
+        
         source_x += source_dims[0] / 2;
         source_y += source_dims[1] / 2;
         source_z += source_dims[2] / 2;
@@ -186,7 +190,7 @@ NumericVector transform_volume(NumericVector V, NumericVector M, IntegerVector t
                    target_dims.begin(), 
                    M.begin(),
                    method);
-
+  
   transformed_volume.attr("dim") = target_dims;
   
   return(transformed_volume);
