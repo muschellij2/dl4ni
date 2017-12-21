@@ -192,7 +192,7 @@ test_that("A DLflow works for a fully-connected model", {
              scale = "z",
              scale_y = "none")
 
-  scheme$add(memory_limit = "2G")
+  scheme$add(memory_limit = "1G")
 
   # Create new flow
   flow <- DLflow$new(name = "brain_extraction", inputs = c("T1"))

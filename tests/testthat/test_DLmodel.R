@@ -34,7 +34,7 @@ test_that("DLmodel works as expected for a fully connected model", {
              scale = "z",
              scale_y = "none")
   
-  scheme$add(memory_limit = "2G")
+  scheme$add(memory_limit = "1G")
   
   # Network instatiation
   expect_works(bet_model <- scheme$instantiate(problem_info = info))
