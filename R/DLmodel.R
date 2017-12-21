@@ -315,9 +315,9 @@ DLmodel <- R6::R6Class(
       
     },
     
-    graph = function() {
+    graph = function(mode = "graphviz") {
       
-      self %>% graph_from_model()
+      self %>% graph_from_model(mode = mode)
       
     },
     

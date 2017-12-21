@@ -208,11 +208,11 @@ graph_from_model <- function(.model, mode = c("graphviz", "igraph")) {
     sizes <- model %>% model_units()
     sizes <- sizes[-which_to_remove]
     
-    if (!.model$hyperparameters$multioutput) 
-      sizes[length(sizes)] <- config$output_width ^ 3
+    if (!.model$get_config()$multioutput) 
+      sizes[length(sizes)] <- .model$get_config()$output_width ^ 3
     
-    sizes[new_names == "Feature Input"] <- config$num_features
-    sizes[grepl(pattern = "Volume", x = new_names)] <- config$width ^ 3
+    sizes[new_names == "Feature Input"] <- .model$get_config()$num_features
+    sizes[grepl(pattern = "Volume", x = new_names)] <- .model$get_config()$width ^ 3
     
     # Build graph
     g <- igraph::graph.adjacency(adj_matrix, mode = "directed")
@@ -313,9 +313,11 @@ plot_graph <- function(g, interactive = FALSE) {
   
   if (interactive && require(htmlwidgets) && require(threejs)) {
     
-    threejs::graphjs(g, main = "Network", bg = "gray10", edge.arrow.size = .4, 
-                     vertex.label = NA, edge.curved = 0, layout = cbind(L$layout, 0), showLabels = FALSE, 
-                     stroke = FALSE, curvature = 0.1, attraction = 0.9, repulsion = 0.8, opacity = 0.9)
+    warning("Not implemented yet!")
+    
+    # threejs::graphjs(g, main = "Network", bg = "gray10", edge.arrow.size = .4, 
+    #                  vertex.label = NA, edge.curved = 0, layout = cbind(L$layout, 0), showLabels = FALSE, 
+    #                  stroke = FALSE, curvature = 0.1, attraction = 0.9, repulsion = 0.8, opacity = 0.9)
     
   } else {
     
