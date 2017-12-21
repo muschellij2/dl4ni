@@ -79,11 +79,11 @@ ALREADY DONE:
   + schemes prefijados
   + meshnet
   + Error en DLmodel.fit cuando keep_best == FALSE, no se definen path y prefix.
+  + prepare_for_training = FALSE en DLscheme$instantiate.
 
 WIP:
   = Comentarios y documentación en todas las funciones
   = Raise memory limit a un modelo, no desde el esquema. (Not enough memory to train the model, raise the memory limit?)
-  = prepare_for_training = FALSE en DLscheme$instantiate.
   = Actualizar para usar la última versión del paquete keras.
   = multiwidth.
   = build_model en el flow, para acompañar a train_output.

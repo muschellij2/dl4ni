@@ -38,6 +38,9 @@ test_that("DLmodel works as expected for a fully connected model", {
   
   # Network instatiation
   expect_works(bet_model <- scheme$instantiate(problem_info = info))
+  expect_works(bet_model <- scheme$instantiate(problem_info = info, prepare_for_training = 2048))
+  expect_works(bet_model <- scheme$instantiate(problem_info = info, prepare_for_training = FALSE))
+  
   expect_works(bet_model$plot(to_file = tempfile(fileext = ".png")))
   
   expect_is(bet_model, "DLmodel")

@@ -71,7 +71,8 @@ DLscheme <- R6::R6Class(
     instantiate = function(problem_info = NULL, 
                            inputs = NULL, 
                            outputs = NULL, 
-                           labels_subset = NULL) {
+                           labels_subset = NULL,
+                           prepare_for_training = TRUE) {
       
       if (is.null(problem_info)) {
         
@@ -101,21 +102,29 @@ DLscheme <- R6::R6Class(
       
       model <- self %>% instantiate_model(problem_info, labels_subset = labels_subset)
       
-      if (!is.null(problem_info$train)) {
+      if (is.numeric(prepare_for_training) || (is.logical(prepare_for_training) && isTRUE(prepare_for_training))) {
         
-        model$use_data(use = "train",
-                       x_files = problem_info$train$x,
-                       y_files = problem_info$train$y,
-                       target_windows_per_file = 1024)
+        target_windows_per_file <- 1024
+        if (is.numeric(prepare_for_training)) 
+          target_windows_per_file <- as.integer(prepare_for_training)
         
-      }
-      
-      if (!is.null(problem_info$test)) {
+        if (!is.null(problem_info$train)) {
+          
+          model$use_data(use = "train",
+                         x_files = problem_info$train$x,
+                         y_files = problem_info$train$y,
+                         target_windows_per_file = target_windows_per_file)
+          
+        }
         
-        model$use_data(use = "test",
-                       x_files = problem_info$test$x,
-                       y_files = problem_info$test$y,
-                       target_windows_per_file = 1024)
+        if (!is.null(problem_info$test)) {
+          
+          model$use_data(use = "test",
+                         x_files = problem_info$test$x,
+                         y_files = problem_info$test$y,
+                         target_windows_per_file = target_windows_per_file)
+          
+        }
         
       }
       
