@@ -200,7 +200,8 @@ DLflow <- R6::R6Class(
                      train_split = 0.75,
                      epochs = 10, 
                      target_windows_per_file = 1024,
-                     mode = c("debug", "faster", "medium", "slower")) {
+                     mode = c("debug", "faster", "medium", "slower"),
+                     ...) {
       
       my_flow <- self$.__enclos_env__$private
       my_flow %>% train_output(output = output, 
