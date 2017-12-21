@@ -14,8 +14,8 @@ test_that("block_half_double works as expected", {
   expect_works(model <- keras_model(input, output))
   
   expect_works(output <- input %>% 
-                 block_double(use_upsampling = TRUE, batch_normalization = TRUE, dropout = 0.2) %>% 
-                 block_double(use_upsampling = FALSE, batch_normalization = TRUE, dropout = 0.2))
+                 block_double(num_steps = 2, use_upsampling = TRUE, batch_normalization = TRUE, dropout = 0.2) %>% 
+                 block_double(num_steps = 2, use_upsampling = FALSE, batch_normalization = TRUE, dropout = 0.2))
   expect_works(model <- keras_model(input, output))
   
   
