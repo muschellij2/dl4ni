@@ -38,18 +38,18 @@ subset_flow <- function(flow, outputs) {
   
   # List of flow inputs and outputs
   new_flow$inputs <- intersect(flow$inputs, needed_nodes)
-  new_flow$outputs <- c(new_flow$inputs, setdiff(needed_nodes, new_flow$inputs))
+  only_output <- setdiff(needed_nodes, new_flow$inputs)
+  
+  new_flow$outputs <- c(new_flow$inputs, only_output)
   
   # List of flow processes (both models and functions)
-  new_flow$processes <- flow$processes[new_flow$outputs]
-  new_flow$schemes <- flow$schemes[new_flow$outputs]
+  new_flow$processes <- flow$processes[only_output]
+  new_flow$schemes <- flow$schemes[only_output]
   new_flow$trained <- list()
   
   # List of pipelines to execute for each process and of required inputs
   new_flow$pipeline <- list()
   new_flow$required_inputs <- list()
-  
-  only_output <- setdiff(new_flow$outputs, new_flow$inputs)
   
   for (out in only_output) {
     
@@ -113,10 +113,20 @@ subset_flow <- function(flow, outputs) {
   
   # Create a deep copy of the flow to remove dependencies between keras models
   class(new_flow) <- "DLflow"
-  res_flow <- new_flow %>% clone_flow()
   
-  class(res_flow) <- c("DLflow", class(res_flow))
+  for (proc_id in seq_along(new_flow$processes)) {
+    
+    proc <- new_flow$processes[[proc_id]]
+    if (inherits(proc, "DLscheme") | inherits(proc, "DLmodel")) {
+      
+      proc <- proc$clone()
+      
+    }
+    
+    new_flow$processes[[proc_id]] <- proc
+    
+  }
   
-  return(invisible(res_flow))
+  return(invisible(new_flow))
   
 }
