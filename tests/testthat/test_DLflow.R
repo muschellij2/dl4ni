@@ -329,6 +329,13 @@ test_that("DLflow trains correctly", {
                           epochs = 1,
                           verbose = FALSE))
 
+  # Train parcellation
+  expect_works(flow$train(output = "parcellation",
+                          input_filenames = list("only_brain" = info_parc$inputs$T1),
+                          output_filenames = info_parc$outputs,
+                          epochs = 1,
+                          verbose = FALSE))
+  
   path <- tempdir()
   file_prefix <- basename(tempfile())
   expect_works(flow$save(path = path, file_prefix = file_prefix))
@@ -337,8 +344,8 @@ test_that("DLflow trains correctly", {
   # Test the inference
   # Starting from betted image
   file <- info_seg$inputs$T1[1]
-  expect_error(result <- flow$execute(inputs = list(only_brain = file),
-                                      desired_outputs = c("segmentation", "parcellation")))
+  expect_warning(result <- flow$execute(inputs = list(only_brain = file),
+                                      desired_outputs = c("segmentation", "foo")))
 
   expect_works(result <- flow$execute(inputs = list(only_brain = file),
                                       desired_outputs = c("segmentation")))
