@@ -32,22 +32,25 @@ ortho_plot <- function(x, y = NULL, text = "", interactiveness = FALSE, force = 
   if (!is.null(y) & ("niftiImage" %in% class(x)))
     y <- RNifti::updateNifti(image = y, template = x)
   
-  # Check paths
-  args <- list(...)
-  saving_path <- ifelse("saving_path" %in% names(args), args$saving_path, tempdir())
-  saving_prefix <- ifelse("saving_path" %in% names(args), args$saving_prefix, tempfile())
-  
   # Produce interactive output?
   interactiveness <- interactiveness && interactive() && require(papayar)
   interactiveness <- interactiveness && !force
   
-  # Output filename
-  filename <- file.path(saving_path, 
-                        saving_prefix, 
-                        paste0("plot_", gsub(pattern = " ", replacement = "_", x = tolower(text))))
-  
   # Output PNG file if forced to do so
   if (!interactive() | force) {
+    
+    # Check paths
+    args <- list(...)
+    temp_path <- tempfile()
+    saving_path <- ifelse("saving_path" %in% names(args), args$saving_path, dirname(temp_path))
+    saving_prefix <- ifelse("saving_path" %in% names(args), args$saving_prefix, basename(temp_path))
+    
+    saving_path <- file.path(saving_path, saving_prefix)
+    dir.create(saving_path, showWarnings = FALSE, recursive = TRUE)
+    
+    # Output filename
+    filename <- file.path(saving_path,
+                          paste0("plot_", gsub(pattern = " ", replacement = "_", x = tolower(text))))
     
     png(filename = filename)
     
