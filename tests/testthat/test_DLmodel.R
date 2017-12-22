@@ -89,8 +89,8 @@ test_that("DLmodel works as expected for a fully connected model", {
   
   # Infer in the input volume
   expect_works(brain <- bet_model$infer(V = input_imgs, speed = "faster", verbose = FALSE))
-  expect_works(ortho_plot(input_imgs[1]))
-  expect_works(ortho_plot(input_imgs[1], brain))
+  expect_works(ortho_plot(input_imgs[[1]]))
+  expect_works(ortho_plot(input_imgs[[1]], brain))
   
   # The model can be resetted
   expect_works(bet_model$reset())
