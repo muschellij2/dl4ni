@@ -59,6 +59,8 @@ ortho_plot <- function(x, y = NULL, text = "", interactiveness = FALSE, force = 
   # Use papayar to render the widget if interactive or plain ortho2 if not interactive
   if (interactiveness) {
     
+    # nocov start
+    
     if (!is.null(y)) {
 
       papayar::papaya(list(x, y))
@@ -68,6 +70,8 @@ ortho_plot <- function(x, y = NULL, text = "", interactiveness = FALSE, force = 
       papayar::papaya(x)
       
     }
+    
+    # nocov end
     
   } else {
     
