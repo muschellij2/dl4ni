@@ -517,8 +517,7 @@ create_generator <- function(model,
                    "mean" = X_vol[[input]] <- X_vol[[input]] - meanX[[input]],
                    "z"    = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / stdX[[input]],
                    "max"  = X_vol[[input]] <- X_vol[[input]] / maxX[[input]],
-                   "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]),
-                   "110" = X_vol[[input]] <- X_vol[[input]] - 110)
+                   "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]))
             
           }
           
@@ -531,8 +530,7 @@ create_generator <- function(model,
                "mean" = X_vol[[input]] <- X_vol[[input]] - meanX[[input]],
                "z"    = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / stdX[[input]],
                "max"  = X_vol[[input]] <- X_vol[[input]] / maxX[[input]],
-               "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]),
-               "110" = X_vol[[input]] <- X_vol[[input]] - 110)
+               "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]))
         
       }
       
@@ -647,8 +645,7 @@ create_generator <- function(model,
              "mean" = Y <- Y - meanY,
              "z"    = Y <- (Y - meanY) / stdY,
              "max"  = Y <- Y / maxY,
-             "meanmax" = Y <- (Y - meanY) / (maxY - meanY),
-             "110" = Y <- Y - 110)
+             "meanmax" = Y <- (Y - meanY) / (maxY - meanY))
       
       
     }
