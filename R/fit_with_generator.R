@@ -57,10 +57,10 @@ fit_with_generator <- function(.model,
   
   # At least we require the training configuration
   if (is.null(train_config) & is.null(generator) & is.null(steps_per_epoch)) {
-
+    
     message <- "No training configuration/generator provided."
     .model$log("ERROR", message = message)
-        
+    
     stop(message)
     
   }
@@ -84,10 +84,10 @@ fit_with_generator <- function(.model,
   
   # If no validation is provided, a warning will be given
   if (is.null(validation_config) & is.null(validation_data) & is.null(validation_steps)) {
-
+    
     message <- "No validation configuration/generator provided."
     .model$log("WARNING", message = message)
-        
+    
     warning(message)
     
   }
@@ -127,7 +127,7 @@ fit_with_generator <- function(.model,
   
   # Compute optimal batch size
   batch_size <- .model$check_memory()
-
+  
   .model$log("DEBUG", message = paste0("Optimal batch size set to: ", batch_size, "."))
   
   if (verbose)
@@ -139,7 +139,7 @@ fit_with_generator <- function(.model,
   .model$log("DEBUG", message = "Unfreeze learning phase.")
   
   best_validation_loss <- .model$get_loss()
-    
+  
   epoch <- 0
   
   # Set variables needed to keep always the best model trained so far
@@ -270,7 +270,7 @@ fit_with_generator <- function(.model,
   
   # Package progress is useful to make graphical progress bars.
   if (verbose) {
-
+    
     # nocov start
     
     if (require(progress)) {
@@ -288,7 +288,7 @@ fit_with_generator <- function(.model,
       progress <- FALSE
       
     }
-
+    
     # nocov end
     
   }
@@ -307,16 +307,6 @@ fit_with_generator <- function(.model,
     message("Initializing Viewer")
     
     .model$log("INFO", message = "Initializing Viewer")
-
-    # view_metrics <- keras:::KerasMetricsCallback$new()
-    # view_metrics$view_metrics <- TRUE
-    # view_metrics$metrics <- list("loss" = numeric())
-    # 
-    # callback_view <- callback_lambda(
-    #   on_epoch_end = view_metrics$on_epoch_end
-    # )
-    # 
-    # my_callback <- c(my_callback, callback_view)
     
   }
   
@@ -345,7 +335,7 @@ fit_with_generator <- function(.model,
     if (verbose) {
       
       # nocov start
-
+      
       message("\nEpoch ", epoch,  "/", epochs)
       
       if (!progress) {
@@ -354,7 +344,7 @@ fit_with_generator <- function(.model,
         message("Start Training")
         
       }
-
+      
       # nocov end
       
     }
@@ -363,7 +353,7 @@ fit_with_generator <- function(.model,
     
     # Information (progress bar) for subepochs
     if (verbose) {
-
+      
       # nocov start
       
       if (progress) {
@@ -378,7 +368,7 @@ fit_with_generator <- function(.model,
         pb_subepoch$update(ratio = 0, tokens = list(subepoch = 0, loss = last_loss)) 
         
       }
-
+      
       # nocov end
       
     }
@@ -399,34 +389,13 @@ fit_with_generator <- function(.model,
       
       num_outputs <- ifelse(is.list(data[[2]]), length(data[[2]]), 1)
       
-      if (length(data) > 2) {
-        
-        # With sample weight
-        
-        model %>% fit(
-          x = data[[1]], y = data[[2]],
-          epochs = epoch, 
-          verbose = 0, 
-          batch_size = batch_size,
-          sample_weight = to_numpy_array(data[[3]]),
-          initial_epoch = epoch - 1, 
-          callbacks = my_callback)#,
-        # ...)
-        
-      } else {
-        
-        # No sample weight
-        
-        model %>% fit(
-          x = data[[1]], y = data[[2]],
-          epochs = epoch, 
-          verbose = 0, 
-          batch_size = batch_size,
-          initial_epoch = epoch - 1, 
-          callbacks = my_callback) #,
-        # ...)
-        
-      }
+      model %>% fit(
+        x = data[[1]], y = data[[2]],
+        epochs = epoch, 
+        verbose = 0, 
+        batch_size = batch_size,
+        initial_epoch = epoch - 1, 
+        callbacks = my_callback) 
       
       .model$log("DEBUG", message = "Subepoch finished.")
       
@@ -471,7 +440,7 @@ fit_with_generator <- function(.model,
       }
       
       if (verbose) {
-
+        
         # nocov start
         
         if (progress)
@@ -479,7 +448,7 @@ fit_with_generator <- function(.model,
                                          loss = sprintf("%.5f", last_loss)))
         
         # nocov end
-
+        
       }
       
     }
@@ -490,12 +459,12 @@ fit_with_generator <- function(.model,
     if (verbose) {
       
       # nocov start
-
+      
       if (!progress) 
         message("Training loss: ", training_loss)
       
       # nocov end
-
+      
     }
     
     # If we have validation data, start the validation
@@ -506,12 +475,12 @@ fit_with_generator <- function(.model,
       if (verbose) {
         
         # nocov start
-
+        
         if (!progress)
           message("   Start Validation")
         
         # nocov end
-
+        
       }
       
       # Initialize variables for validation
@@ -525,7 +494,7 @@ fit_with_generator <- function(.model,
         if (verbose) {
           
           # nocov start
-
+          
           if (progress) {
             
             # Progress bar for validation subepoch
@@ -539,7 +508,7 @@ fit_with_generator <- function(.model,
             pb_subepoch_val$update(ratio = 0, tokens = list(subepoch = 0, loss = Inf))
             
           }
-
+          
           # nocov end
           
         }
@@ -566,13 +535,13 @@ fit_with_generator <- function(.model,
           if (verbose) {
             
             # nocov start
-
+            
             if (progress)
               pb_subepoch_val$tick(tokens = list(subepoch = val_steps, 
                                                  loss = sprintf("%.5f", loss / num_outputs)))
             
             # nocov end
-
+            
           }
           
         }
@@ -584,9 +553,15 @@ fit_with_generator <- function(.model,
         
       } else {
         
+        # nocov start
+        
         # If we have validation data, not a generator, just evaluate
+        # This is included just for generality purposes, but I think no one
+        # is going to use it this way.
         loss_acc <- model %>% evaluate(x = validation_data[[1]],
                                        y = validation_data[[2]])
+        
+        # nocov end
         
       }
       
@@ -605,7 +580,7 @@ fit_with_generator <- function(.model,
         Sys.sleep(0.1)
         
       }
-
+      
       prev_loss_acc <- loss_acc
       # .model$add_to_history(epoch = epoch, val_loss = loss_acc)
       
@@ -629,24 +604,24 @@ fit_with_generator <- function(.model,
       if (verbose) {
         
         # nocov start
-
+        
         if (!progress)
           message("\nValidation loss: ", loss_acc)
         
         # nocov end
-
+        
       }
       
     }
     
     if (verbose) {
-
+      
       # Update the progress bar
-
+      
       # nocov start
       if (progress) 
         pb_epochs$tick(tokens = list(epoch = epoch))
-
+      
       # nocov end
       
     }

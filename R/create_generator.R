@@ -43,8 +43,10 @@ create_generator <- function(model,
     
     # nocov start
 
-    message("Number of windows per batch is set to ", num_windows) # nocov
-    message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.") # nocov
+    message("Number of windows per batch is set to ", num_windows) 
+    message("Will use ", batches_per_file, 
+            " batches to achieve ", batches_per_file * num_windows, 
+            " windows extracted per each image.") 
     
     # nocov end
     

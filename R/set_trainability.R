@@ -14,7 +14,6 @@ set_trainability <- function(.model, layer_names = NULL, trainability = FALSE) {
   # Check input class
   stopifnot(inherits(.model, "DLmodel")) 
   
-  
   model <- .model$get_model()
   
   # Get layer names

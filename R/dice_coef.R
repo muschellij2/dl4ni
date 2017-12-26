@@ -57,8 +57,7 @@ dice_loss <- function(y_true, y_pred, smooth = 1.0) {
 #' 
 bce_dice_loss <- function(y_true, y_pred) {
   
-  result <- keras::loss_binary_crossentropy(y_true, y_pred) +
-    (1 - dice_coef(y_true, y_pred))
+  result <- keras::loss_binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
   
   return(result)
   

@@ -36,9 +36,9 @@ get_activations <- function(object, layer) {
   # This function is just the predictor
   f <- function(x) {
     
-    m %>% set_trainability(trainability = FALSE)
+    # m %>% set_trainability(trainability = FALSE)
     res <- m %>% predict_on_batch(x)
-    m %>% set_trainability(trainability = TRUE)
+    # m %>% set_trainability(trainability = TRUE)
     
     return(res)
     
