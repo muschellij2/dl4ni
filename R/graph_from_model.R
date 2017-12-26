@@ -301,7 +301,7 @@ plot_graph <- function(g, interactive = FALSE) {
         
       } else {
         
-        break
+        break # nocov
         
       }
       

@@ -156,6 +156,8 @@ fit_with_generator <- function(.model,
     # always overwrite.
     if (file.exists(save_path) & interactive()) {
       
+      # nocov start
+      
       .model$log("WARNING", message = "Existing previous version.")
       
       choices <- c("Overwrite", "Load previous", "Save both")
@@ -207,6 +209,7 @@ fit_with_generator <- function(.model,
       
       .model$log("DEBUG", message = paste0("Model saved in ", save_path))
       
+      # nocov end
       
     } else {
       
