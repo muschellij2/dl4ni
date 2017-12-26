@@ -364,5 +364,6 @@ test_that("DLflow trains correctly", {
                           interactiveness = FALSE,
                           text = paste0("Predicted: segmentation")))
 
+  expect_works(flow$reset())
 
 })

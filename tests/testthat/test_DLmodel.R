@@ -21,13 +21,11 @@ test_that("DLmodel works as expected for a fully connected model", {
              only_convolutionals = FALSE,
              output_width = 3,
              num_features = 3,
-             vol_layers_pattern = list( 
-               dense(25)),
+             vol_layers_pattern = list(dense(25)),
              vol_dropout = 0.15,
              feature_layers = list(dense(10)),
              feature_dropout = 0.15,
-             common_layers = list(
-               dense(20)),
+             common_layers = list(dense(20)),
              common_dropout = 0.25,
              last_hidden_layers = list(dense(10)),
              optimizer = "adadelta",
@@ -91,6 +89,11 @@ test_that("DLmodel works as expected for a fully connected model", {
   expect_works(brain <- bet_model$infer(V = input_imgs, speed = "faster", verbose = FALSE))
   expect_works(ortho_plot(input_imgs[[1]]))
   expect_works(ortho_plot(input_imgs[[1]], brain))
+  
+  # Get activation at a intermediate layer
+  expect_works(f <- bet_model %>% get_activations(layer = 4))
+  expect_works(new_data <- bet_model$.__enclos_env__$private$train_config$generator())
+  expect_works(f(new_data[[1]]))
   
   # The model can be resetted
   expect_works(bet_model$reset())
