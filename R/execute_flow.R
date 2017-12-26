@@ -84,7 +84,7 @@ execute_flow <- function(flow, inputs = list(),
           if (!is.null(flow$computed_outputs[[intermediate_output]])) next
           
           if (verbose)
-            cat("Computing", intermediate_output, "...\n") #!exclude
+            cat("Computing", intermediate_output, "...\n") # nocov
           
           process <- flow$processes[[intermediate_output]]
           my_inputs <- flow$inmediate_inputs[[intermediate_output]]

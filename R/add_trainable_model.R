@@ -46,7 +46,7 @@ add_trainable_model <- function(flow,
   
   # Store the model in the flow
   if (verbose)
-    cat("Storing configuration\n")
+    cat("Storing configuration\n") # nocov
   
   flow %>% add_process(proc = params, inputs = inputs, output = output, trained = FALSE)
   

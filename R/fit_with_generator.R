@@ -131,7 +131,7 @@ fit_with_generator <- function(.model,
   .model$log("DEBUG", message = paste0("Optimal batch size set to: ", batch_size, "."))
   
   if (verbose)
-    cat("Batch size is set to:", batch_size, "\n")
+    cat("Batch size is set to:", batch_size, "\n") # nocov
   
   # Unfreeze learning phase (freeze at the end)
   .model %>% set_trainability(trainability = TRUE)
@@ -184,7 +184,7 @@ fit_with_generator <- function(.model,
                  best_validation_loss <- readRDS(file = file.path(model_path, model_prefix, paste0(model_prefix, "_loss.rds")))
                
                if (verbose)
-                 message("Previous model loaded.")
+                 message("Previous model loaded.") # nocov
                
              },
              
@@ -203,7 +203,7 @@ fit_with_generator <- function(.model,
              })
       
       if (verbose)
-        message("Model saved in ", save_path)
+        message("Model saved in ", save_path) # nocov
       
       .model$log("DEBUG", message = paste0("Model saved in ", save_path))
       
@@ -218,7 +218,7 @@ fit_with_generator <- function(.model,
                             comment = paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ":", " Initial state.\n"))
       
       if (verbose)
-        message("Model saved in ", save_path)
+        message("Model saved in ", save_path) # nocov
       
       .model$log("DEBUG", message = paste0("Model saved in ", save_path))
       
@@ -267,6 +267,8 @@ fit_with_generator <- function(.model,
   
   # Package progress is useful to make graphical progress bars.
   if (verbose) {
+
+    # nocov start
     
     if (require(progress)) {
       
@@ -283,6 +285,8 @@ fit_with_generator <- function(.model,
       progress <- FALSE
       
     }
+
+    # nocov end
     
   }
   
@@ -337,6 +341,8 @@ fit_with_generator <- function(.model,
     # Information (progress bar) for epochs.
     if (verbose) {
       
+      # nocov start
+
       message("\nEpoch ", epoch,  "/", epochs)
       
       if (!progress) {
@@ -345,6 +351,8 @@ fit_with_generator <- function(.model,
         message("Start Training")
         
       }
+
+      # nocov end
       
     }
     
@@ -352,6 +360,8 @@ fit_with_generator <- function(.model,
     
     # Information (progress bar) for subepochs
     if (verbose) {
+
+      # nocov start
       
       if (progress) {
         
@@ -365,6 +375,8 @@ fit_with_generator <- function(.model,
         pb_subepoch$update(ratio = 0, tokens = list(subepoch = 0, loss = last_loss)) 
         
       }
+
+      # nocov end
       
     }
     
@@ -456,11 +468,15 @@ fit_with_generator <- function(.model,
       }
       
       if (verbose) {
+
+        # nocov start
         
         if (progress)
           pb_subepoch$tick(tokens = list(subepoch = step, 
                                          loss = sprintf("%.5f", last_loss)))
         
+        # nocov end
+
       }
       
     }
@@ -470,9 +486,13 @@ fit_with_generator <- function(.model,
     
     if (verbose) {
       
+      # nocov start
+
       if (!progress) 
         message("Training loss: ", training_loss)
       
+      # nocov end
+
     }
     
     # If we have validation data, start the validation
@@ -482,9 +502,13 @@ fit_with_generator <- function(.model,
       
       if (verbose) {
         
+        # nocov start
+
         if (!progress)
           message("   Start Validation")
         
+        # nocov end
+
       }
       
       # Initialize variables for validation
@@ -497,6 +521,8 @@ fit_with_generator <- function(.model,
         
         if (verbose) {
           
+          # nocov start
+
           if (progress) {
             
             # Progress bar for validation subepoch
@@ -510,6 +536,8 @@ fit_with_generator <- function(.model,
             pb_subepoch_val$update(ratio = 0, tokens = list(subepoch = 0, loss = Inf))
             
           }
+
+          # nocov end
           
         }
         
@@ -534,10 +562,14 @@ fit_with_generator <- function(.model,
           
           if (verbose) {
             
+            # nocov start
+
             if (progress)
               pb_subepoch_val$tick(tokens = list(subepoch = val_steps, 
                                                  loss = sprintf("%.5f", loss / num_outputs)))
             
+            # nocov end
+
           }
           
         }
@@ -593,18 +625,26 @@ fit_with_generator <- function(.model,
       
       if (verbose) {
         
+        # nocov start
+
         if (!progress)
           message("\nValidation loss: ", loss_acc)
         
+        # nocov end
+
       }
       
     }
     
     if (verbose) {
-      
+
       # Update the progress bar
+
+      # nocov start
       if (progress) 
         pb_epochs$tick(tokens = list(epoch = epoch))
+
+      # nocov end
       
     }
     

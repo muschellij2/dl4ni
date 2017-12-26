@@ -41,8 +41,12 @@ create_generator <- function(model,
   
   if (verbose) {
     
-    message("Number of windows per batch is set to ", num_windows) #!exclude
-    message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.") #!exclude
+    # nocov start
+
+    message("Number of windows per batch is set to ", num_windows) # nocov
+    message("Will use ", batches_per_file, " batches to achieve ", batches_per_file * num_windows, " windows extracted per each image.") # nocov
+    
+    # nocov end
     
   }
   
@@ -168,7 +172,7 @@ create_generator <- function(model,
     sampling_indices <- all_idx
     
     if (verbose)
-      message("Number of actual windows: ", length(sampling_indices)) #!exclude
+      message("Number of actual windows: ", length(sampling_indices)) # nocov
     
     num_batches <- ceiling(length(sampling_indices) / num_windows)
     max_epochs <- min(c(num_batches, batches_per_file))
@@ -227,7 +231,7 @@ create_generator <- function(model,
   
   # print(batch_idx)
   if (verbose)
-    message("Number of batches per volume: ", num_batches) #!exclude
+    message("Number of batches per volume: ", num_batches) # nocov
   
   max_epochs <- min(c(num_batches, batches_per_file))
   

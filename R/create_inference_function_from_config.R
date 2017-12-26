@@ -114,13 +114,17 @@ create_inference_function_from_config <- function(object) {
     
     if (verbose && require(progress)) {
       
-      progress <- TRUE #!exclude
-      pb_infer <- progress_bar$new(format = " Batch :batch/:total [:bar] ETA: :eta . Elapsed: :elapsed", #!exclude
-                                   total = num_batches, #!exclude
-                                   clear = FALSE, #!exclude
-                                   width = 60) #!exclude
+      # nocov start
       
-      pb_infer$update(ratio = 0, tokens = list(batch = 0)) #!exclude
+      progress <- TRUE 
+      pb_infer <- progress_bar$new(format = " Batch :batch/:total [:bar] ETA: :eta . Elapsed: :elapsed", 
+                                   total = num_batches, 
+                                   clear = FALSE, 
+                                   width = 60) 
+      
+      pb_infer$update(ratio = 0, tokens = list(batch = 0)) 
+
+      # nocov end
       
     } else {
       
@@ -131,7 +135,7 @@ create_inference_function_from_config <- function(object) {
     for (batch in seq(num_batches)) {
       
       if (verbose && !progress)
-        message("Batch ", batch, " out of ", num_batches) #!exclude
+        message("Batch ", batch, " out of ", num_batches) # nocov
       
       model$log("INFO", message = paste0("Start of batch no. ", batch, "."))
       
@@ -461,7 +465,7 @@ create_inference_function_from_config <- function(object) {
       
       if (verbose && progress) {
         
-        pb_infer$tick(tokens = list(batch = batch)) #!exclude
+        pb_infer$tick(tokens = list(batch = batch)) # nocov
         
       }
       

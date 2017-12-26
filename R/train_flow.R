@@ -47,7 +47,7 @@ train_output <- function(flow,
   stopifnot(all(file.exists(unlist(input_filenames))), all(file.exists(unlist(output_filenames))))
   
   if (verbose)
-    cat("Checking previous steps are trained...\n") #!exclude
+    cat("Checking previous steps are trained...\n") # nocov
   
   # Check that previous steps in the pipeline are trained
   needed_outputs <- flow$inmediate_inputs[[output]]
@@ -79,7 +79,7 @@ train_output <- function(flow,
   }
   
   if (verbose)
-    cat("   Everything is Ok...\n") #!exclude
+    cat("   Everything is Ok...\n") # nocov
   
   model <- flow$processes[[output]]
   
@@ -94,7 +94,7 @@ train_output <- function(flow,
     desired_outputs <- needed_outputs 
     
     if (verbose)
-      cat("Obtaining required inputs...\n") #!exclude
+      cat("Obtaining required inputs...\n") # nocov
     
     results <- list()
     
@@ -102,7 +102,7 @@ train_output <- function(flow,
     for (s in seq(num_subjects)) {
       
       if (verbose)
-        cat("Subject number", s, "out of", num_subjects, "...\n") #!exclude
+        cat("Subject number", s, "out of", num_subjects, "...\n") # nocov
       
       # Input files for this subject
       input_file_list <- lapply(given_input, function(x) x[s])
@@ -153,17 +153,17 @@ train_output <- function(flow,
     if (inherits(model, "DLscheme")) {
       
       if (verbose)
-        cat("Scheme detected. Model must be built....\n") #!exclude
+        cat("Scheme detected. Model must be built....\n") # nocov
       
       # Configuration of the model
       if (verbose)
-        cat("Preparing model configuration...\n") #!exclude
+        cat("Preparing model configuration...\n") # nocov
       
       scheme <- model
       
       # Model creation
       if (verbose)
-        cat("Creating model...\n") #!exclude
+        cat("Creating model...\n") # nocov
       
       model <- scheme$instantiate(inputs = results, 
                                   outputs = output_filenames, 
@@ -176,7 +176,7 @@ train_output <- function(flow,
     if (!model$has_train_data) {
       
       if (verbose)
-        cat("Training configuration...\n") #!exclude
+        cat("Training configuration...\n") # nocov
       
       # Training configuration
       train_indices <- sample(seq(num_subjects), size = round(train_split * num_subjects))
@@ -200,7 +200,7 @@ train_output <- function(flow,
     
     # Actual training
     if (verbose)
-      cat("Actual training...\n") #!exclude
+      cat("Actual training...\n") # nocov
     
     # Mark as trained in the output
     on.exit({
@@ -217,7 +217,7 @@ train_output <- function(flow,
               verbose = verbose)
     
     if (verbose)
-      cat("Done.\n") #!exclude
+      cat("Done.\n") # nocov
     
   }
   

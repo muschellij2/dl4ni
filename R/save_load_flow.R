@@ -108,7 +108,7 @@ load_flow <- function(filename, verbose = FALSE) {
 
   # Load flow
   if (verbose)
-    cat("Loading main flow..\n") # !exclude
+    cat("Loading main flow..\n") # nocov
 
   flow_file <- list.files(output_dir, pattern = "_flow.rds")
   flow <- readRDS(file.path(output_dir, flow_file))
@@ -130,14 +130,14 @@ load_flow <- function(filename, verbose = FALSE) {
     if (inherits(f, "function")) {
 
       if (verbose)
-        cat("Loading function:", function_name, "...\n") # !exclude
+        cat("Loading function:", function_name, "...\n") # nocov
 
     }
 
     if (inherits(f, "list")) {
 
       if (verbose)
-        cat("Loading model scheme:", function_name, "...\n") # !exclude
+        cat("Loading model scheme:", function_name, "...\n") # nocov
 
       class(f) <- c("DLscheme", class(f))
       flow$schemes[[function_name]] <- f
@@ -151,7 +151,7 @@ load_flow <- function(filename, verbose = FALSE) {
   for (model_name in models) {
 
     if (verbose)
-      cat("Loading model:", model_name, "...\n") # !exclude
+      cat("Loading model:", model_name, "...\n") # nocov
 
     flow$processes[[model_name]] <- load_model(path = processes_dir, prefix = model_name)
 
