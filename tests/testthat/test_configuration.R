@@ -4,7 +4,6 @@ expect_works <- function(object) testthat::expect_error(object, NA)
 
 test_that("configuration works as expected", {
 
-  
   problem <- "brain_extraction"
   problem_path <- problem %>% get_dataset()
   info <- problem_path %>% get_problem_info(as_autoencoder = TRUE)
@@ -33,6 +32,19 @@ test_that("configuration works as expected", {
   scheme$add(memory_limit = "1G")
   
   expect_works(ae_model <- info %>% scheme$instantiate())
+  expect_works(ae_model$fit(epochs = 1, keep_best = FALSE, metrics_viewer = FALSE, verbose = FALSE))
   
+  # Select random test image
+  test_index <- sample(info$test$subject_indices, size = 1)
+  input_file_list <- lapply(info$inputs, function(x) x[test_index])
+  
+  # Load images and ground truth
+  input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
+  ground_truth <- read_nifti_to_array(info$outputs[test_index])
+  
+  # Infer in the input volume
+  expect_works(same <- ae_model$infer(V = input_imgs, speed = "faster", verbose = FALSE))
+  expect_works(ortho_plot(ground_truth))
+  expect_works(ortho_plot(same))
   
 })

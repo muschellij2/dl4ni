@@ -1,7 +1,5 @@
 context("segnet")
 
-expect_works <- function(object) testthat::expect_error(object, NA)
-
 test_that("segnet works as expected", {
 
   expect_works(s1 <- segnet(mode = "sampling"))

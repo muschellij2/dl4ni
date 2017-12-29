@@ -1,7 +1,5 @@
 context("subset_problem")
 
-expect_works <- function(object) testthat::expect_error(object, NA)
-
 test_that("subset_problem works as expected", {
 
   # We'll use a modified BET (non-convolutional) demo
