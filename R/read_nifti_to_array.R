@@ -18,6 +18,7 @@ read_nifti_to_array <- function(filename) {
     
   }
   
+  # nocov start
   if (require(ANTsR)) {
     
     return(ANTsR::as.array(ANTsR::antsImageRead(filename)))
@@ -38,5 +39,7 @@ read_nifti_to_array <- function(filename) {
     return(as.array(oro.nifti::readNIfTI(filename, reorient = FALSE)))
     
   }
+  
+  # nocov end
   
 }

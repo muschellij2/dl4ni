@@ -83,6 +83,7 @@ ALREADY DONE:
 
 WIP:
   = Comentarios y documentación en todas las funciones
+  = keras_warmup <- load_keras y más.
   = Raise memory limit a un modelo, no desde el esquema. (Not enough memory to train the model, raise the memory limit?)
   = Actualizar para usar la última versión del paquete keras.
   = multiwidth.
