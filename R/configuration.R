@@ -96,7 +96,9 @@ define_config <- function(...) {
   if (!is.null(config$decoder_layers) & (length(config$decoder_layers) > 0)) {
     
     config$is_autoencoder <- TRUE
-    config$output_width <- config$width
+    # Not needed, we can build general autoencoders 
+    # where an image is mapped to a subimage of itself.
+    # config$output_width <- config$width 
     
   }
   
