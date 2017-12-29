@@ -17,4 +17,6 @@ load_keras <- function() {
   if (!require(keras))
     stop("Library 'keras' is not available.")
   
+  K <- keras::backend()
+  
 }
