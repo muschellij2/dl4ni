@@ -161,13 +161,15 @@ create_model_from_config <- function(config) {
                            outputs = main_output)
     
     n_layers_encoder <- length(encoder$layers)
+    encoder_output_shape <- (encoder %>% model_shapes())[[n_layers_encoder]]
     
-    print(summary(encoder))
+    # Build full model and decoder at the same time
+    # Use shared layers
+    # Decoder begins with a layer of the same shape as the output of the encoder.
+    decoder_input <- layer_input(shape = encoder_output_shape)
     
-    # Build full model
-    full_output <- main_output
-    
-    full_output <- full_output %>% 
+    second_part_inputs <- list(main_output, decoder_input) 
+    full_output <- second_part_inputs %>% 
       add_layers(layers_definition = config$decoder_layers,
                  clf = FALSE)
     
@@ -181,38 +183,8 @@ create_model_from_config <- function(config) {
       
     }
     
-    model <- keras_model(inputs = inputs, outputs = full_output)
-    
-    print(summary(model))
-    
-    n_layers_full <- length(model$layers)
-    encoder_output_shape <- (encoder %>% model_shapes())[[n_layers_encoder]]
-    
-    cat("Encoder output shape = ", encoder_output_shape, "\n")
-    cat("N layers full = ", n_layers_full, "\n")
-    cat("N layers encoder = ", n_layers_encoder, "\n")
-    
-    for (layer in seq(n_layers_encoder + 1, n_layers_full)) {
-      
-      print(model$layers[[layer]]$get_config())
-      
-    }
-    
-    
-    # Decoder begins with a layer of the same shape as the output of the encoder.
-    decoder_input <- layer_input(shape = encoder_output_shape)
-    
-    # Add the SAME decoder layers
-    decoder_output <- decoder_input
-    for (layer in seq(n_layers_encoder + 1, n_layers_full)) {
-      
-      decoder_output <- model$layers[[layer]](decoder_output)
-      
-    }
-    
-    # And create the decoder model
-    decoder <- keras_model(inputs = decoder_input,
-                           outputs = decoder_output)
+    model <- keras_model(inputs = inputs, outputs = full_output[[1]])
+    decoder <- keras_model(inputs = decoder_input, outputs = full_output[[2]])
     
   } else {
     
