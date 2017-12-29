@@ -11,8 +11,8 @@ encode <- function(model, inputs) {
   require(keras)
   
   # Just predict using the encoder, if it exists
-  if (("DLmodel" %in% class(model)) && (!is.null(model$encoder)))
-    model$encoder %>% predict_on_batch(inputs)
+  if (inherits(model, "DLmodel") && (model$is_autoencoder()))
+    model$get_encoder() %>% predict_on_batch(inputs)
   
 }
 
@@ -28,7 +28,7 @@ decode <- function(model, inputs) {
   require(keras)
   
   # Just predict using the decoder, if it exists
-  if (("DLmodel" %in% class(model)) && (!is.null(model$decoder)))
-    model$decoder %>% predict_on_batch(inputs)
+  if (inherits(model, "DLmodel") && (model$is_autoencoder()))
+    model$get_decoder() %>% predict_on_batch(inputs)
   
 }

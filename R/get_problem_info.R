@@ -6,6 +6,8 @@
 #' @param input_path      (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param output_path     (NULL) PARAM_DESCRIPTION, Default: NULL
 #' @param num_subjects    (NULL) PARAM_DESCRIPTION, Default: NULL
+#' @param interactive     (logical) PARAM_DESCRIPTION, Default: TRUE
+#' @param as_autoencoder  (logical) PARAM_DESCRIPTION, Default: FALSE
 #'
 #' @return OUTPUT_DESCRIPTION
 #'
@@ -22,7 +24,8 @@ get_problem_info <- function(problem_path = NULL,
                              input_path = NULL,
                              output_path = NULL,
                              num_subjects = NULL,
-                             interactive = TRUE) {
+                             interactive = TRUE,
+                             as_autoencoder = FALSE) {
   
   if (is.null(problem_path) & is.null(input_path)) {
     
@@ -120,6 +123,12 @@ get_problem_info <- function(problem_path = NULL,
       
     }
     
+    # Special case for when we are defining an autoencoder
+    if (as_autoencoder) {
+      
+      output_path <- input_path
+      
+    }
     
     # Manage outputs
     # Check if there are more than one possible output

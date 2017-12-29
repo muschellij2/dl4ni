@@ -68,10 +68,23 @@ create_model_from_config <- function(config) {
   # According to the path definition, we keep only the features path, the volumes paths, or both, concatenated.
   output_vol <- concatenate_layers(vol_outputs)
   
+  # Define the inputs, according to the config$path.
+  inputs <- switch(config$path[1],
+                   
+                   "volumes" = vol_inputs,
+                   
+                   "both" = c(input_features, vol_inputs),
+                   
+                   "features" = input_features)
+  
   main_output <- switch(config$path[1],
+                        
                         "both"     = layer_concatenate(list(output_features, output_vol)),
+                        
                         "features" = output_features,
+                        
                         "volumes"  = output_vol)
+  
   
   # Add layers in the common part of the model
   if (length(config$common_layers) > 0) {
@@ -128,7 +141,8 @@ create_model_from_config <- function(config) {
   }
   
   # Add last layer
-  if (config$add_last_layer) {
+  # If the model is an autoencoder, the last layer should be placed at the end, not here.
+  if (config$add_last_layer && !(length(config$decoder_layers) > 0)) {
     
     main_output <- main_output %>% 
       add_layers(layers_definition = list(config$last_layer),
@@ -136,14 +150,6 @@ create_model_from_config <- function(config) {
     
   }
   
-  # Define the inputs, according to the config$path.
-  inputs <- switch(config$path[1],
-                   
-                   "volumes" = vol_inputs,
-                   
-                   "both" = c(input_features, vol_inputs),
-                   
-                   "features" = input_features)
   
   # If we have decoder layers, define the encoder, decoder and complete model.
   if (length(config$decoder_layers) > 0) {
@@ -156,6 +162,8 @@ create_model_from_config <- function(config) {
     
     n_layers_encoder <- length(encoder$layers)
     
+    print(summary(encoder))
+    
     # Build full model
     full_output <- main_output
     
@@ -163,11 +171,36 @@ create_model_from_config <- function(config) {
       add_layers(layers_definition = config$decoder_layers,
                  clf = FALSE)
     
+    # Add last layer
+    # If the model is an autoencoder, the last layer is placed here.
+    if (config$add_last_layer) {
+      
+      full_output <- full_output %>% 
+        add_layers(layers_definition = list(config$last_layer),
+                   clf = FALSE)
+      
+    }
+    
     model <- keras_model(inputs = inputs, outputs = full_output)
+    
+    print(summary(model))
+    
     n_layers_full <- length(model$layers)
+    encoder_output_shape <- (encoder %>% model_shapes())[[n_layers_encoder]]
+    
+    cat("Encoder output shape = ", encoder_output_shape, "\n")
+    cat("N layers full = ", n_layers_full, "\n")
+    cat("N layers encoder = ", n_layers_encoder, "\n")
+    
+    for (layer in seq(n_layers_encoder + 1, n_layers_full)) {
+      
+      print(model$layers[[layer]]$get_config())
+      
+    }
+    
     
     # Decoder begins with a layer of the same shape as the output of the encoder.
-    decoder_input <- layer_input(shape = ((encoder %>% model_shapes())[[n_layers_encoder]]))
+    decoder_input <- layer_input(shape = encoder_output_shape)
     
     # Add the SAME decoder layers
     decoder_output <- decoder_input

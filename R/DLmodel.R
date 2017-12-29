@@ -211,6 +211,12 @@ DLmodel <- R6::R6Class(
       
     },
     
+    is_autoencoder = function() {
+      
+      return(!(is.null(private$encoder)) && !(is.null(private$decoder)))
+      
+    },
+
     get_width = function() {
       
       return(private$width)
