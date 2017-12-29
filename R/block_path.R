@@ -19,6 +19,14 @@ block_paths <- function(object,
   
   require(keras)
   
+  was_list <- TRUE
+  if (!is.list(object)) {
+    
+    object <- list(object)
+    was_list <- FALSE
+    
+  }
+  
   # Build the independent paths.
   outputs <- list()
   
@@ -27,7 +35,7 @@ block_paths <- function(object,
     
     outputs[[i]] <- object
     
-    # If there are hidden layers, add them to the initial object
+    # If there are hidden layers, add them to the initial object (shared layers)
     if (length(hidden_layers) > 0) {
       
       outputs[[i]] <- (outputs[[i]]) %>% 
@@ -46,16 +54,37 @@ block_paths <- function(object,
 
   }
   
+  # Transform the output to the desired format
+  # Now, it is: first level: num_paths; second level: number of inputs
+  # We want it to be first level: num inputs; 2nd level: num_paths
+  # So we could concatenate layers and assign outputs to inputs directly
+  real_output <- list()
+  for (input_index in seq_along(object)) {
+    
+    real_output[[input_index]] <- list()
+    
+    for (path_index in seq(num_paths)) {
+      
+      real_output[[input_index]][[path_index]] <- outputs[[path_index]][[input_index]]
+      
+    }
+    
+  }
+  
   # Concatenate outputs if required
   if (concatenate) {
     
-    output <- concatenate_layers(outputs)
+    output <- lapply(real_output, concatenate_layers)
+    
+    if (!was_list) output <- output[[1]]
 
     return(output)
     
   } else {
     
-    return(outputs)
+    if (!was_list) real_output <- real_output[[1]]
+    
+    return(real_output)
     
   }
   

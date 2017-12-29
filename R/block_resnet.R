@@ -19,6 +19,7 @@ block_resnet <- function(object,
                          hidden_activation = "relu",
                          hidden_dropout = 0,
                          params = NULL) {
+  # nocov start
   
   # Override parameters
   if (!is.null(params)) {
@@ -42,17 +43,29 @@ block_resnet <- function(object,
   
   # Concatenate hidden layers
   output <- object %>% 
-    add_layers(layers_definition = hidden_layers, 
-               activation = hidden_activation, 
-               dropout = hidden_dropout)
+    add_layers(layers_definition = hidden_layers)
   
   # Add a dense layer
-  output <- output %>% 
+  output <- output %m>% 
     layer_dense(units = input_units, activation = hidden_activation)
   
   # Add this last layer to the initial object
-  output <- layer_add(c(object, output))
+  if (is.list(object)) {
+    
+    for (index in seq_along(object)) {
+      
+      output[[index]] <- layer_add(c(object[[index]], output[[index]]))
+      
+    }
+        
+  } else {
+    
+    output <- layer_add(c(object, output))
+    
+  }
   
   return(output)
+  
+  # nocov end
   
 }

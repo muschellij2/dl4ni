@@ -24,11 +24,11 @@ block_multivalued <- function(object,
                               hidden_layers = list(),
                               num_values = 2,
                               units = 1) {
-
+  
   # Layers to add at the end of each independent path
   finalize_layers <- list(dense(units = num_values, activation = "sigmoid"),
                           dense(units = 1, activation = "linear"))  
-
+  
   # Build the independent paths.
   output <- object %>% block_paths(hidden_layers = hidden_layers, 
                                     num_paths = units,

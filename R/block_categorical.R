@@ -37,7 +37,15 @@ block_categorical <- function(object,
   # Concatenate output?
   if (concatenate) {
     
-    output <- concatenate_layers(outputs)
+    if (is.list(object)) {
+      
+      output <- lapply(outputs, concatenate_layers)
+      
+    } else {
+      
+      output <- concatenate_layers(outputs)
+      
+    }
     
     return(output)
     

@@ -31,7 +31,20 @@ block_clf <- function(object,
     output <- object %>% 
       add_layers(layers_definition = hidden_layers)
     
-    output <- layer_concatenate(c(object, output))
+    if (is.list(object)) {
+      
+      for (index in seq_along(object)) {
+        
+        output[[index]] <- layer_concatenate(c(object[[index]], output[[index]]))
+        
+      }
+      
+    } else {
+      
+      output <- layer_concatenate(c(object, output))
+      
+    }
+    
     
   }
   
