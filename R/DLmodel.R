@@ -379,11 +379,12 @@ DLmodel <- R6::R6Class(
       
       verbose <- FALSE
       if (!is.null(args$verbose)) verbose <- args$verbose
+
+      tmp_path <- tempfile()
       
       if (keep_best) {
         
         # Path and prefix must be provided
-        tmp_path <- tempfile()
         warn <- FALSE
         if (is.null(args$path) || !file.exists(args$path)) {
           
@@ -453,7 +454,7 @@ DLmodel <- R6::R6Class(
     infer = function(V = NULL, 
                      speed = c("faster", "medium", "slower"), ...) {
       
-      self %>% infer_on_volume(V = V, speed = speed[1])
+      self %>% infer_on_volume(V = V, speed = speed[1], ...)
       
     },
     
