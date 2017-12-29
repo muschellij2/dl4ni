@@ -32,7 +32,6 @@ block_half <- function(object,
   # Initialize the output in order to compose
   output <- object
   
-  
   filters <- initial_filters
   
   # In each step, add a convolutional and a max_pooling layers, doubling the
@@ -49,11 +48,11 @@ block_half <- function(object,
     
     if (use_maxpooling) {
       
-      output <- output %>% layer_max_pooling_3d()
+      output <- output %m>% layer_max_pooling_3d()
       
     } else {
       
-      output <- output %>% 
+      output <- output %m>% 
         layer_conv_3d(filters = filters, 
                       kernel_size = kernel_size, 
                       strides = c(2, 2, 2), 
@@ -118,8 +117,8 @@ block_double <- function(object,
     
     if (use_upsampling) {
       
-      output <- output %>% 
-        layer_upsampling_3d() %>% 
+      output <- output %m>% 
+        layer_upsampling_3d() %m>% 
         layer_conv_3d(filters = filters, 
                       kernel_size = c(2, 2, 2), 
                       activation = activation, 
@@ -127,7 +126,7 @@ block_double <- function(object,
       
     } else {
       
-      output <- output %>% 
+      output <- output %m>% 
         layer_conv_3d_transpose(filters = filters, 
                                 kernel_size = c(3, 3, 3), 
                                 strides = c(2, 2, 2), 
@@ -137,10 +136,10 @@ block_double <- function(object,
     }
     
     output <- conv_block(output, 
-                      num_filters = filters, 
-                      activation = activation, 
-                      batch_normalization = batch_normalization, 
-                      dropout = 0)
+                         num_filters = filters, 
+                         activation = activation, 
+                         batch_normalization = batch_normalization, 
+                         dropout = 0)
     
     filters <- filters / 2
     if (filters < 1) filters <- 1

@@ -29,9 +29,9 @@ block_regression <- function(object,
   
   # Build the independent paths.
   output <- object %>% block_paths(hidden_layers = hidden_layers, 
-                                   num_paths = units,
-                                   finalize_layers = finalize_layers,
-                                   concatenate = TRUE)
+                                    num_paths = units,
+                                    finalize_layers = finalize_layers,
+                                    concatenate = TRUE)
   
   
   return(output)

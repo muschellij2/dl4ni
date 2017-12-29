@@ -7,23 +7,38 @@ conv_block <- function(object,
                        dropout = 0) {
   
   res <- object
-  res <- res %>%
+  res <- res %m>%
     layer_conv_3d(filters = num_filters, kernel_size = c(3, 3, 3), activation = activation, padding = "same")
   
   if (batch_normalization)
-    res <- res %>% layer_batch_normalization()
+    res <- res %m>% layer_batch_normalization()
   
   if (dropout > 0)
-    res <- res %>% layer_dropout(rate = dropout)
+    res <- res %m>% layer_dropout(rate = dropout)
   
-  res <- res %>%
+  res <- res %m>%
     layer_conv_3d(filters = num_filters, kernel_size = c(3, 3, 3), activation = activation, padding = "same")
   
   if (batch_normalization)
-    res <- res %>% layer_batch_normalization()
+    res <- res %m>% layer_batch_normalization()
   
-  if (residual)
-    res <- layer_concatenate(c(object, res))
+  if (residual) {
+    
+    if (is.list(object)) {
+      
+      for (index in seq_along(object)) {
+        
+        res[[index]] <- layer_concatenate(c(object[[index]], res[[index]]))
+        
+      }
+      
+    } else {
+      
+      res <- layer_concatenate(c(object, res))
+      
+    }
+    
+  }
   
   return(res)
   
@@ -50,11 +65,11 @@ level_block <- function(object,
     
     if (mode[1] == "sampling") {
       
-      res <- res1 %>% layer_max_pooling_3d()
+      res <- res1 %m>% layer_max_pooling_3d()
       
     } else {
       
-      res <- res1 %>% 
+      res <- res1 %m>% 
         layer_conv_3d(filters = num_filters, 
                       kernel_size = c(3, 3, 3), 
                       strides = c(2, 2, 2), 
@@ -73,8 +88,8 @@ level_block <- function(object,
     
     if (mode[1] == "sampling") {
       
-      res <- res %>% 
-        layer_upsampling_3d() %>% 
+      res <- res %m>% 
+        layer_upsampling_3d() %m>% 
         layer_conv_3d(filters = num_filters, 
                       kernel_size = c(2, 2, 2), 
                       activation = activation, 
@@ -82,7 +97,7 @@ level_block <- function(object,
       
     } else {
       
-      res <- res %>% 
+      res <- res %m>% 
         layer_conv_3d_transpose(filters = num_filters, 
                                 kernel_size = c(3, 3, 3), 
                                 strides = c(2, 2, 2), 
@@ -91,7 +106,20 @@ level_block <- function(object,
       
     }
     
-    res1 <- layer_concatenate(c(res1, res))
+    if (is.list(object)) {
+      
+      for (index in seq_along(object)) {
+        
+        res1[[index]] <- layer_concatenate(c(res1[[index]], res[[index]])) 
+        
+      }
+      
+    } else {
+      
+      res1 <- layer_concatenate(c(res1, res))
+      
+    }
+    
     res <- conv_block(res1, 
                       num_filters = num_filters, 
                       activation = activation, 
@@ -137,7 +165,7 @@ block_unet <- function(object,
                      residual = residual) 
   
   if (out_filters > 0)
-    res <- res %>% 
+    res <- res %m>% 
       layer_conv_3d(filters = out_filters, 
                     kernel_size = c(1, 1, 1), 
                     activation = final_activation)

@@ -1,7 +1,5 @@
 context("analyze_output")
 
-expect_works <- function(object) testthat::expect_error(object, NA)
-
 test_that("analyze_output works as expected", {
 
   # We'll use a modified BET (non-convolutional) demo
