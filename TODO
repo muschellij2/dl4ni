@@ -80,6 +80,7 @@ ALREADY DONE:
   + meshnet
   + Error en DLmodel.fit cuando keep_best == FALSE, no se definen path y prefix.
   + prepare_for_training = FALSE en DLscheme$instantiate.
+  + instantiate_autoencoder.
 
 WIP:
   = Comentarios y documentación en todas las funciones
@@ -95,7 +96,6 @@ WIP:
   = Cambiar RESNET.
   = Calcular output_width a partir de si el modelo es convolucional y del tamaño de la salida de la última capa.
   = Generar nombres de forma automática en create_model_from_config.
-  = instantiate_autoencoder.
   = Cambiar el input de un modelo convolucional para que acepte una imagen entera?
   = CLF da problemas si las dimensiones no son las adecuadas en capas convolucionales. Chequear.
   = Mejoras de velocidad en create_generator_from_config.
