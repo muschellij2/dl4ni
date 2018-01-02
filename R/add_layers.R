@@ -48,8 +48,16 @@ add_layers <- function(object,
       }
       
       # Shape of the current output
-      input_shape <- object_shape(output[[1]])
-      
+      if (is.list(output)) {
+        
+        input_shape <- object_shape(output[[1]])
+        
+      } else {
+        
+        input_shape <- object_shape(output)
+        
+      }
+
       # Add layers depending on the actual type of the layer_to_add
       switch(type,
              

@@ -486,7 +486,9 @@ DLmodel <- R6::R6Class(
     
     history = data.frame(epoch = NULL, subepoch = NULL, time = NULL, loss = NULL, val_loss = NULL),
     
-    render_file = tempfile(fileext = ".html"),
+    render_file = tempfile(tmpdir = normalizePath("~"), 
+                           pattern = "dl4ni-metrics_", 
+                           fileext = ".html"),
     
     get_log_lines = function(level = c("DEBUG", "WARNING", "INFO", "ERROR")) {
       
