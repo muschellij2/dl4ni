@@ -1,8 +1,3 @@
-rm(list = ls())
-rstudioapi::restartSession()
-devtools::load_all()
-devtools::load_all("../dl4ni.data/")
-
 ##%######################################################%##
 #                                                          #
 ####               Example For Autoencoder              ####
@@ -21,7 +16,8 @@ load_keras()
 
 problem <- "brain_extraction"
 problem_path <- problem %>% get_dataset()
-info <- problem_path %>% get_problem_info()
+info <- problem_path %>% get_problem_info(as_autoencoder = TRUE,
+                                          interactive = FALSE)
 
 info %>% split_train_test_sets()
 
@@ -39,18 +35,15 @@ scheme$add(width = width,
            only_convolutionals = FALSE,
            output_width = 3,
            num_features = 3,
-           vol_layers_pattern = list(clf(all = TRUE, 
-                                         hidden_layers =  list(dense(250),
-                                                               dense(100)))),
+           vol_layers_pattern = list(dense(250), dense(100)),
            vol_dropout = 0.15,
            feature_layers = list(dense(10), 
                                  dense(5)),
            feature_dropout = 0.15,
-           common_layers = list(clf(all = TRUE, 
-                                    hidden_layers =  list(dense(250),
-                                                          dense(100)))),
+           common_layers = list(dense(250), dense(100)),
            common_dropout = 0.25,
-           last_hidden_layers = list(dense(20), dense(10)),
+           decoder_layers = list(dense(250), dense(100)),
+           last_hidden_layers = list(dense(10)),
            optimizer = "adadelta",
            scale = "meanmax")
 
@@ -62,7 +55,7 @@ scheme$add(memory_limit = "2G")
 #                                                          #
 ##%######################################################%##
 
-ae_model <- scheme$instantiate(inputs = info$inputs)
+ae_model <- scheme$instantiate(problem_info = info)
 
 ae_model$summary()
 
@@ -113,7 +106,8 @@ saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 ae_model$fit(epochs = epochs,
              keep_best = keep_best,
              path = saving_path,
-             prefix = saving_prefix)
+             prefix = saving_prefix,
+             metrics_viewer = TRUE, verbose = TRUE)
 
 ae_model$plot_history()
 
@@ -138,10 +132,10 @@ input_file_list <- lapply(info$inputs, function(x) x[test_index])
 input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
 ground_truth <- input_imgs[[1]]
 
-ground_truth <- do.call(paste0("scale_", scheme$scale), args = list(ground_truth))
+# ground_truth <- do.call(paste0("scale_", scheme$scale), args = list(ground_truth))
 
 # Infer in the input volume
-reconstruction <- ae_model$infer(V = input_imgs, speed = "debug")
+reconstruction <- ae_model$infer(V = input_imgs)
 
 # Plot Ground Truth results
 ortho_plot(x = ground_truth,
@@ -153,3 +147,11 @@ ortho_plot(x = reconstruction * 255,
            text = "Predicted", 
            interactiveness = FALSE)
 
+rec <- map_images(source = reconstruction,
+                  target = ground_truth,
+                  nbins = 128)
+
+# Plot Model results
+ortho_plot(x = rec, 
+           text = "Predicted and matched", 
+           interactiveness = FALSE)
