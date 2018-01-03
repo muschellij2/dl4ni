@@ -210,7 +210,8 @@ DLflow <- R6::R6Class(
                                train_split = train_split,
                                epochs = epochs, 
                                target_windows_per_file = target_windows_per_file,
-                               mode = mode[1])
+                               mode = mode[1],
+                               ...)
       
     },
     
