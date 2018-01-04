@@ -148,8 +148,7 @@ ortho_plot(x = reconstruction * 255,
            interactiveness = FALSE)
 
 rec <- map_images(source = reconstruction,
-                  target = ground_truth,
-                  nbins = 128)
+                  target = ground_truth)
 
 # Plot Model results
 ortho_plot(x = rec, 
