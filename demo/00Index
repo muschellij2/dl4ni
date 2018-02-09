@@ -2,12 +2,6 @@ autoencoder                          Create and use an autoencoder with dense la
 autoencoder_conv                     Create and use an autoencoder with convolutional layers.
 bet                                  Create a dense model to perform brain extraction.
 bet_conv                             Create a convolutional model to perform brain extraction.
-flow_lesion_load                     Toy flow illustrating the computation graph to perform lesion load estimation.
-flow_parcellation                    Create a flow to perform brain extraction, segmentation and parcellation using dense layers.
-flow_parcellation_conv               Create a flow to perform brain extraction, segmentation and parcellation using convolutional layers.
-flow_parcellation_conv_3schemes      Create a flow to perform brain extraction, segmentation and parcellation using convolutional layers, with a scheme different for each model in the flow.
-flow_t1_flair                        Create a flow to perform brain extraction, segmentation and the transformation from T1 to FLAIR using dense layers.
-flow_t1_flair_conv                   Create a flow to perform brain extraction, segmentation and the transformation from T1 to FLAIR using convolutional layers.
 multi_machine                        Create a model to perform the conversion between different machines or modalities, using dense layers.
 multi_machine_conv                   Create a model to perform the conversion between different machines or modalities, using convolutional layers.
 parcellation                         Create a model to perform brain parcellation with dense layers.
