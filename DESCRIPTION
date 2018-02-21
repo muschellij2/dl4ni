@@ -7,7 +7,7 @@ Authors@R: person("Domingo", "López-Rodríguez", role = c("aut", "cre"), email 
 Maintainer: Domingo Lopez-Rodriguez <neuroimaginador@gmail.com>
 Description: This package is specific to use Deep Learning (by means of the keras package and tensorflow) for Neuroimaging. Users can create models and pipelines and apply them to classification, regression or labelling problems.
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.12), keras, neurobase
+Imports: Rcpp (>= 0.12.12), keras, utils4ni
 Suggests: testthat, ni.datasets
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
