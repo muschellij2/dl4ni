@@ -26,7 +26,9 @@ create_generator <- function(model,
   
   config <- model$get_config()
   
-  require(tictoc)
+  require(utils4ni)
+  # require(tictoc)
+  
   # tic("Initialization")
   
   num_inputs <- length(config$vol_layers)
@@ -42,7 +44,7 @@ create_generator <- function(model,
   if (verbose) {
     
     # nocov start
-
+    
     message("Number of windows per batch is set to ", num_windows) 
     message("Will use ", batches_per_file, 
             " batches to achieve ", batches_per_file * num_windows, 
@@ -63,15 +65,17 @@ create_generator <- function(model,
   }
   
   Vx <- list()
-  meanX <- list()
-  stdX <- list()
-  maxX <- list()
+  statsX <- list()
   
   if (config$use_data_augmentation) {
     
     M <- random_transformation_matrix(scale_range = config$augment_scales, 
                                       rotation_range = config$augment_rotations, 
                                       translation_range = config$augment_translations)
+    
+  } else {
+    
+    M <- identity_matrix()
     
   }
   
@@ -81,47 +85,9 @@ create_generator <- function(model,
     
     tmpVx <- read_nifti_to_array(x_files[[input]][next_file])
     
-    if (config$use_data_augmentation) {
-      
-      interp_method <- 3
-      if (config$input_types[input] == "categorical") {
-        
-        interp_method <- 0
-        
-      }
-      
-      n_dims <- length(dim(tmpVx))
-      
-      if (n_dims == 4) {
-        
-        for (i in seq(dim(tmpVx)[4])) {
-          
-          tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx)[1:3], method = interp_method) 
-          
-        }
-        
-        Vx[[input]] <- tmpVx
-        
-      } else {
-        
-        Vx[[input]] <- transform_volume(V = tmpVx, M = M, target_dims = dim(tmpVx), method = interp_method) 
-        
-      }
-      
-    } else {
-      
-      Vx[[input]] <- tmpVx
-      
-    }
+    Vx[[input]] <- apply_image_augmentation(tmpVx, M = M, type = config$input_types[input])
     
-    if (config$scale %in% c("mean", "z", "max", "meanmax")) {
-      
-      v <- as.vector(Vx[[input]])
-      if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <- mean(v)
-      if (config$scale %in% "z") stdX[[input]] <- sd(v)
-      if (config$scale %in% c("max", "meanmax")) maxX[[input]] <- max(v)
-      
-    }
+    statsX[[input]] <- get_image_stats(Vx[[input]])
     
     if (config$is_autoencoder & !is.null(config$remap_classes)) {
       
@@ -135,103 +101,38 @@ create_generator <- function(model,
   
   tmpVy <- read_nifti_to_array(y_files[next_file])
   
-  if (config$use_data_augmentation) {
+  output_type <- "continuous"
+  if (config$categorize_output) output_type <- "categorical"
+  
+  Vy <- apply_image_augmentation(tmpVy, M = M, type = output_type)
+  
+  statsY <- get_image_stats(Vy)
+  
+  if (!is.null(config$class_balance) & !is.null(config$y_label)) {
     
-    if (config$categorize_output) {
-      
-      Vy <- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 0) 
-      
-    } else {
-      
-      Vy <- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 3) 
-      
-    }
+    Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+    unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
     
   } else {
     
-    Vy <- tmpVy
+    unique_labels <- 0
     
   }
   
-  if (config$scale_y %in% c("mean", "z", "max", "meanmax")) {
-    
-    vy <- as.vector(Vy)
-    
-    if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <- mean(vy)
-    if (config$scale_y %in% "z") stdY <- sd(vy)
-    if (config$scale_y %in% c("max", "meanmax")) maxY <- max(vy)
-    
-  }
+  sample <- utils4ni::get_sample_indices(Vy = Vy,
+                                         num_windows = num_windows,
+                                         batches_per_file = batches_per_file,
+                                         stride = stride,
+                                         mode = mode,
+                                         class_balance = config$class_balance,
+                                         unique_labels = unique_labels,
+                                         verbose = verbose)
   
-  V0 <- Vy * 0 
-  V0[seq(from = 1, to = dim(V0)[1], by = stride), 
-     seq(from = 1, to = dim(V0)[2], by = stride), 
-     seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
-  all_idx <- which(V0 > 0) 
+  sampling_indices <- sample$sampling_indices
+  batch_idx <- sample$batch_idx
+  num_batches <- sample$num_batches
+  max_epochs <- sample$max_epochs
   
-  if (mode == "all") {
-    
-    sampling_indices <- all_idx
-    
-    if (verbose)
-      message("Number of actual windows: ", length(sampling_indices)) # nocov
-    
-    num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, batches_per_file))
-    
-    if (max_epochs > 1) {
-      
-      batch_idx <- rep(seq(max_epochs), each = num_windows) 
-      batch_idx <- batch_idx[seq_along(sampling_indices)]
-      
-    } else
-      batch_idx <- rep(1, times = length(sampling_indices))
-    
-  } else {
-    
-    sampling_indices <- sample(all_idx, length(all_idx))
-    
-    if (!is.null(config$class_balance) & !is.null(config$y_label)) {
-      
-      Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
-      unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
-      
-      balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
-      sampling_indices <- rep(0, length(balanced_classes))
-      
-      for (class in unique_labels) {
-        
-        idx_for_class <- which(balanced_classes == class)
-        idx_in_img <- which(Vy == class)
-        
-        if (length(idx_in_img) > 0) {
-          idx <- sample(idx_in_img, 
-                        size = length(idx_for_class), 
-                        replace = length(idx_for_class) > length(idx_in_img))
-          sampling_indices[idx_for_class] <- idx
-          
-        }
-        
-      }
-      
-      sampling_indices <- sampling_indices[sampling_indices > 0]
-      
-      if (length(sampling_indices) < length(all_idx))
-        sampling_indices <- sample(sampling_indices, 
-                                   size = length(all_idx),
-                                   replace = TRUE)
-      
-      
-    }
-    
-    num_batches <- ceiling(length(sampling_indices) / num_windows)
-    max_epochs <- min(c(num_batches, batches_per_file))
-    
-    batch_idx <- rep(seq(max_epochs), each = num_windows) 
-    
-  }
-  
-  # print(batch_idx)
   if (verbose)
     message("Number of batches per volume: ", num_batches) # nocov
   
@@ -261,15 +162,16 @@ create_generator <- function(model,
       
       # tic("Reading X")
       Vx <<- list()
-      meanX <<- list()
-      stdX <<- list()
-      maxX <<- list()
-      
+
       if (config$use_data_augmentation) {
         
         M <<- random_transformation_matrix(scale_range = config$augment_scales, 
                                            rotation_range = config$augment_rotations, 
                                            translation_range = config$augment_translations)
+        
+      } else {
+        
+        M <- identity_matrix()
         
       }
       
@@ -279,47 +181,9 @@ create_generator <- function(model,
         
         tmpVx <- read_nifti_to_array(x_files[[input]][next_file])
         
-        if (config$use_data_augmentation) {
-          
-          interp_method <- 3
-          if (config$input_types[input] == "categorical") {
-            
-            interp_method <- 0
-            
-          }
-          
-          n_dims <- length(dim(tmpVx))
-          
-          if (n_dims == 4) {
-            
-            for (i in seq(dim(tmpVx)[4])) {
-              
-              tmpVx[, , , i] <- transform_volume(V = tmpVx[, , , i], M = M, target_dims = dim(tmpVx)[1:3], method = interp_method) 
-              
-            }
-            
-            Vx[[input]] <<- tmpVx
-            
-          } else {
-            
-            Vx[[input]] <<- transform_volume(V = tmpVx, M = M, target_dims = dim(tmpVx), method = interp_method) 
-            
-          }
-          
-        } else {
-          
-          Vx[[input]] <<- tmpVx
-          
-        }
+        Vx[[input]] <<- apply_image_augmentation(tmpVx, M = M, type = config$input_types[input])
         
-        if (config$scale %in% c("mean", "z", "max", "meanmax")) {
-          
-          v <- as.vector(Vx[[input]])
-          if (config$scale %in% c("mean", "z", "meanmax")) meanX[[input]] <<- mean(v)
-          if (config$scale %in% "z") stdX[[input]] <<- sd(v)
-          if (config$scale %in% c("max", "meanmax")) maxX[[input]] <<- max(v)
-          
-        }
+        statsX[[input]] <<- get_image_stats(Vx[[input]])
         
         if (config$is_autoencoder & !is.null(config$remap_classes)) {
           
@@ -333,102 +197,39 @@ create_generator <- function(model,
       
       tmpVy <- read_nifti_to_array(y_files[next_file])
       
-      if (config$use_data_augmentation) {
+      output_type <- "continuous"
+      if (config$categorize_output) output_type <- "categorical"
+      
+      Vy <<- apply_image_augmentation(tmpVy, M = M, type = output_type)
+      
+      statsY <<- get_image_stats(Vy)
+      # toc()
+      # 
+      
+      if (!is.null(config$class_balance) & !is.null(config$y_label)) {
         
-        if (config$categorize_output) {
-          
-          Vy <<- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 0) 
-          
-        } else {
-          
-          Vy <<- transform_volume(V = tmpVy, M = M, target_dims = dim(tmpVy), method = 3) 
-          
-        }
+        Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
+        unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
         
       } else {
         
-        Vy <<- tmpVy
+        unique_labels <- 0
         
       }
       
-      if (config$scale_y %in% c("mean", "z", "max", "meanmax")) {
-        
-        vy <- as.vector(Vy)
-        
-        if (config$scale_y %in% c("mean", "z", "meanmax")) meanY <<- mean(vy)
-        if (config$scale_y %in% "z") stdY <<- sd(vy)
-        if (config$scale_y %in% c("max", "meanmax")) maxY <<- max(vy)
-        
-      }
-      # toc()
+      sample <- utils4ni::get_sample_indices(Vy = Vy,
+                                             num_windows = num_windows,
+                                             batches_per_file = batches_per_file,
+                                             stride = stride,
+                                             mode = mode,
+                                             class_balance = config$class_balance,
+                                             unique_labels = unique_labels,
+                                             verbose = verbose)
       
-      # tic("Sampling")
-      if (mode == "sampling") {
-        
-        
-        if (!is.null(config$class_balance) & !is.null(config$y_label)) {
-          
-          # tic("Mapping")
-          Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
-          # toc()
-          
-          unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
-          
-          # tic("Class balancing")
-          balanced_classes <- sample(unique_labels, size = length(all_idx), replace = TRUE)
-          sampling_indices <- rep(0, length(balanced_classes))
-          
-          for (class in unique_labels) {
-            
-            idx_for_class <- which(balanced_classes == class)
-            idx_in_img <- which(Vy == class)
-            
-            if (length(idx_in_img) > 0) {
-              idx <- sample(idx_in_img, 
-                            size = length(idx_for_class), 
-                            replace = length(idx_for_class) > length(idx_in_img))
-              sampling_indices[idx_for_class] <- idx
-              
-            }
-            
-          }
-          
-          # toc()
-          
-          # tic("Resampling")
-          sampling_indices <<- sampling_indices[sampling_indices > 0]
-          
-          if (length(sampling_indices) < length(all_idx))
-            sampling_indices <<- sample(sampling_indices, 
-                                        size = length(all_idx),
-                                        replace = TRUE)
-          
-          # toc()
-          
-          
-        } else {
-          
-          # tic("First sample")
-          sampling_indices <<- sample(all_idx, length(all_idx))
-          # toc()
-          
-          
-        }
-        
-        # tic("Num batches")
-        num_batches <- ceiling(length(sampling_indices) / num_windows)
-        batch_idx <<- rep(seq(max_epochs), each = num_windows) 
-        
-        # toc()
-        
-      } else {
-        
-        sampling_indices <<- sample(sampling_indices, size = length(sampling_indices))
-        
-      }
-      
-      # toc()
-      # toc()
+      sampling_indices <<- sample$sampling_indices
+      batch_idx <<- sample$batch_idx
+      num_batches <- sample$num_batches
+      max_epochs <- sample$max_epochs
       
     }
     
@@ -457,6 +258,13 @@ create_generator <- function(model,
     
     for (input in seq(num_inputs)) {
       
+      nv <- 1
+      if (length(dim(Vx[[input]])) > 3) {
+        
+        nv <- dim(Vx[[input]])[4]
+        
+      }
+      
       X <- get_windows_at(Vx[[input]], config$width, x, y, z)
       
       X_vol[[input]] <- X[, -c(1:3)]
@@ -468,7 +276,7 @@ create_generator <- function(model,
       }
       
       if (config$only_convolutionals)
-        X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, 1))
+        X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, nv))
       
       
       if (config$is_autoencoder) {
@@ -514,10 +322,10 @@ create_generator <- function(model,
             
             switch(config$scale,
                    "none" = X_vol[[input]] <- X_vol[[input]],
-                   "mean" = X_vol[[input]] <- X_vol[[input]] - meanX[[input]],
-                   "z"    = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / stdX[[input]],
-                   "max"  = X_vol[[input]] <- X_vol[[input]] / maxX[[input]],
-                   "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]))
+                   "mean" = X_vol[[input]] <- X_vol[[input]] - statsX[[input]]$mean,
+                   "z"    = X_vol[[input]] <- (X_vol[[input]] - statsX[[input]]$mean) / statsX[[input]]$sd,
+                   "max"  = X_vol[[input]] <- X_vol[[input]] / statsX[[input]]$max,
+                   "meanmax" = X_vol[[input]] <- (X_vol[[input]] - statsX[[input]]$mean) / (statsX[[input]]$max - statsX[[input]]$mean))
             
           }
           
@@ -527,10 +335,10 @@ create_generator <- function(model,
         
         switch(config$scale,
                "none" = X_vol[[input]] <- X_vol[[input]],
-               "mean" = X_vol[[input]] <- X_vol[[input]] - meanX[[input]],
-               "z"    = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / stdX[[input]],
-               "max"  = X_vol[[input]] <- X_vol[[input]] / maxX[[input]],
-               "meanmax" = X_vol[[input]] <- (X_vol[[input]] - meanX[[input]]) / (maxX[[input]] - meanX[[input]]))
+               "mean" = X_vol[[input]] <- X_vol[[input]] - statsX[[input]]$mean,
+               "z"    = X_vol[[input]] <- (X_vol[[input]] - statsX[[input]]$mean) / statsX[[input]]$sd,
+               "max"  = X_vol[[input]] <- X_vol[[input]] / statsX[[input]]$max,
+               "meanmax" = X_vol[[input]] <- (X_vol[[input]] - statsX[[input]]$mean) / (statsX[[input]]$max - statsX[[input]]$mean))
         
       }
       
@@ -642,10 +450,10 @@ create_generator <- function(model,
     } else {
       
       switch(config$scale_y,
-             "mean" = Y <- Y - meanY,
-             "z"    = Y <- (Y - meanY) / stdY,
-             "max"  = Y <- Y / maxY,
-             "meanmax" = Y <- (Y - meanY) / (maxY - meanY))
+             "mean" = Y <- Y - statsY$mean,
+             "z"    = Y <- (Y - statsY$mean) / statsY$sd,
+             "max"  = Y <- Y / statsY$max,
+             "meanmax" = Y <- (Y - statsY$mean) / (statsY$max - statsY$mean))
       
       
     }
