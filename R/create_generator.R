@@ -91,7 +91,7 @@ create_generator <- function(model,
     
     if (config$is_autoencoder & !is.null(config$remap_classes)) {
       
-      Vx[[input]] <- map_ids(image = Vx[[input]], config$remap_classes)
+      Vx[[input]] <- map_ids_cpp(image = Vx[[input]], config$remap_classes)
       
     }
     
@@ -110,7 +110,7 @@ create_generator <- function(model,
   
   if (!is.null(config$class_balance) & !is.null(config$y_label)) {
     
-    Vy <- map_ids(image = Vy, remap_classes = config$remap_classes)
+    Vy <- map_ids_cpp(image = Vy, remap_classes = config$remap_classes)
     unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
     
   } else {
@@ -187,7 +187,7 @@ create_generator <- function(model,
         
         if (config$is_autoencoder & !is.null(config$remap_classes)) {
           
-          Vx[[input]] <<- map_ids(image = Vx[[input]], config$remap_classes)
+          Vx[[input]] <<- map_ids_cpp(image = Vx[[input]], config$remap_classes)
           
         }
         
@@ -208,7 +208,7 @@ create_generator <- function(model,
       
       if (!is.null(config$class_balance) & !is.null(config$y_label)) {
         
-        Vy <<- map_ids(image = Vy, remap_classes = config$remap_classes)
+        Vy <<- map_ids_cpp(image = Vy, remap_classes = config$remap_classes)
         unique_labels <- unique(c(0, config$remap_classes$target, config$remap_classes$remaining))
         
       } else {
