@@ -1,3 +1,1 @@
-useDynLib(dl4ni)
 exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
