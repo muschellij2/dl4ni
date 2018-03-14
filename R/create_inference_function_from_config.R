@@ -57,7 +57,7 @@ create_inference_function_from_config <- function(object) {
       
       if (config$is_autoencoder & !is.null(config$remap_classes)) {
         
-        V[[input]] <- map_ids(image = V[[input]], config$remap_classes)
+        V[[input]] <- map_ids_cpp(image = V[[input]], config$remap_classes)
         
       }
       
@@ -540,7 +540,7 @@ create_inference_function_from_config <- function(object) {
       
       model$log("DEBUG", message = "Remapping classes to original indices.")
       
-      res <- map_ids(image = res, remap_classes = config$remap_classes, invert = TRUE)
+      res <- map_ids_cpp(image = res, remap_classes = config$remap_classes, invert = TRUE)
       
     }
     
