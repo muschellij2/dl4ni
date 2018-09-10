@@ -134,7 +134,7 @@ fit_with_generator <- function(.model,
     cat("Batch size is set to:", batch_size, "\n") # nocov
   
   # Unfreeze learning phase (freeze at the end)
-  .model %>% set_trainability(trainability = TRUE)
+  # .model %>% set_trainability(trainability = TRUE)
   
   .model$log("DEBUG", message = "Unfreeze learning phase.")
   
@@ -248,7 +248,7 @@ fit_with_generator <- function(.model,
         .model$get_model() %>% load_model_weights_hdf5(filepath = weights_filename)
         
         # Freeze learning phase (freeze at the end)
-        .model %>% set_trainability(trainability = FALSE)
+        # .model %>% set_trainability(trainability = FALSE)
         
         .model$log("DEBUG", message = "Freeze learning phase.")
         
