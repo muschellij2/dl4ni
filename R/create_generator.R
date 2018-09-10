@@ -406,7 +406,18 @@ create_generator <- function(model,
         
         Y2 <- keras::to_categorical(Y, num_classes = config$num_classes)
         
-        Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
+        if (is.array(Y2)) {
+          
+          Y <- aperm(Y2, c(1, 3, 2))
+          
+          d <- dim(Y2)
+          dim(Y) <- c(d[1], d[2] * d[3])
+          
+        } else {
+          
+          Y <- t(matrix(t(Y2), nrow = config$output_width ^ 3 * config$num_classes))
+          
+        }
         
         if (config$multioutput) {
           
