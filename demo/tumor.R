@@ -1,3 +1,11 @@
+rm(list = ls())
+rstudioapi::restartSession()
+devtools::load_all("../utils4ni/")
+devtools::load_all("../ni.datasets/")
+
+ni.datasets::set_dataset_dir(dir = "/Volumes/Domingo/dlni_data")
+devtools::load_all()
+
 ##%######################################################%##
 #                                                          #
 ####        Example For Brain Tumor Segmentation        ####
@@ -5,7 +13,6 @@
 ##%######################################################%##
 
 require(neurobase)
-require(dl4ni.data)
 load_keras()
 
 ##%######################################################%##
@@ -106,7 +113,8 @@ tumor_model$use_data(use = "test",
 
 epochs <- 15
 keep_best <- TRUE
-saving_path <- file.path(system.file(package = "dl4ni"), "models")
+saving_path <- "/Volumes/Domingo/dlni_models" # Must exist
+dir.create(path = saving_path, showWarnings = FALSE, recursive = TRUE)
 saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 
 tumor_model$fit(epochs = epochs,
@@ -133,7 +141,7 @@ test_index <- sample(info$test$subject_indices, size = 1)
 input_file_list <- lapply(info$inputs, function(x) x[test_index])
 
 # Load images and ground truth
-input_imgs <- prepare_files_for_inference(file_list = input_file_list) 
+input_imgs <- read_nifti_batch(file_list = input_file_list) 
 ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
 # Infer in the input volume
