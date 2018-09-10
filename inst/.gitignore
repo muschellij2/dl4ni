@@ -12,3 +12,4 @@ models
 old
 test.h5
 test.json
+.DS_Store

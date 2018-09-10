@@ -8,3 +8,5 @@ src/*.dll
 model.png
 model*.png
 demo_old
+.DS_Store
+.Rbuildignore
