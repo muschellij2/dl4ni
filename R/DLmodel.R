@@ -112,7 +112,7 @@ DLmodel <- R6::R6Class(
       summary(private$model)
       
     },
-    
+
     log = function(level = c("DEBUG", "INFO", "WARNING", "ERROR"), message = "...") {
       
       line_to_add <- paste0("(", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), ") [",
@@ -386,7 +386,8 @@ DLmodel <- R6::R6Class(
         
         # Path and prefix must be provided
         warn <- FALSE
-        if (is.null(args$path) || !file.exists(args$path)) {
+        
+        if (is.null(args$path)) {
           
           warn <- TRUE
           path <- dirname(tmp_path)
@@ -394,6 +395,12 @@ DLmodel <- R6::R6Class(
         } else {
           
           path <- args$path
+          
+        }
+        
+        if (!file.exists(path)) {
+          
+          dir.create(path, showWarnings = FALSE, recursive = TRUE)
           
         }
         
