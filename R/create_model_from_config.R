@@ -27,8 +27,7 @@ create_model_from_config <- function(config) {
     input_features <- layer_input(shape = c(config$num_features))
     
     output_features <- input_features %>% 
-      add_layers(layers_definition = config$feature_layers,
-                 clf = FALSE)
+      add_layers(layers_definition = config$feature_layers)
     
   }
   
@@ -41,31 +40,58 @@ create_model_from_config <- function(config) {
   vol_inputs <- list()
   vol_outputs <- list()
   
-  # For each input image
-  for (v_input in seq(num_vol_inputs)) {
+  # Check if input volumes should be concatenated
+  if (config$concatenate_vol_inputs) {
     
-    # The input is always a vector, with width ^ 3 components for each of the volumes inside the image
-    # (there can be 4D images).
+    total_volumes <- sum(config$num_volumes)
+    
     if (config$only_convolutionals) {
       
-      vol_inputs[[v_input]] <- layer_input(shape = c(config$width, config$width, config$width, config$num_volumes[v_input])) 
+      vol_inputs[[1]] <- layer_input(shape = c(config$width, config$width, 
+                                               config$width, total_volumes))
       
     } else {
       
-      vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
+      vol_inputs[[1]] <- layer_input(shape = c(total_volumes * config$width ^ 3)) 
       
     }
     
-    vol_outputs[[v_input]] <- vol_inputs[[v_input]]
+    vol_outputs[[1]] <- vol_inputs[[1]]
     
     # Add layers in this path
-    vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
-      add_layers(layers_definition = config$vol_layers[[v_input]],
-                 clf = FALSE) 
+    vol_outputs[[1]] <- (vol_outputs[[1]]) %>% 
+      add_layers(layers_definition = config$vol_layers[[1]]) 
+    
+  } else {
+    
+    # For each input image
+    for (v_input in seq(num_vol_inputs)) {
+      
+      # The input is always a vector, with width ^ 3 components for each of the volumes inside the image
+      # (there can be 4D images).
+      if (config$only_convolutionals) {
+        
+        vol_inputs[[v_input]] <- layer_input(shape = c(config$width, config$width, 
+                                                       config$width, config$num_volumes[v_input])) 
+        
+      } else {
+        
+        vol_inputs[[v_input]] <- layer_input(shape = c(config$num_volumes[v_input] * config$width ^ 3)) 
+        
+      }
+      
+      vol_outputs[[v_input]] <- vol_inputs[[v_input]]
+      
+      # Add layers in this path
+      vol_outputs[[v_input]] <- (vol_outputs[[v_input]]) %>% 
+        add_layers(layers_definition = config$vol_layers[[v_input]]) 
+      
+    }
     
   }
   
-  # According to the path definition, we keep only the features path, the volumes paths, or both, concatenated.
+  # According to the path definition, we keep only the features path, 
+  # the volumes paths, or both, concatenated.
   output_vol <- concatenate_layers(vol_outputs)
   
   # Define the inputs, according to the config$path.
@@ -92,8 +118,7 @@ create_model_from_config <- function(config) {
     result$log("INFO", message = "Adding common layers.")
     
     main_output <- main_output %>% 
-      add_layers(layers_definition = config$common_layers,
-                 clf = FALSE)
+      add_layers(layers_definition = config$common_layers)
     
   }
   
@@ -145,8 +170,7 @@ create_model_from_config <- function(config) {
   if (config$add_last_layer && !(length(config$decoder_layers) > 0)) {
     
     main_output <- main_output %>% 
-      add_layers(layers_definition = list(config$last_layer),
-                 clf = FALSE)
+      add_layers(layers_definition = list(config$last_layer))
     
   }
   
@@ -170,16 +194,14 @@ create_model_from_config <- function(config) {
     
     second_part_inputs <- list(main_output, decoder_input) 
     full_output <- second_part_inputs %>% 
-      add_layers(layers_definition = config$decoder_layers,
-                 clf = FALSE)
+      add_layers(layers_definition = config$decoder_layers)
     
     # Add last layer
     # If the model is an autoencoder, the last layer is placed here.
     if (config$add_last_layer) {
       
       full_output <- full_output %>% 
-        add_layers(layers_definition = list(config$last_layer),
-                   clf = FALSE)
+        add_layers(layers_definition = list(config$last_layer))
       
     }
     

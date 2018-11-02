@@ -38,7 +38,8 @@ create_generator <- function(model,
   
   stride <- ifelse(mode == "all", radius, 1)
   
-  num_windows <- model$check_memory() # %>% compute_batch_size()
+  # Maximum number of windows that can be allocated into memory when training
+  num_windows <- model$check_memory() 
   batches_per_file <- ceiling(target_windows_per_file / num_windows)
   
   if (verbose) {
@@ -276,7 +277,8 @@ create_generator <- function(model,
       }
       
       if (config$only_convolutionals)
-        X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, nv))
+        X_vol[[input]] <- array(X_vol[[input]], 
+                                dim = c(length(idx), config$width, config$width, config$width, nv))
       
       
       if (config$is_autoencoder) {
@@ -342,6 +344,18 @@ create_generator <- function(model,
         
       }
       
+    }
+    
+    # Must concatenate input volumes if required
+    if (config$concatenate_vol_inputs) {
+      
+      X_vol <- Reduce(abind::abind, X_vol)
+      
+      if (config$channels == "first") {
+        
+        X_vol <- aperm(X_vol, perm = c(1, 5, 2, 3, 4))
+        
+      }
       
     }
     
@@ -377,13 +391,17 @@ create_generator <- function(model,
     Y <- get_windows_at(Vy, config$output_width, x_, y_, z_)
     Y <- Y[, -c(1:3)]
     
+    # How many output dimensions???
+    if (length(dim(Vy)) > 3) nv <- dim(Vy)[4] else nv <- 1
+    
     # toc()
     
     if (config$only_convolutionals) {
       
       # tic("Transforming for convolutional")
       
-      Y <- array(Y, dim = c(length(idx), config$output_width, config$output_width, config$output_width, 1))
+      Y <- array(Y, dim = c(length(idx), config$output_width, 
+                            config$output_width, config$output_width, nv))
       
       if (config$categorize_output) {
         

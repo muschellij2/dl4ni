@@ -63,7 +63,7 @@ create_inference_function_from_config <- function(object) {
       
     }
     
-    V0 <- V[[1]] * 0 
+    V0 <- array(0, dim = dim(V[[1]]))
     V0[seq(from = 1, to = dim(V0)[1], by = stride), 
        seq(from = 1, to = dim(V0)[2], by = stride), 
        seq(from = 1, to = dim(V0)[3], by = stride)] <- 1 
@@ -71,27 +71,59 @@ create_inference_function_from_config <- function(object) {
     
     model$log("INFO", message = "Initializing results.")
     
-    if ((config$categorize_output) && (config$category_method == "by_class")) {
+    if ((config$categorize_output)) {
       
-      if (config$only_convolutionals) {
+      num_classes <- config$num_classes
+      
+      if (!config$only_convolutionals) {
         
-        num_classes <- config$num_classes
-        
-      } else {
-        
-        num_classes <- config$last_layer$params$num_classes
+        if (is.null(config$num_classes))
+          num_classes <- config$last_layer$params$num_classes
         
       }
       
-      res <- array(0, dim = c(dim(V[[1]]), num_classes))
+      if (config$category_method == "by_class") {
+        
+        nv <- num_classes
+        output_dims <- dim(V[[1]])
+        res <- array(0, dim = c(output_dims, nv))
+        
+      } else {
+        
+        nv <- 1
+        output_dims <- dim(V[[1]])
+        
+        res <- array(0, dim = output_dims)
+        
+      }
       
     } else {
       
-      res <- V[[1]] * 0
+      # Determine the dimensionality of the output
+      output_dims <- .model$output_shape %>% unlist()
+      
+      # This works both for convolutional or dense models
+      if (config$channels == "first") {
+        
+        nv <- output_dims[1]
+        output_dims <- output_dims[-1]
+
+      } else {
+        
+        nv <- output_dims[length(output_dims)]
+        output_dims <- output_dims[-length(output_dims)]
+        
+      }
+      
+      if (length(output_dims) == 0)
+        output_dims <- 1
+      
+      res_dims <- c(dim(V[[1]]), nv)
+      res <- array(0, dim = res_dims)
       
     }
     
-    counts <- V[[1]] * 0
+    counts <- res * 0
     last_distance <- V[[1]] * 0 + 3 * config$width ^ 2
     
     # Must define num_windows
@@ -154,6 +186,10 @@ create_inference_function_from_config <- function(object) {
         
         X <- get_windows_at(V[[input]], config$width, x, y, z)
         
+        nv <- 1
+        if (length(dim(V[[input]])) > 3) 
+          nv <- dim(V[[input]])[4]
+        
         X_coords <- X[, 1:3]
         X_coords[, 1] <- X_coords[, 1] / dim(V[[input]])[1]
         X_coords[, 2] <- X_coords[, 2] / dim(V[[input]])[2]
@@ -168,7 +204,8 @@ create_inference_function_from_config <- function(object) {
         }
         
         if (config$only_convolutionals)
-          X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, config$width, config$width, 1))
+          X_vol[[input]] <- array(X_vol[[input]], dim = c(length(idx), config$width, 
+                                                          config$width, config$width, nv))
         
         
         if (config$is_autoencoder) {
@@ -239,6 +276,19 @@ create_inference_function_from_config <- function(object) {
         
       }
       
+      # Must concatenate input volumes if required
+      if (config$concatenate_vol_inputs) {
+        
+        X_vol <- Reduce(abind::abind, X_vol)
+        
+        if (config$channels == "first") {
+          
+          X_vol <- aperm(X_vol, perm = c(1, 5, 2, 3, 4))
+          
+        }
+        
+      }
+      
       inputs <- switch(config$path[1],
                        
                        "volumes" = X_vol,
@@ -251,7 +301,8 @@ create_inference_function_from_config <- function(object) {
       
 
       # Available memory is the memory limit minus the memory reserved for the parameters in the model
-      available_memory <- config$memory_limit - object.size(vector(mode = "double", length = model$get_model()$count_params()))
+      available_memory <- config$memory_limit - object.size(vector(mode = "double", 
+                                                                   length = model$get_model()$count_params()))
       
       # Get the maximum number of objects that fit into the memory limit.
       batch_size <- as.integer(available_memory / 
@@ -259,9 +310,17 @@ create_inference_function_from_config <- function(object) {
       
       model$log("INFO", message = paste0("batch_size is ", batch_size, "."))
       
+      # WARNING if batch_size is 0
+      if (batch_size == 0) {
+        
+        message("batch size is 0")
+        batch_size <- 1
+        
+      }
+      
       output <- .model$predict(x = inputs, batch_size = as.integer(batch_size))
       
-      model$log("INFO", message = "Writing output to correct fomat.")
+      model$log("INFO", message = "Writing output to correct format.")
       
       if (config$only_convolutionals) {
         
@@ -272,8 +331,15 @@ create_inference_function_from_config <- function(object) {
           if (config$category_method == "simple") {
             
             # Remove the class dimension
-            new_output <- array(0, dim = dim(output)[-5])
             n_batch <- dim(output)[1]
+            new_output <- array(0, dim = c(n_batch, output_dims))
+            
+            # ?????????
+            if (config$channels == "first") {
+              
+              output <- aperm(output, perm = c(1, 3, 4, 5, 2))
+              
+            }
             
             for (id in seq(n_batch)) {
               
