@@ -21,7 +21,7 @@ load_keras()
 #                                                          #
 ##%######################################################%##
 
-problem <- "t1_flair2"
+problem <- "t1_flair"
 problem_path <- problem %>% get_dataset()
 info <- problem_path %>% get_problem_info()
 
@@ -55,11 +55,11 @@ scheme$add(width = 7,
                                                          dense(100)))),
            common_dropout = 0.25,
            last_hidden_layers = list(dense(10)),
-           optimizer = "adadelta",
+           optimizer = "rmsprop",
            scale = "meanmax",
            scale_y = "meanmax")
 
-scheme$add(memory_limit = "2G")
+scheme$add(memory_limit = "4G")
 
 ##%######################################################%##
 #                                                          #
@@ -119,7 +119,8 @@ saving_prefix <- paste0(problem, "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"))
 flair_model$fit(epochs = epochs,
                 keep_best = keep_best,
                 path = saving_path,
-                prefix = saving_prefix)
+                prefix = saving_prefix,
+                verbose = TRUE)
 
 flair_model$plot_history()
 
@@ -145,7 +146,7 @@ input_imgs <- read_nifti_batch(file_list = input_file_list)
 ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
 # Predict on the inputs
-flair <- flair_model$infer(V = input_imgs, speed = "faster")
+flair <- flair_model$infer(V = input_imgs, speed = "faster", verbose = TRUE)
 
 # Plot
 ortho_plot(x = input_imgs[[1]], text = "Original image", interactiveness = FALSE)

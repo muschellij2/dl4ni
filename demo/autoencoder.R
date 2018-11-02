@@ -43,19 +43,31 @@ scheme$add(width = width,
            only_convolutionals = FALSE,
            output_width = 3,
            num_features = 3,
-           vol_layers_pattern = list(dense(250), dense(100)),
-           vol_dropout = 0.15,
+           vol_layers_pattern = list(clf(all = TRUE,
+                                         hidden_layers = list(dense(300),
+                                                              dense(400),
+                                                              dense(200),
+                                                              dense(100),
+                                                              dense(250),
+                                                              dense(100)))),
+           vol_dropout = 0.25,
            feature_layers = list(dense(10), 
                                  dense(5)),
-           feature_dropout = 0.15,
-           common_layers = list(dense(250), dense(100)),
+           feature_dropout = 0.4,
+           common_layers = list(clf(all = TRUE, 
+                                    hidden_layers = list(dense(400), 
+                                                         dense(200), 
+                                                         dense(100)))),
            common_dropout = 0.25,
-           decoder_layers = list(dense(250), dense(100)),
+           decoder_layers = list(clf(all = TRUE, 
+                                     hidden_layers = list(dense(400), 
+                                                          dense(200), 
+                                                          dense(100)))),
            last_hidden_layers = list(dense(10)),
-           optimizer = "adadelta",
+           optimizer = "nadam",
            scale = "meanmax")
 
-scheme$add(memory_limit = "2G")
+scheme$add(memory_limit = "4G")
 
 ##%######################################################%##
 #                                                          #
@@ -116,7 +128,8 @@ ae_model$fit(epochs = epochs,
              keep_best = keep_best,
              path = saving_path,
              prefix = saving_prefix,
-             metrics_viewer = TRUE, verbose = TRUE)
+             metrics_viewer = TRUE, 
+             verbose = TRUE)
 
 ae_model$plot_history()
 
@@ -161,5 +174,5 @@ rec <- map_images(source = reconstruction,
 
 # Plot Model results
 ortho_plot(x = rec, 
-           text = "Predicted and matched", 
+           text = "Matched", 
            interactiveness = FALSE)

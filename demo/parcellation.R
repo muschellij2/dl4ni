@@ -64,7 +64,9 @@ scheme$add(width = 7,
                                                          dense(200), 
                                                          dense(100)))),
            common_dropout = 0.25,
-           last_hidden_layers = list(30, 20),
+           last_hidden_layers = list(clf(all = TRUE, 
+                                         hidden_layers = list(dense(40), 
+                                                              dense(20)))),
            optimizer = "nadam",
            scale = "z",
            scale_y = "none")
@@ -99,7 +101,7 @@ parcellation_model$plot(to_file = paste0("model_", problem, ".png"))
 
 # By default, 1024 windows are extracted from each file. 
 # Use 'use_data' to provide a different number.
-target_windows_per_file <- 1024
+target_windows_per_file <- 1024 * 8
 
 parcellation_model$check_memory()
 
@@ -119,7 +121,7 @@ parcellation_model$use_data(use = "test",
 #                                                          #
 ##%######################################################%##
 
-epochs <- 15
+epochs <- 30
 keep_best <- TRUE
 saving_path <- "/Volumes/Domingo/dlni_models" # Must exist
 dir.create(path = saving_path, showWarnings = FALSE, recursive = TRUE)
@@ -157,24 +159,40 @@ ground_truth <- read_nifti_to_array(info$outputs[test_index])
 ground_truth <- map_ids_cpp(ground_truth, remap_classes = info$remap_classes)
 
 # Infer in the input volume
-parcellation <- parcellation_model$infer(V = input_imgs, speed = "faster")
+parcellation <- parcellation_model$infer(V = input_imgs, speed = "medium")
 parcellation <- map_ids_cpp(parcellation, remap_classes = info$remap_classes)
 
 # Some values for plotting
-num_classes <- length(info$remap_classes$target)
+num_classes <- length(unique(info$remap_classes$target))
 col.y <- scales::alpha(colour = scales::hue_pal()(num_classes), alpha = 0.45)
+
+ground_truth[ground_truth == 16] <- 0
 
 # Plot Ground Truth results
 ortho_plot(x = input_imgs[[1]], 
-           y = ground_truth, 
+           y = ground_truth * (ground_truth < 15), 
            col.y = col.y, 
            text = "Ground Truth", 
            interactiveness = FALSE)
 
 # Plot Model results
 ortho_plot(x = input_imgs[[1]], 
-           y = parcellation, 
+           y = parcellation * (parcellation < 15), 
            col.y = col.y, 
            text = "Predicted", 
            interactiveness = FALSE)
 
+# Images for the paper
+ortho2(x = input_imgs[[1]], 
+       y = ground_truth * (ground_truth < 15), 
+       col.y = col.y,
+       crosshairs = FALSE, 
+       add.orient = FALSE, 
+       mfrow = c(1, 3))
+
+ortho2(x = input_imgs[[1]], 
+       y = parcellation * (parcellation < 15), 
+       col.y = col.y,
+       crosshairs = FALSE, 
+       add.orient = FALSE, 
+       mfrow = c(1, 3))

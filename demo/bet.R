@@ -36,27 +36,55 @@ info %>% split_train_test_sets()
 #                                                          #
 ##%######################################################%##
 
+# scheme <- DLscheme$new()
+# 
+# scheme$add(width = 7,
+#            only_convolutionals = FALSE,
+#            output_width = 3,
+#            num_features = 3,
+#            vol_layers_pattern = list( 
+#              dense(250),
+#              dense(100)),
+#            vol_dropout = 0.15,
+#            feature_layers = list(dense(10), 
+#                                  dense(5)),
+#            feature_dropout = 0.15,
+#            common_layers = list(
+#              dense(200),
+#              dense(100)),
+#            common_dropout = 0.25,
+#            last_hidden_layers = list(dense(10)),
+#            optimizer = "adadelta",
+#            scale = "z",
+#            scale_y = "none")
+
 scheme <- DLscheme$new()
 
 scheme$add(width = 7,
            only_convolutionals = FALSE,
            output_width = 3,
            num_features = 3,
-           vol_layers_pattern = list( 
-             dense(250),
-             dense(100)),
+           vol_layers_pattern = list(clf(all = TRUE,
+                                         hidden_layers = list(dense(300),
+                                                              dense(400),
+                                                              dense(200),
+                                                              dense(100),
+                                                              dense(250),
+                                                              dense(100)))),
            vol_dropout = 0.15,
            feature_layers = list(dense(10), 
                                  dense(5)),
            feature_dropout = 0.15,
-           common_layers = list(
-             dense(200),
-             dense(100)),
+           common_layers = list(clf(all = TRUE, 
+                                    hidden_layers = list(dense(400), 
+                                                         dense(200), 
+                                                         dense(100)))),
            common_dropout = 0.25,
-           last_hidden_layers = list(dense(10)),
-           optimizer = "adadelta",
+           last_hidden_layers = list(30, 20),
+           optimizer = "nadam",
            scale = "z",
            scale_y = "none")
+
 
 scheme$add(memory_limit = "4G")
 
@@ -144,7 +172,7 @@ input_imgs <- read_nifti_batch(file_list = input_file_list)
 ground_truth <- read_nifti_to_array(info$outputs[test_index])
 
 # Infer in the input volume
-brain <- bet_model$infer(V = input_imgs, speed = "faster")
+brain <- bet_model$infer(V = input_imgs, speed = "medium")
 
 # Some values for plotting
 num_classes <- length(info$values)
