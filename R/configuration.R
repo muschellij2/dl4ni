@@ -37,7 +37,7 @@ define_config <- function(...) {
     config[[field]] <- args[[field]]
     
   }
-  
+
   # Specific logic for when we use only convolutional layers
   if (config$only_convolutionals) {
     
@@ -58,7 +58,11 @@ define_config <- function(...) {
       if (config$categorize_output) {
         
         # Number of classes of the last layer.
-        config$num_classes <- config$last_layer_info$num_classes + 1
+        if (!is.null(config$last_layer_info$num_classes)) {
+          
+          config$num_classes <- config$last_layer_info$num_classes + 1
+          
+        }
         
         # Make class balancing
         if (config$num_classes > 2) {
@@ -85,7 +89,10 @@ define_config <- function(...) {
   }
   
   # Specific logic for the inference
-  if (!is.null(config$regularize) && !is.null(config$categorize_output) && isTRUE(config$categorize_output) && (config$category_method == "simple")) {
+  if (!is.null(config$regularize) && 
+      !is.null(config$categorize_output) && 
+      isTRUE(config$categorize_output) && 
+      (config$category_method == "simple")) {
     
     # No need to smooth the output image if the category_method is "simple"
     config$regularize <- NULL
