@@ -204,6 +204,15 @@ unet <- function(initial_filters = 2, depth = 3, ...) {
   
 }
 
+dense_unet <- function(initial_units = 256, depth = 3, ...) {
+  
+  list(type = "dense_unet",
+       params = list(initial_units = initial_units, 
+                     depth = depth,
+                     ...))
+  
+}
+
 
 maxpooling <- function(mode = c("downsampling", "convolutional"), ...) {
   
