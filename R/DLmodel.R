@@ -321,6 +321,12 @@ DLmodel <- R6::R6Class(
       
     },
     
+    raise_memory_limit = function(memory_limit = "4G") {
+      
+      private$hyperparameters$memory_limit <- convert_to_bytes(memory_limit)
+      
+    },
+    
     graph = function(mode = "graphviz") {
       
       self %>% graph_from_model(mode = mode)
