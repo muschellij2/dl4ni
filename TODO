@@ -81,12 +81,18 @@ ALREADY DONE:
   + Error en DLmodel.fit cuando keep_best == FALSE, no se definen path y prefix.
   + prepare_for_training = FALSE en DLscheme$instantiate.
   + instantiate_autoencoder.
+  + Actualizar para usar la última versión del paquete keras.
 
 WIP:
   = Comentarios y documentación en todas las funciones
+  = Importar modelo keras externo, deduciendo su configuración... Así ampliamos el "model zoo"...
+  = create_generator, create_inference_function, configuration... Cambiar lo necesario para inputs/outputs 4D.
+  = Limpiar utils4ni a una versión mínima con lo que necesita d4ni
+  = dl4ni: mage intensity augmentation. Add noise and change contrast.
+  = Encoder y decoder con sus funciones de inferencia. Misma función de inferencia, pero los inputs y outputs se procesarán de forma distinta según encoder, decoder o modelo.
   = keras_warmup <- load_keras y más.
+  = Seleccionar ventanas de la imagen usando una máscara.
   = Raise memory limit a un modelo, no desde el esquema. (Not enough memory to train the model, raise the memory limit?)
-  = Actualizar para usar la última versión del paquete keras.
   = Cambiar set_trainability a freeze_weights, unfreeze_weights en la última versión de keras.
   = multiwidth.
   = build_model en el flow, para acompañar a train_output.
