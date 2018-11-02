@@ -12,13 +12,45 @@
 #' @import keras
 #' 
 add_layers <- function(object, 
-                       layers_definition = c(),
-                       clf = FALSE) {
+                       layers_definition = c(), 
+                       ...) {
+  
+  check_args <- function(...) {
+    
+    passed_args <- list(...)
+    
+    if ("residual" %in% names(passed_args)) {
+      
+      residual <- passed_args[["residual"]]
+      
+    } else {
+      
+      residual <- FALSE
+      
+    }
+    
+    passed_args <- list(...)
+    
+    if ("channels" %in% names(passed_args)) {
+      
+      channels <- passed_args[["channels"]]
+      
+    } else {
+      
+      channels <- FALSE
+      
+    }
+    
+    return(list(residual, channels))
+    
+  }
   
   require(keras)
   
   # Initialize output
   output <- object
+  
+  c(clf, channels) %<-% check_args(...)
   
   # If we have layers
   if (length(layers_definition) > 0) {
@@ -70,8 +102,18 @@ add_layers <- function(object,
                # first we have to flatten it.
                if (is_volumetric) {
                  
+                 if (channels == "last") {
+                   
+                   kernel_size = input_shape[1:3]
+                   
+                 } else {
+                   
+                   kernel_size = input_shape[2:4]
+                   
+                 }
+                 
                  new_params <- list(filters = params$units,
-                                    kernel_size = input_shape[1:3],
+                                    kernel_size = kernel_size,
                                     activation = this_config$activation)
                  new_layer <- do.call(layer_conv_3d, args = new_params)
                  
@@ -88,11 +130,13 @@ add_layers <- function(object,
                  new_layer 
                
                # Add additional secondary layers as specified
-               if (this_config$batch_normalization) output <- output %m>% layer_batch_normalization()
+               if (this_config$batch_normalization) 
+                 output <- output %m>% layer_batch_normalization()
                
                # output <- output %>% layer_activation(activation = this_config$activation)
                
-               if (this_config$dropout > 0) output <- output %m>% layer_dropout(rate = this_config$dropout)
+               if (this_config$dropout > 0) 
+                 output <- output %m>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -128,7 +172,8 @@ add_layers <- function(object,
                
                output <- output %>% block_resnet(params = params)
                
-               if (this_config$dropout > 0) output <- output %m>% layer_dropout(rate = this_config$dropout)
+               if (this_config$dropout > 0) 
+                 output <- output %m>% layer_dropout(rate = this_config$dropout)
                
              },
              
@@ -149,6 +194,16 @@ add_layers <- function(object,
                params$activation <- this_config$activation
                params$dropout <- this_config$dropout
                output <- do.call(block_unet, args = params)
+               
+             },
+             
+             "dense_unet" = {
+               
+               params$object <- output
+               params$batch_normalization <- this_config$batch_normalization
+               params$activation <- this_config$activation
+               params$dropout <- this_config$dropout
+               output <- do.call(block_dense_unet, args = params)
                
              },
              
@@ -287,9 +342,11 @@ add_layers <- function(object,
                    new_layer 
                  
                  # Add secondary layers as needed
-                 if (this_config$batch_normalization) output <- output %m>% layer_batch_normalization()
+                 if (this_config$batch_normalization) 
+                   output <- output %m>% layer_batch_normalization()
                  
-                 if (this_config$dropout > 0) output <- output %m>% layer_dropout(rate = this_config$dropout)
+                 if (this_config$dropout > 0) 
+                   output <- output %m>% layer_dropout(rate = this_config$dropout)
                  
                } else {
                  
