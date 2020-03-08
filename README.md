@@ -1,5 +1,8 @@
 # Deep Learning Flows for Neuroimaging
-
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/muschellij2/dl4ni.svg?branch=master)](https://travis-ci.com/muschellij2/dl4ni)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/muschellij2/dl4ni?branch=master&svg=true)](https://ci.appveyor.com/project/muschellij2/dl4ni)
+<!-- badges: end -->
 This document describes the use of the `dl4ni` package, Deep Learning Flows for Neuroimaging.
 
 ## Introduction
