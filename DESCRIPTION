@@ -8,6 +8,7 @@ Maintainer: Domingo Lopez-Rodriguez <neuroimaginador@gmail.com>
 Description: This package is specific to use Deep Learning (by means of the keras package and tensorflow) for Neuroimaging. Users can create models and pipelines and apply them to classification, regression or labelling problems.
 License: GPL (>= 2)
 Imports: keras, utils4ni, png
+Remotes: neuroimaginador/utils4ni
 Suggests: testthat, ni.datasets
 RoxygenNote: 6.0.1
 Encoding: UTF-8
